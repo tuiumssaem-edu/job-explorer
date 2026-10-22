@@ -219,7 +219,7 @@
                 <p class="chapter-label">STEP 02</p>
                 <h2 class="chapter-title">나에게 어울리는 직업을 찾아볼까요?</h2>
                 <hr class="chapter-rule">
-                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 직업을 살펴보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 커리어넷에서 직업을 찾아보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
             </div>
 
             <div id="recommendationBanner" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-4 md:p-5 shadow-sm">
@@ -236,7 +236,13 @@
                 </div>
             </div>
 
+            <div id="careerSearchBox" class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-4 md:p-6 space-y-3"></div>
+
             <div class="bg-white rounded-2xl p-4 md:p-6 border border-slate-200 shadow-sm space-y-4">
+                <div>
+                    <h3 class="font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-list-check text-indigo-500"></i>수업용 예시 직업</h3>
+                    <p class="text-xs text-slate-500 mt-1">선생님이 수업에 맞게 정리한 예시 목록이에요. 공식 자료가 아니라서, 더 믿을 만한 정보는 위의 커리어넷에서 찾아요.</p>
+                </div>
                 <div class="flex flex-col md:flex-row gap-3">
                     <div class="relative flex-grow">
                         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
@@ -456,14 +462,14 @@
             <div class="flex items-center gap-4 border-b border-slate-100 pb-4">
                 <div id="modalIcon" class="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 text-3xl flex items-center justify-center"><i class="fa-solid fa-briefcase"></i></div>
                 <div>
-                    <span id="modalCategory" class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-full"></span>
+                    <span id="modalCategory" class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-full"></span> <span id="modalSource" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full"></span>
                     <h3 id="modalTitle" class="text-2xl font-black text-slate-900 mt-1"></h3>
                 </div>
             </div>
             <div class="space-y-4 text-sm">
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-1">
                     <h4 class="font-extrabold text-slate-800 flex items-center gap-1.5 text-base"><i class="fa-solid fa-circle-info text-indigo-500"></i><span>어떤 일을 하나요?</span></h4>
-                    <p id="modalDescription" class="text-slate-600 leading-relaxed"></p>
+                    <p id="modalDescription" class="text-slate-600 leading-relaxed" style="white-space:pre-line"></p>
                 </div>
                 <div class="grid sm:grid-cols-2 gap-3">
                     <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 space-y-1">
@@ -472,12 +478,12 @@
                     </div>
                     <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-1">
                         <h4 class="font-extrabold text-blue-900 flex items-center gap-1.5"><i class="fa-solid fa-route text-blue-600"></i><span>취업하려면 어떻게 해야 하나요?</span></h4>
-                        <p id="modalPathway" class="text-xs text-blue-800 leading-relaxed"></p>
+                        <p id="modalPathway" class="text-xs text-blue-800 leading-relaxed" style="white-space:pre-line"></p>
                     </div>
                 </div>
                 <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-1">
-                    <span class="font-bold flex items-center gap-1"><i class="fa-solid fa-heart text-amber-500"></i>꿀팁</span>
-                    <p id="modalTip" class="leading-relaxed"></p>
+                    <span id="modalTipHead" class="font-bold flex items-center gap-1"><i class="fa-solid fa-heart text-amber-500"></i>꿀팁</span>
+                    <p id="modalTip" class="leading-relaxed" style="white-space:pre-line"></p>
                 </div>
             </div>
             <div class="flex gap-3 pt-2">
@@ -611,7 +617,7 @@
         // ---------- 수업 안내 (학습 목표와 오늘 할 일) ----------
         const LESSON_GUIDE = {
             step1: { goal: '내가 잘하거나 좋아하는 것을 떠올리며 나의 강점을 골라요.', todo: '강점 카드를 눌러 골라요.' },
-            step2: { goal: '관심 있는 직업을 살펴보고 한 가지를 골라요.', todo: '직업 카드를 보고 [이 직업 고르기]를 눌러요.' },
+            step2: { goal: '관심 있는 직업을 살펴보고 한 가지를 골라요.', todo: '커리어넷에서 직업을 찾거나 예시 직업 카드를 보고, [이 직업 고르기]를 눌러요.' },
             step3: { goal: '직업 정보를 살펴보고 직업 소개 포스터를 만들어요.', todo: '넣고 싶은 내용과 모양을 골라 포스터를 완성하고 저장해요. 더 꾸미고 싶으면 캔바에서 이어서 해요.' },
             step4: { goal: '직장생활에 필요한 태도와 능력을 살펴보고 준비할 것을 골라요.', todo: '잘하는 것에 체크하고, 연습하고 싶은 것을 한 가지 골라요.' },
             step5: { goal: '나의 강점과 희망 직업을 연결하고 실천 다짐을 정해요.', todo: 'AI 조언 중 내 생각과 맞는 것을 고르고, 다짐을 정해서 카드를 만들어요.' }
@@ -904,6 +910,25 @@
 
         LOCAL_JOBS_DB.forEach(j => { j.places = JOB_PLACES[j.id] || []; });
 
+        // 커리어넷에서 가져온 직업은 careerCache('CN_번호')에 저장돼 있고, 필요할 때 직업 정보로 바꿔서 써요.
+        const CN_PREFIX = 'CN_';
+        const CN_PREP_LABEL = { recruit: '취업 방법', training: '직업훈련', certificate: '관련 자격증', curriculum: '관련 교육' };
+        function makeCareerJob(cc) {
+            const pr = cc.prepare || {};
+            const pathway = Object.keys(CN_PREP_LABEL).map(k => (pr[k] || []).length ? CN_PREP_LABEL[k] + ': ' + pr[k].join(' / ') : '').filter(Boolean).join('\n');
+            return {
+                id: CN_PREFIX + cc.seq, name: cc.name, category: 'CAREERNET', categoryName: cc.group || '커리어넷 직업백과',
+                icon: 'fa-briefcase', strengths: [], source: '커리어넷',
+                summary: (cc.works || [])[0] || '', skills: (cc.abilities || []).slice(0, 6), places: [],
+                pathway: pathway, tip: '', cc: cc
+            };
+        }
+        function allJobs() {
+            const cn = Object.keys(careerCache).filter(k => k.indexOf(CN_PREFIX) === 0 && careerCache[k] && careerCache[k].name).map(k => makeCareerJob(careerCache[k]));
+            return LOCAL_JOBS_DB.concat(cn);
+        }
+        const findJob = id => allJobs().find(j => j.id === id) || null;
+
         const strengthShort = id => { const s = STRENGTHS_DATA.find(x => x.id === id); return s ? s.short : ''; };
         const prepItem = () => CHECKLIST_ITEMS.find(c => c.id === chosenPrep) || null;
 
@@ -932,12 +957,13 @@
                 if (!raw) return;
                 const st = JSON.parse(raw);
                 selectedStrengths = Array.isArray(st.strengths) ? st.strengths.filter(id => STRENGTHS_DATA.some(x => x.id === id)) : [];
-                selectedTargetJob = LOCAL_JOBS_DB.find(j => j.id === st.jobId) || null;
+                selectedTargetJob = null;
                 checkedSkills = new Set((st.checked || []).filter(id => CHECKLIST_ITEMS.some(c => c.id === id)));
                 chosenPrep = CHECKLIST_ITEMS.some(c => c.id === st.prep) ? st.prep : null;
                 posterPicks = new Set(st.posterPicks || []);
                 aiJobCache = st.aiJobCache && typeof st.aiJobCache === 'object' ? st.aiJobCache : {};
                 careerCache = st.careerCache && typeof st.careerCache === 'object' ? st.careerCache : {};
+                selectedTargetJob = findJob(st.jobId);
                 choiceReasons = new Set((st.reasons || []).filter(id => REASONS.some(r => r.id === id)));
                 expressModes = new Set((st.express || []).filter(id => EXPRESS_MODES.some(m => m.id === id)));
                 posterTemplate = POSTER_TEMPLATES.some(t => t.id === st.posterTemplate) ? st.posterTemplate : 'T1';
@@ -1015,6 +1041,7 @@
         }
 
         function refreshJobList() {
+            renderCareerSearch();
             const banner = document.getElementById('recommendationBanner');
             let list = LOCAL_JOBS_DB.map(j => ({ ...j, matchScore: matchInfo(j) }));
             if (selectedStrengths.length > 0) {
@@ -1066,7 +1093,7 @@
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 rounded-xl ${m > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-600'} flex items-center justify-center text-2xl flex-shrink-0"><i class="fa-solid ${job.icon}"></i></div>
                             <div>
-                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">${esc(job.categoryName)}</span>
+                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">${esc(job.categoryName)}</span> <span class="bg-slate-50 text-slate-500 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md">수업용 예시</span>
                                 <h3 class="font-extrabold text-slate-900 text-lg tracking-tight mt-0.5">${esc(job.name)}</h3>
                             </div>
                         </div>
@@ -1103,22 +1130,34 @@
         }
 
         function openJobDetail(jobId) {
-            const job = LOCAL_JOBS_DB.find(j => j.id === jobId);
+            const job = findJob(jobId);
             if (!job) return;
+            const isCn = job.source === '커리어넷';
+            const cc = job.cc || {};
             document.getElementById('modalTitle').innerText = job.name;
             document.getElementById('modalCategory').innerText = job.categoryName;
-            document.getElementById('modalDescription').innerText = job.summary;
-            document.getElementById('modalPathway').innerText = job.pathway;
-            document.getElementById('modalTip').innerText = job.tip;
+            const src = document.getElementById('modalSource');
+            src.innerText = isCn ? '출처: 커리어넷 직업백과' : '수업용 예시 (공식 출처 아님)';
+            src.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full ' + (isCn ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-500');
+            document.getElementById('modalDescription').innerText = isCn ? ((cc.works || []).join('\n') || '내용이 비어 있어요.') : job.summary;
+            document.getElementById('modalPathway').innerText = job.pathway || (isCn ? '커리어넷에 정리된 준비 방법이 없어요.' : '');
+            document.getElementById('modalTipHead').innerHTML = isCn ? '<i class="fa-solid fa-scale-balanced text-amber-500"></i>내 강점과 견주어 봐요' : '<i class="fa-solid fa-heart text-amber-500"></i>꿀팁';
+            if (isCn) {
+                const mine = selectedStrengths.map(strengthShort).join(', ');
+                document.getElementById('modalTip').innerText = (mine ? `내 강점: ${mine}` : '내 강점: 아직 고르지 않았어요 (1번 탭)') +
+                    `\n이 직업에서 필요한 능력과 견주어 보고, 선생님과 이야기해 봐요. 앱이 맞는지 점수를 매기지는 않아요.`;
+            } else {
+                document.getElementById('modalTip').innerText = job.tip;
+            }
             document.getElementById('modalIcon').innerHTML = `<i class="fa-solid ${job.icon}"></i>`;
-            document.getElementById('modalSkills').innerHTML = job.skills.map(s => `<li>${esc(s)}</li>`).join('');
+            document.getElementById('modalSkills').innerHTML = (job.skills.length ? job.skills : ['내용이 비어 있어요.']).map(s => `<li>${esc(s)}</li>`).join('');
             document.getElementById('modalSelectBtn').onclick = function () { selectJobAsTarget(job.id); closeModal(); };
             document.getElementById('jobDetailModal').classList.remove('hidden');
         }
         function closeModal() { document.getElementById('jobDetailModal').classList.add('hidden'); }
 
         function selectJobAsTarget(jobId) {
-            const job = LOCAL_JOBS_DB.find(j => j.id === jobId);
+            const job = findJob(jobId);
             if (!job) return;
             if (!selectedTargetJob || selectedTargetJob.id !== job.id) {
                 selectedTargetJob = job;
@@ -1169,9 +1208,10 @@
                 if (list.some(x => x.group === group && x.text === text)) return;
                 list.push({ group, text, src, key: group + '|' + text });
             };
-            add('tasks', job.summary, '기본');
-            (job.places || []).forEach(t => add('places', t, '기본'));
-            job.skills.forEach(t => add('skills', t, '기본'));
+            const baseSrc = job.source === '커리어넷' ? '커리어넷' : '기본';
+            add('tasks', job.summary, baseSrc);
+            (job.places || []).forEach(t => add('places', t, baseSrc));
+            job.skills.forEach(t => add('skills', t, baseSrc));
             if (cc) {
                 (cc.works || []).forEach(t => add('tasks', t, '커리어넷'));
                 (cc.abilities || []).forEach(t => add('skills', t, '커리어넷'));
@@ -1211,38 +1251,52 @@
             return parts.join('\n').slice(0, 1400);
         }
 
+        // 포스터 단계: 이 직업 정보가 어디서 왔는지 보여 줘요. (검색은 2번 탭 '직업 탐색'에서 해요)
         function careerPanelHtml(job) {
-            if (careerQueryFor !== job.id) {
-                careerQuery = CAREER_KEYWORD[job.id] || job.name.split(' ')[0];
-                careerQueryFor = job.id; careerResults = []; careerMsg = '';
+            const cc = job.source === '커리어넷' ? job.cc : careerCache[job.id];
+            if (!cc) {
+                return `
+            <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 space-y-2">
+                <h3 class="font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-circle-info text-slate-500"></i>이 직업의 정보 출처</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">이 직업은 선생님이 정리한 <strong>수업용 예시</strong>예요. 공식 자료로 확인한 내용은 아니에요. 커리어넷에서 확인한 정보로 포스터를 만들고 싶으면 [직업 탐색]에서 커리어넷으로 직업을 찾아요.</p>
+                <button onclick="switchTab('step2')" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs"><i class="fa-solid fa-building-columns mr-1"></i>커리어넷에서 직업 찾으러 가기</button>
+            </div>`;
             }
-            const cc = careerCache[job.id];
+            const prepRows = Object.keys(PREPARE_LABEL).map(k => ((cc.prepare || {})[k] || []).length ? `<p><span class="font-bold">${PREPARE_LABEL[k]}:</span> ${cc.prepare[k].map(esc).join(' / ')}</p>` : '').join('');
+            return `
+            <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-5 space-y-2">
+                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>커리어넷 직업백과 정보</h3>
+                <div class="bg-white border border-sky-200 rounded-xl p-3 text-xs space-y-1 leading-relaxed">
+                    ${(cc.works || []).length ? `<p><span class="font-bold">하는 일:</span> ${cc.works.map(esc).join(' / ')}</p>` : ''}
+                    ${(cc.abilities || []).length ? `<p><span class="font-bold">핵심 능력:</span> ${cc.abilities.map(esc).join(', ')}</p>` : ''}
+                    ${prepRows}
+                    <p class="text-slate-500">하는 일과 핵심 능력은 아래 칸에서 눌러서 고를 수 있어요. 출처: 커리어넷 직업백과</p>
+                </div>
+            </div>`;
+        }
+
+        // 2번 탭: 커리어넷 직업백과에서 직업 찾기
+        function renderCareerSearch() {
+            const box = document.getElementById('careerSearchBox');
+            if (!box) return;
+            const mine = selectedStrengths.map(strengthShort).join(', ');
             const results = careerResults.map((r, i) => `
                 <button type="button" onclick="pickCareer(${i})" class="w-full text-left p-3 rounded-xl border-2 border-sky-100 bg-white hover:border-sky-400 transition">
                     <span class="block font-extrabold text-sky-900 text-sm">${esc(r.name)} ${r.group ? `<span class="text-[11px] font-bold text-slate-500">· ${esc(r.group)}</span>` : ''}</span>
                     <span class="block text-xs text-slate-600 mt-0.5">${esc(r.work)}</span>
                 </button>`).join('');
-            const detail = cc ? `
-                <div class="bg-white border border-sky-200 rounded-xl p-3 text-xs space-y-1 leading-relaxed">
-                    <p class="font-extrabold text-sky-900 text-sm">가져온 직업: ${esc(cc.name)}</p>
-                    ${(cc.works || []).length ? `<p><span class="font-bold">하는 일:</span> ${cc.works.map(esc).join(' / ')}</p>` : ''}
-                    ${(cc.abilities || []).length ? `<p><span class="font-bold">핵심 능력:</span> ${cc.abilities.map(esc).join(', ')}</p>` : ''}
-                    ${Object.keys(PREPARE_LABEL).map(k => ((cc.prepare || {})[k] || []).length ? `<p><span class="font-bold">${PREPARE_LABEL[k]}:</span> ${cc.prepare[k].map(esc).join(' / ')}</p>` : '').join('')}
-                    <p class="text-slate-500">하는 일과 핵심 능력은 아래 칸에서 눌러서 고를 수 있어요. 출처: 커리어넷</p>
-                </div>` : '';
-            return `
-            <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-5 space-y-3">
-                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>커리어넷 공식 직업 정보 (선택)</h3>
-                <p class="text-xs text-sky-800">더 자세한 직업 정보를 커리어넷에서 찾아볼 수 있어요. 찾은 글이 어려우면 아래 AI가 쉬운 말로 바꿔 줘요.</p>
+            const focus = document.activeElement && document.activeElement.id === 'careerQueryInput';
+            box.innerHTML = `
+                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>커리어넷 직업백과에서 직업 찾기</h3>
+                <p class="text-xs text-sky-800 leading-relaxed">나라에서 운영하는 직업 정보(커리어넷)에서 직업을 찾아요. 하는 일, 필요한 능력, 준비 방법에 <strong>출처</strong>가 붙어요.${mine ? ` <span class="font-bold">내 강점: ${esc(mine)}</span> — 직업에서 필요한 능력과 견주어 봐요.` : ''}</p>
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" value="${esc(careerQuery)}" oninput="careerQuery = this.value" onkeyup="if(event.key==='Enter') searchCareer()" maxlength="20" aria-label="커리어넷에서 찾을 직업 이름"
-                        class="flex-1 p-2.5 border border-sky-300 rounded-xl text-sm bg-white" placeholder="찾을 직업 이름">
+                    <input type="text" id="careerQueryInput" value="${esc(careerQuery)}" oninput="careerQuery = this.value" onkeyup="if(event.key==='Enter') searchCareer()" maxlength="20" aria-label="커리어넷에서 찾을 직업 이름"
+                        class="flex-1 p-2.5 border border-sky-300 rounded-xl text-sm bg-white" placeholder="찾을 직업 이름 (예: 바리스타, 사서, 조경)">
                     <button onclick="searchCareer()" ${careerBusy ? 'disabled' : ''} class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid fa-magnifying-glass mr-1"></i>커리어넷에서 찾기</button>
                 </div>
-                <p class="text-xs font-bold text-sky-900">${esc(careerMsg)}</p>
-                ${results ? `<div class="grid sm:grid-cols-2 gap-2">${results}</div>` : ''}
-                ${detail}
-            </div>`;
+                <p class="text-xs font-bold text-sky-900" role="status">${esc(careerMsg)}</p>
+                ${results ? `<div class="grid sm:grid-cols-2 gap-2">${results}</div>` : ''}`;
+            if (focus) { const el = document.getElementById('careerQueryInput'); if (el) { el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} } }
         }
 
         function careerErrorMsg(e) {
@@ -1252,40 +1306,40 @@
         }
 
         async function searchCareer() {
-            if (careerBusy || !selectedTargetJob) return;
+            if (careerBusy) return;
             const q = (careerQuery || '').trim();
-            if (!q) { careerMsg = '찾을 직업 이름을 입력해요.'; renderPosterStep(); return; }
-            careerBusy = true; careerMsg = '커리어넷에서 찾고 있어요...'; careerResults = []; renderPosterStep();
+            if (!q) { careerMsg = '찾을 직업 이름을 입력해요.'; renderCareerSearch(); return; }
+            careerBusy = true; careerMsg = '커리어넷에서 찾고 있어요...'; careerResults = []; renderCareerSearch();
             try {
                 const r = await callAi('career-search', { query: q });
                 careerResults = (Array.isArray(r.jobs) ? r.jobs : []).filter(j => j && j.seq && j.name);
                 careerMsg = careerResults.length ? `${careerResults.length}개를 찾았어요. 알고 싶은 직업을 눌러요.` : '찾은 직업이 없어요. 다른 낱말로 찾아봐요.';
             } catch (e) { careerMsg = careerErrorMsg(e); }
-            careerBusy = false; renderPosterStep();
+            careerBusy = false; renderCareerSearch();
         }
 
         async function pickCareer(i) {
             const r = careerResults[i];
-            const job = selectedTargetJob;
-            if (!r || !job || careerBusy) return;
-            careerBusy = true; careerMsg = '자세한 내용을 가져오고 있어요...'; renderPosterStep();
+            if (!r || careerBusy) return;
+            careerBusy = true; careerMsg = '자세한 내용을 가져오고 있어요...'; renderCareerSearch();
             try {
                 const d = await callAi('career-detail', { seq: r.seq });
                 const arr = v => (Array.isArray(v) ? v : []).map(x => String(x == null ? '' : x).trim()).filter(Boolean);
                 const pr = d.prepare || {};
                 const cc = {
-                    seq: String(d.seq || r.seq), name: asStr(d.name) || r.name, group: asStr(d.group),
+                    seq: String(d.seq || r.seq).replace(/\D/g, ''), name: asStr(d.name) || r.name, group: asStr(d.group),
                     works: arr(d.works).slice(0, 6), abilities: arr(d.abilities).slice(0, 8), aptitudes: arr(d.aptitudes).slice(0, 5),
                     prepare: { recruit: arr(pr.recruit), training: arr(pr.training), certificate: arr(pr.certificate), curriculum: arr(pr.curriculum) }
                 };
-                if (cc.works.length || cc.abilities.length) {
-                    careerCache[job.id] = cc; saveState();
-                    careerMsg = '커리어넷 정보를 가져왔어요. 포스터에 넣고 싶은 것을 골라요.';
+                if (cc.seq && (cc.works.length || cc.abilities.length)) {
+                    careerCache[CN_PREFIX + cc.seq] = cc; saveState();
+                    careerMsg = '커리어넷 정보를 가져왔어요.';
+                    openJobDetail(CN_PREFIX + cc.seq);
                 } else {
                     careerMsg = '이 직업은 보여 줄 내용이 비어 있어요. 다른 직업을 눌러 봐요.';
                 }
             } catch (e) { careerMsg = careerErrorMsg(e); }
-            careerBusy = false; renderPosterStep();
+            careerBusy = false; renderCareerSearch();
         }
 
         const POSTER_TEMPLATES = [{ id: 'T1', name: '노트형' }, { id: 'T2', name: '컬러형' }, { id: 'T3', name: '간판형' }];
@@ -1645,7 +1699,7 @@
             </div>
 
             <div class="space-y-4">
-                <h3 class="step-h"><span class="num n1">1</span>직업 정보 더 알아보기 <small>(해 보고 싶을 때)</small></h3>
+                <h3 class="step-h"><span class="num n1">1</span>직업 정보 살펴보기 <small>(출처를 확인해요)</small></h3>
                 ${careerPanelHtml(job)}
                 <div class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-3">
@@ -1957,7 +2011,7 @@
         function renderStep5() {
             const sel = document.getElementById('targetJobSelect');
             sel.innerHTML = '<option value="">직업을 골라요</option>' +
-                LOCAL_JOBS_DB.map(j => `<option value="${j.id}" ${selectedTargetJob && selectedTargetJob.id === j.id ? 'selected' : ''}>${esc(j.name)}</option>`).join('');
+                allJobs().map(j => `<option value="${j.id}" ${selectedTargetJob && selectedTargetJob.id === j.id ? 'selected' : ''}>${esc(j.name)}</option>`).join('');
             const st = selectedStrengths.map(strengthShort).join(', ');
             document.getElementById('step5Strengths').innerHTML = st ? esc(st) : '<span class="text-slate-400">1번 탭에서 강점을 골라요</span>';
             const pi = prepItem();
@@ -1972,7 +2026,7 @@
         }
 
         function handleJobSelectChange() {
-            const found = LOCAL_JOBS_DB.find(j => j.id === document.getElementById('targetJobSelect').value) || null;
+            const found = findJob(document.getElementById('targetJobSelect').value);
             if (found && (!selectedTargetJob || selectedTargetJob.id !== found.id)) {
                 selectedTargetJob = found; posterPicks = new Set();
             } else if (!found) { selectedTargetJob = null; posterPicks = new Set(); }
@@ -1989,7 +2043,7 @@
             const items = [];
             items.push({ kind: 'connect', label: '나의 강점과 직업', text: s1 ? `${job.name}에서는 "${s1}" 같은 나의 강점이 도움이 돼요.` : `${job.name}에서는 성실하게 배우는 마음이 도움이 돼요.` });
             items.push({ kind: 'praise', label: '응원 한마디', text: '직업을 스스로 골라 보고 준비해 보는 모습이 멋져요.' });
-            items.push({ kind: 'action', label: '해 볼 수 있는 행동 1', text: job.tip });
+            items.push({ kind: 'action', label: '해 볼 수 있는 행동 1', text: job.tip || `${job.name}이 하는 일을 선생님과 이야기해 봐요.` });
             if (pi) items.push({ kind: 'action', label: '해 볼 수 있는 행동 2', text: `${pi.short}, 이것을 매일 조금씩 연습해요.` });
             if (pi) items.push({ kind: 'promise', label: '다짐 문장', text: `${pi.short}부터 차근차근 해 볼게요.` });
             return items.map((it, i) => ({ ...it, id: 'a' + i }));
