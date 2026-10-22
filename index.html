@@ -17,8 +17,10 @@
         button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
 
         /* ===== 바인더 노트 디자인 ===== */
-        :root { --ink:#1c1c1c; --paper:#faf9f7; --desk:#8a9fbd; --cream:#fdf0c4; --sage:#d3e2c4; --sky:#d3e4fa; }
-        body.bg-slate-50 { background: var(--desk); }
+        :root { --ink:#1c1c1c; --paper:#faf9f7; --desk:#b7c7dc; --grid:rgba(255,255,255,.65); --cream:#fdf0c4; --sage:#d3e2c4; --sky:#d3e4fa; }
+        body.bg-slate-50, .idx-nav, .landing { background-color: var(--desk);
+            background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 26px 26px; background-attachment: fixed; }
         header.sticky { background: var(--paper); border-bottom: 2px solid var(--ink); box-shadow: none; }
         header .bg-gradient-to-tr { background: var(--desk); background-image: none; color: var(--ink); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
         header nav { background: #f1eee9; border-top: 2px solid var(--ink); }
@@ -27,9 +29,8 @@
         #appContent { position: relative; width: calc(100% - 44px); max-width: 72rem; margin: 52px auto 48px; padding: 30px 26px 34px;
             background: var(--paper); border: 2px solid var(--ink); border-radius: 18px;
             box-shadow: 7px 8px 0 0 #ece9e4, 7px 8px 0 2px var(--ink); }
-        .pin { position: absolute; top: -20px; left: -16px; width: 26px; height: 26px; border-radius: 50%; background: var(--desk); border: 3px solid var(--ink); z-index: 2; }
-        .pin::before { content: ''; position: absolute; top: -13px; left: -8px; width: 8px; height: 24px; background: var(--ink); border-radius: 6px; transform: rotate(48deg); z-index: -1; }
-        @media (max-width: 640px) { #appContent { width: calc(100% - 28px); padding: 22px 14px 26px; } .pin { left: -10px; } }
+        .pin { position: absolute; top: -30px; left: 40px; width: 30px; height: 74px; transform: rotate(-7deg); z-index: 3; filter: drop-shadow(1px 2px 0 rgba(0,0,0,.22)); pointer-events: none; }
+        @media (max-width: 640px) { #appContent { width: calc(100% - 28px); padding: 22px 14px 26px; } .pin { left: 22px; } }
 
         .chapter { text-align: center; padding: 4px 0 6px; }
         .chapter-label { font-size: 12px; font-weight: 800; letter-spacing: .28em; color: #b9b4ab; }
@@ -66,7 +67,7 @@
         .brand-b { font-size: clamp(1rem, 3vw, 1.25rem); font-weight: 800; color: var(--ink); }
 
         /* ----- 위쪽 색깔 인덱스 탭 ----- */
-        .idx-nav { background: var(--desk); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); padding: 10px 14px 0; }
+        .idx-nav { border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); padding: 10px 14px 0; }
         .idx-row { max-width: 72rem; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; align-items: end; }
         nav .idx { --tc: #fff; background: var(--tc); border: 2px solid var(--ink); border-bottom: 0; border-radius: 12px 12px 0 0;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 7px 3px 8px; margin-top: 9px;
@@ -78,7 +79,7 @@
         @media (min-width: 768px) { nav .idx { flex-direction: row; gap: 8px; font-size: 1rem; } }
 
         /* ----- 시작 화면 ----- */
-        .landing { position: fixed; inset: 0; z-index: 45; background: var(--desk); overflow-y: auto; display: flex; align-items: flex-start; justify-content: center; padding: 48px 18px 40px; }
+        .landing { position: fixed; inset: 0; z-index: 45; overflow-y: auto; display: flex; align-items: flex-start; justify-content: center; padding: 48px 18px 40px; }
         .landing.hidden { display: none; }
         .landing-card { position: relative; width: 100%; max-width: 600px; margin: auto; background: var(--paper); border: 2px solid var(--ink); border-radius: 18px;
             box-shadow: 7px 8px 0 0 #ece9e4, 7px 8px 0 2px var(--ink); padding: 34px 28px 28px; text-align: center; }
@@ -92,10 +93,25 @@
         .btn-line:hover { background: var(--cream); }
         .landing-read { font-size: 13px; }
         .guide .n1, .guide-row .n1 { background: var(--cream); } .guide-row .n2 { background: var(--sage); } .guide-row .n3 { background: var(--sky); } .guide-row .n4 { background: var(--lav); } .guide-row .n5 { background: var(--peach); }
+
+        /* ----- 포스터 만들기 ----- */
+        .step-h { display: flex; align-items: center; gap: 8px; font-size: 1.2rem; font-weight: 900; color: var(--ink); }
+        .step-h small { font-size: .75rem; font-weight: 700; color: #8b867d; }
+        .pz-canvas { display: block; width: 100%; height: auto; border: 2px solid var(--ink); border-radius: 12px; box-shadow: 5px 6px 0 rgba(28,28,28,.18); background: #fff; }
+        .pz-thumb { display: block; width: 100%; height: auto; border: 1.5px solid var(--ink); border-radius: 6px; }
+        .tpl-btn { display: flex; flex-direction: column; gap: 6px; align-items: stretch; text-align: center; padding: 8px; border: 2px solid #d8d4cc; border-radius: 12px; background: #fff; }
+        .tpl-btn.on { border-color: var(--ink); box-shadow: 3px 3px 0 var(--ink); background: var(--cream); }
+        .sw-btn { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--ink); color: transparent; display: inline-flex; align-items: center; justify-content: center; position: relative; }
+        .sw-btn.on { color: var(--ink); box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--ink); }
+        .sw-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+        #posterPrintArea { display: none; }
         @media print {
             body * { visibility: hidden; }
             .pin, #landing { display: none !important; }
             #dreamCardPrintArea, #dreamCardPrintArea * { visibility: visible; }
+            #posterPrintArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+            #posterPrintArea, #posterPrintArea * { visibility: visible; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #posterPrintArea img { display: block; width: 180mm; height: 240mm; margin: 0 auto; }
             #dreamCardPrintArea { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: 2px solid #000 !important; color: #000 !important; background: #fff !important; }
         }
     </style>
@@ -103,6 +119,10 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <symbol id="clip-mark" viewBox="0 0 40 96">
+            <path d="M28 30 L28 70 A10 10 0 0 1 8 70 L8 22 A12 12 0 0 1 32 22 L32 74" fill="none" stroke="#1c1c1c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M28 30 L28 70 A10 10 0 0 1 8 70 L8 22 A12 12 0 0 1 32 22 L32 74" fill="none" stroke="#dfe5ee" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
         <symbol id="logo-mark" viewBox="0 0 56 56">
             <rect x="4" y="36" width="14" height="14" rx="3" fill="#fdf0c4" stroke="#1c1c1c" stroke-width="2.5"/>
             <rect x="21" y="26" width="14" height="24" rx="3" fill="#d3e2c4" stroke="#1c1c1c" stroke-width="2.5"/>
@@ -147,7 +167,7 @@
                     <span class="num">2</span><span class="idx-label">직업 탐색</span>
                 </button>
                 <button onclick="switchTab('step3')" id="tab-step3" class="tab-btn idx idx3">
-                    <span class="num">3</span><span class="idx-label">포스터 재료</span>
+                    <span class="num">3</span><span class="idx-label">포스터 만들기</span>
                 </button>
                 <button onclick="switchTab('step4')" id="tab-step4" class="tab-btn idx idx4">
                     <span class="num">4</span><span class="idx-label">취업 역량 체크</span>
@@ -160,7 +180,7 @@
     </header>
 
     <main id="appContent" class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
-        <span class="pin" aria-hidden="true"></span>
+        <svg class="pin" viewBox="0 0 40 96" aria-hidden="true"><use href="#clip-mark"/></svg>
         <div id="lessonGuide"></div>
 
         <!-- ========== STEP 1: 나의 강점 ========== -->
@@ -244,9 +264,9 @@
         <section id="step3" class="tab-content hidden space-y-6">
             <div class="chapter">
                 <p class="chapter-label">STEP 03</p>
-                <h2 class="chapter-title">포스터에 넣을 내용을 골라요!</h2>
+                <h2 class="chapter-title">내가 소개하는 직업 포스터를 만들어요!</h2>
                 <hr class="chapter-rule">
-                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 직업이 하는 일, 일하는 장소, 필요한 능력을 살펴보고 포스터에 넣을 내용만 골라요. 고른 내용은 캔바 포스터에 붙여 넣어요.</p>
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 직업 정보를 살펴보고, 넣고 싶은 내용과 모양을 골라요. 완성한 포스터는 이미지로 저장하고, 더 꾸미고 싶을 때는 캔바에서 이어서 해요.</p>
             </div>
             <div id="posterArea" class="space-y-6"></div>
         </section>
@@ -487,7 +507,7 @@
     <!-- 시작 화면 -->
     <div id="landing" class="landing" role="dialog" aria-modal="true" aria-labelledby="landingTitle">
         <div class="landing-card">
-            <span class="pin" aria-hidden="true"></span>
+            <svg class="pin" viewBox="0 0 40 96" aria-hidden="true"><use href="#clip-mark"/></svg>
             <p class="chapter-label">CAREER EXPLORER · 진로와 직업</p>
             <svg class="logo logo-lg" viewBox="0 0 56 56" aria-hidden="true"><use href="#logo-mark"/></svg>
             <h1 id="landingTitle" class="landing-title"><span class="brand-a">꿈차근!</span> 직업탐색기</h1>
@@ -496,7 +516,7 @@
             <ol class="landing-steps">
                 <li class="guide-row"><span class="num n1">1</span><span><b>나의 강점</b> 내가 잘하는 것 찾기</span></li>
                 <li class="guide-row"><span class="num n2">2</span><span><b>직업 탐색</b> 어울리는 직업 살펴보기</span></li>
-                <li class="guide-row"><span class="num n3">3</span><span><b>포스터 재료</b> 직업 소개 내용 고르기</span></li>
+                <li class="guide-row"><span class="num n3">3</span><span><b>포스터 만들기</b> 직업 소개 포스터 완성하기</span></li>
                 <li class="guide-row"><span class="num n4">4</span><span><b>취업 역량 체크</b> 준비할 것 정하기</span></li>
                 <li class="guide-row"><span class="num n5">5</span><span><b>미래 직업 카드</b> AI 조언 듣고 카드 만들기</span></li>
             </ol>
@@ -554,8 +574,9 @@
         let careerQuery = '', careerQueryFor = null, careerResults = [], careerMsg = '', careerBusy = false;
         let choiceReasons = new Set();    // 직업을 고른 이유
         let expressModes = new Set();     // 발표(표현) 방법
-        let activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false };
+        let activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false, posterSaved: false, posterPrinted: false };
         let reviewState = null;           // 교사 확인 대기 중인 AI 결과
+        let posterTemplate = 'T1', posterTheme = 'C1', posterMaker = '';   // 포스터 모양(저장), 만든 사람(저장 안 함)
 
         const STATE_KEY = 'jx_state_v1';
 
@@ -591,7 +612,7 @@
         const LESSON_GUIDE = {
             step1: { goal: '내가 잘하거나 좋아하는 것을 떠올리며 나의 강점을 골라요.', todo: '강점 카드를 눌러 골라요.' },
             step2: { goal: '관심 있는 직업을 살펴보고 한 가지를 골라요.', todo: '직업 카드를 보고 [이 직업 고르기]를 눌러요.' },
-            step3: { goal: '직업 정보를 살펴보고 포스터에 넣을 내용을 골라요.', todo: '하는 일, 일하는 장소, 필요한 능력 중에서 넣고 싶은 것을 골라요.' },
+            step3: { goal: '직업 정보를 살펴보고 직업 소개 포스터를 만들어요.', todo: '넣고 싶은 내용과 모양을 골라 포스터를 완성하고 저장해요. 더 꾸미고 싶으면 캔바에서 이어서 해요.' },
             step4: { goal: '직장생활에 필요한 태도와 능력을 살펴보고 준비할 것을 골라요.', todo: '잘하는 것에 체크하고, 연습하고 싶은 것을 한 가지 골라요.' },
             step5: { goal: '나의 강점과 희망 직업을 연결하고 실천 다짐을 정해요.', todo: 'AI 조언 중 내 생각과 맞는 것을 고르고, 다짐을 정해서 카드를 만들어요.' }
         };
@@ -899,6 +920,8 @@
                     careerCache: careerCache,
                     reasons: [...choiceReasons],
                     express: [...expressModes],
+                    posterTemplate: posterTemplate,
+                    posterTheme: posterTheme,
                     activity: activity
                 }));
             } catch (e) { /* 저장 불가 환경이어도 수업은 계속돼요 */ }
@@ -917,7 +940,9 @@
                 careerCache = st.careerCache && typeof st.careerCache === 'object' ? st.careerCache : {};
                 choiceReasons = new Set((st.reasons || []).filter(id => REASONS.some(r => r.id === id)));
                 expressModes = new Set((st.express || []).filter(id => EXPRESS_MODES.some(m => m.id === id)));
-                activity = Object.assign({ posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false }, st.activity || {});
+                posterTemplate = POSTER_TEMPLATES.some(t => t.id === st.posterTemplate) ? st.posterTemplate : 'T1';
+                posterTheme = POSTER_THEMES.some(t => t.id === st.posterTheme) ? st.posterTheme : 'C1';
+                activity = Object.assign({ posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false, posterSaved: false, posterPrinted: false }, st.activity || {});
             } catch (e) { /* 무시 */ }
         }
         function resetAll(skipConfirm) {
@@ -926,7 +951,8 @@
             selectedStrengths = []; selectedTargetJob = null; checkedSkills = new Set(); chosenPrep = null;
             aiJobCache = {}; careerCache = {}; posterPicks = new Set(); aiAdvice = null; advicePicks = new Set();
             choiceReasons = new Set(); expressModes = new Set();
-            activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false };
+            posterTemplate = 'T1'; posterTheme = 'C1'; posterMaker = '';
+            activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false, posterSaved: false, posterPrinted: false };
             careerQuery = ''; careerQueryFor = null; careerResults = []; careerMsg = '';
             promiseChoice = 'custom'; customPromise = '';
             teacherDraft = { id: '', ratings: ['', '', '', '', ''], memo: '' };
@@ -1262,6 +1288,336 @@
             careerBusy = false; renderPosterStep();
         }
 
+        const POSTER_TEMPLATES = [{ id: 'T1', name: '노트형' }, { id: 'T2', name: '컬러형' }, { id: 'T3', name: '간판형' }];
+        const POSTER_THEMES = [
+            { id: 'C1', name: '노랑', main: '#f3c24a', light: '#fdf0c4', dark: '#6b5200' },
+            { id: 'C2', name: '초록', main: '#86b97a', light: '#d3e2c4', dark: '#25501f' },
+            { id: 'C3', name: '하늘', main: '#7db3e8', light: '#d3e4fa', dark: '#173f73' },
+            { id: 'C4', name: '보라', main: '#a898dc', light: '#e6def7', dark: '#3d2f7a' },
+            { id: 'C5', name: '분홍', main: '#ef9a8c', light: '#fbdccf', dark: '#7a2e22' }
+        ];
+        const CLIP_PATH = 'M28 30 L28 70 A10 10 0 0 1 8 70 L8 22 A12 12 0 0 1 32 22 L32 74';
+        const PZ_W = 720, PZ_H = 960;
+        const PZ_FONT = '"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo","Noto Sans CJK KR",sans-serif';
+        const PZ_INK = '#1c1c1c';
+
+        // ---------- 포스터 그리기 (캔버스: 미리보기·저장·인쇄가 모두 같은 그림이에요) ----------
+        const pzIconCache = {};
+        let pzIconFamily = '"Font Awesome 6 Free"';   // 실제 아이콘 글꼴 이름은 아이콘 요소에서 읽어요(버전이 달라도 되게)
+        function pzIcon(cls) {
+            if (pzIconCache[cls]) return pzIconCache[cls];
+            let ch = '';
+            try {
+                const i = document.createElement('i');
+                i.className = 'fa-solid ' + cls; i.style.cssText = 'position:absolute;left:-9999px;top:0';
+                document.body.appendChild(i);
+                const cs = getComputedStyle(i, '::before'), c = cs.content;
+                if (cs.fontFamily) pzIconFamily = cs.fontFamily;
+                document.body.removeChild(i);
+                if (c && c !== 'none' && c !== 'normal') { const m = c.match(/^["']((?:[^"'\\]|\\.)*)["']/); ch = m ? m[1] : ''; }   // 첫 번째 따옴표 안의 글자만 ("\f0f4" / "" 형식도 처리)
+            } catch (e) {}
+            if (ch) pzIconCache[cls] = ch;
+            return ch;
+        }
+        function pzRound(ctx, x, y, w, h, r) {
+            r = Math.min(r, w / 2, h / 2);
+            ctx.beginPath(); ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+        }
+        // 띄어쓰기 단위로 줄을 나눠요. 한 낱말이 너무 길면 글자 단위로 나눠요.
+        function pzWrap(ctx, text, maxW) {
+            const words = String(text).split(/\s+/).filter(Boolean), lines = []; let cur = '';
+            for (const w of words) {
+                const t = cur ? cur + ' ' + w : w;
+                if (ctx.measureText(t).width <= maxW) { cur = t; continue; }
+                if (cur) { lines.push(cur); cur = ''; }
+                if (ctx.measureText(w).width <= maxW) { cur = w; continue; }
+                let seg = '';
+                for (const ch of w) { if (seg && ctx.measureText(seg + ch).width > maxW) { lines.push(seg); seg = ch; } else seg += ch; }
+                cur = seg;
+            }
+            if (cur) lines.push(cur);
+            return lines.length ? lines : [''];
+        }
+        function pzSpaced(ctx, text, cx, y, gap) {
+            const chars = [...text], ws = chars.map(c => ctx.measureText(c).width);
+            let x = cx - (ws.reduce((a, b) => a + b, 0) + gap * (chars.length - 1)) / 2;
+            ctx.textAlign = 'left';
+            chars.forEach((c, i) => { ctx.fillText(c, x, y); x += ws[i] + gap; });
+        }
+        const pzFont = (w, px) => `${w} ${px}px ${PZ_FONT}`;
+
+        function posterAllText() {
+            const job = selectedTargetJob;
+            return (job ? job.name : '') + posterText() + ' 내가 소개하는 직업 하는 일 일하는 장소 필요한 능력 꿈차근! 직업탐색기 만든 사람 내가 고른 이유 내용을 골라요 ' + (posterMaker || '');
+        }
+        function drawPoster(canvas, tplId, themeId, forExport) {
+            let ctx = null;
+            try { ctx = canvas.getContext('2d'); } catch (e) {}
+            if (!ctx || !selectedTargetJob) return;
+            const job = selectedTargetJob, T = tplId || posterTemplate;
+            const th = POSTER_THEMES.find(x => x.id === (themeId || posterTheme)) || POSTER_THEMES[0];
+            const S = canvas.width / PZ_W, W = PZ_W, H = PZ_H;
+            ctx.setTransform(S, 0, 0, S, 0, 0); ctx.clearRect(0, 0, W, H);
+            ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+
+            const p = pickedByGroup();
+            const defs = [['하는 일', 'fa-hands', p.tasks], ['일하는 장소', 'fa-location-dot', p.places], ['필요한 능력', 'fa-star', p.skills]]
+                .filter(d => !forExport || d[2].length);
+            const reasons = REASONS.filter(r => choiceReasons.has(r.id)).map(r => r.text).join(' · ');
+            const maker = (posterMaker || '').trim().slice(0, 20);
+
+            // 배경과 카드
+            let card = { x: 0, y: 0, w: W, h: H };
+            if (T === 'T1') {
+                ctx.fillStyle = th.main; ctx.fillRect(0, 0, W, H);
+                card = { x: 34, y: 38, w: W - 68, h: H - 72 };
+                ctx.fillStyle = 'rgba(0,0,0,.18)'; pzRound(ctx, card.x + 9, card.y + 11, card.w, card.h, 22); ctx.fill();
+                ctx.fillStyle = '#faf9f7'; pzRound(ctx, card.x, card.y, card.w, card.h, 22); ctx.fill();
+                ctx.lineWidth = 3; ctx.strokeStyle = PZ_INK; ctx.stroke();
+            } else if (T === 'T2') {
+                ctx.fillStyle = th.main; ctx.fillRect(0, 0, W, H);
+                ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.beginPath(); ctx.arc(650, 40, 175, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.beginPath(); ctx.arc(40, 940, 150, 0, Math.PI * 2); ctx.fill();
+            } else {
+                ctx.fillStyle = '#1c2333'; ctx.fillRect(0, 0, W, H);
+                card = { x: 28, y: 28, w: W - 56, h: H - 56 };
+                pzRound(ctx, card.x, card.y, card.w, card.h, 14); ctx.lineWidth = 4; ctx.strokeStyle = th.main; ctx.stroke();
+            }
+            const col = {
+                kicker: T === 'T1' ? '#aaa59c' : T === 'T3' ? th.main : th.dark,
+                title: T === 'T1' ? PZ_INK : T === 'T3' ? th.main : th.dark,
+                sum: T === 'T3' ? '#e9edf5' : '#333',
+                small: T === 'T1' ? '#666' : T === 'T3' ? '#b7c0d6' : th.dark
+            };
+            const cx = card.x + card.w / 2, x0 = card.x + 46, innerW = card.w - 92;
+
+            // 위쪽: 작은 제목, 아이콘, 직업 이름
+            const ky = card.y + 66;
+            ctx.font = pzFont(800, 17); ctx.fillStyle = col.kicker;
+            if (T === 'T2') {
+                const kw = [...'내가 소개하는 직업'].reduce((a, c) => a + ctx.measureText(c).width + 3, 0) + 44;
+                ctx.fillStyle = 'rgba(255,255,255,.7)'; pzRound(ctx, cx - kw / 2, ky - 27, kw, 40, 20); ctx.fill(); ctx.fillStyle = col.kicker;
+            }
+            pzSpaced(ctx, '내가 소개하는 직업', cx, ky, 3);
+            const icy = card.y + 150;
+            if (T === 'T3') { ctx.fillStyle = th.main; pzRound(ctx, cx - 44, icy - 44, 88, 88, 18); ctx.fill(); }
+            else {
+                ctx.beginPath(); ctx.arc(cx, icy, 44, 0, Math.PI * 2);
+                ctx.fillStyle = T === 'T2' ? '#fff' : th.light; ctx.fill();
+                if (T === 'T1') { ctx.lineWidth = 3; ctx.strokeStyle = PZ_INK; ctx.stroke(); }
+            }
+            ctx.fillStyle = T === 'T3' ? '#1c2333' : T === 'T2' ? th.dark : PZ_INK;
+            ctx.font = `900 38px ${pzIconFamily}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(pzIcon(job.icon) || '', cx, icy + 2);
+            ctx.textBaseline = 'alphabetic';
+            let tfs = 58; ctx.font = pzFont(900, tfs);
+            while (ctx.measureText(job.name).width > innerW && tfs > 30) { tfs -= 2; ctx.font = pzFont(900, tfs); }
+            ctx.fillStyle = col.title; ctx.textAlign = 'center'; ctx.fillText(job.name, cx, card.y + 252);
+            let y = card.y + 278;
+            if (T !== 'T2') {
+                ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + innerW, y); ctx.lineWidth = 2;
+                ctx.strokeStyle = T === 'T3' ? th.main : PZ_INK; ctx.setLineDash(T === 'T3' ? [8, 6] : []); ctx.stroke(); ctx.setLineDash([]);
+            }
+            y += 14;
+            if (p.summary.length) {
+                ctx.font = pzFont(700, 21);
+                const lines = pzWrap(ctx, p.summary[0], innerW - (T === 'T2' ? 40 : 0)), lh = 30;
+                if (T === 'T2') {
+                    const bh = lines.length * lh + 22; ctx.fillStyle = '#fff'; pzRound(ctx, x0, y + 6, innerW, bh, 20); ctx.fill();
+                    ctx.fillStyle = col.sum; ctx.textAlign = 'center';
+                    lines.forEach((ln, i) => ctx.fillText(ln, cx, y + 6 + 30 + i * lh - 2)); y += bh + 16;
+                } else {
+                    ctx.fillStyle = col.sum; ctx.textAlign = 'center';
+                    lines.forEach((ln, i) => ctx.fillText(ln, cx, y + 24 + i * lh)); y += lines.length * lh + 22;
+                }
+            } else { y += 10; }
+
+            // 아래쪽: 고른 이유, 꾸밈 글
+            ctx.font = pzFont(700, 16);
+            const rLines = reasons ? pzWrap(ctx, '내가 고른 이유: ' + reasons, innerW) : [];
+            const footH = (rLines.length ? rLines.length * 22 + 8 : 0) + 56;
+            const bodyTop = y, bodyBottom = card.y + card.h - footH;
+
+            // 가운데: 세 칸. 글자가 많으면 글자 크기를 줄여 한 장에 담아요.
+            const gap = 16, padX = 22;
+            let fs = 24, layout = null;
+            for (const f of [24, 22, 20, 19, 18, 17, 16, 15, 14, 13]) {
+                fs = f; ctx.font = pzFont(600, f);
+                const items = defs.map(d => d[2].map(t => pzWrap(ctx, t, innerW - padX * 2 - 24)));
+                const hs = items.map(ls => 62 + ls.reduce((a, l) => a + l.length, 0) * f * 1.4 + (ls.length ? 0 : 24) + 12);
+                const total = hs.reduce((a, b) => a + b, 0) + gap * Math.max(0, defs.length - 1);
+                layout = { items, hs, total };
+                if (total <= bodyBottom - bodyTop) break;
+            }
+            const avail = bodyBottom - bodyTop;
+            const extra = defs.length ? Math.min(70, Math.max(0, (avail - layout.total) / defs.length)) : 0;
+            let sy = bodyTop + Math.max(0, (avail - (layout.total + extra * defs.length)) / 2);
+            defs.forEach((d, i) => {
+                const h = layout.hs[i] + extra;
+                if (T === 'T1') {
+                    ctx.fillStyle = '#ececec'; ctx.fillRect(x0, sy, innerW, h); ctx.lineWidth = 2; ctx.strokeStyle = PZ_INK; ctx.strokeRect(x0, sy, innerW, h);
+                } else if (T === 'T2') {
+                    ctx.fillStyle = 'rgba(0,0,0,.14)'; pzRound(ctx, x0, sy + 4, innerW, h, 24); ctx.fill();
+                    ctx.fillStyle = '#fff'; pzRound(ctx, x0, sy, innerW, h, 24); ctx.fill();
+                } else {
+                    ctx.fillStyle = 'rgba(255,255,255,.08)'; pzRound(ctx, x0, sy, innerW, h, 8); ctx.fill();
+                    ctx.fillStyle = th.main; ctx.fillRect(x0, sy + 2, 10, h - 4);
+                }
+                const hc = T === 'T3' ? th.main : T === 'T2' ? th.dark : PZ_INK;
+                const ncx = x0 + padX + 16, ncy = sy + 34;
+                ctx.beginPath(); ctx.arc(ncx, ncy, 16, 0, Math.PI * 2);
+                ctx.fillStyle = T === 'T1' ? th.light : th.main; ctx.fill();
+                if (T === 'T1') { ctx.lineWidth = 2; ctx.strokeStyle = PZ_INK; ctx.stroke(); }
+                ctx.fillStyle = T === 'T3' ? '#1c2333' : T === 'T2' ? th.dark : PZ_INK;
+                ctx.font = pzFont(800, 18); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(i + 1), ncx, ncy + 1);
+                ctx.fillStyle = hc; ctx.font = `900 22px ${pzIconFamily}`; ctx.textAlign = 'center';
+                ctx.fillText(pzIcon(d[1]) || '', ncx + 40, ncy + 1);
+                ctx.textBaseline = 'alphabetic'; ctx.font = pzFont(800, 22); ctx.textAlign = 'left'; ctx.fillText(d[0], ncx + 64, ncy + 8);
+                let ty = sy + 62 + fs; ctx.font = pzFont(600, fs);
+                if (!d[2].length) { ctx.globalAlpha = .5; ctx.fillStyle = T === 'T3' ? '#9aa4bd' : '#777'; ctx.fillText('내용을 골라요', x0 + padX + 24, ty); ctx.globalAlpha = 1; }
+                layout.items[i].forEach(lines => {
+                    ctx.fillStyle = T === 'T3' ? '#f1f4fa' : PZ_INK;
+                    lines.forEach((ln, k) => { if (k === 0) ctx.fillText('•', x0 + padX + 2, ty); ctx.fillText(ln, x0 + padX + 24, ty); ty += fs * 1.4; });
+                });
+                sy += h + gap;
+            });
+
+            // 아랫부분
+            ctx.fillStyle = col.small; ctx.textAlign = 'left'; ctx.font = pzFont(700, 16);
+            let ry = card.y + card.h - 56 - (rLines.length ? rLines.length * 22 : 0) + 18;
+            rLines.forEach((ln, i) => ctx.fillText(ln, x0, ry + i * 22));
+            ctx.globalAlpha = .8; ctx.font = pzFont(700, 14);
+            ctx.fillText('꿈차근! 직업탐색기', x0, card.y + card.h - 26);
+            if (maker) { ctx.textAlign = 'right'; ctx.fillText('만든 사람 · ' + maker, x0 + innerW, card.y + card.h - 26); }
+            ctx.globalAlpha = 1;
+
+            // 노트형: 종이 클립
+            if (T === 'T1') {
+                ctx.save(); ctx.translate(card.x + 52, card.y - 40); ctx.rotate(-7 * Math.PI / 180); ctx.scale(.85, .85);
+                const cp = new Path2D(CLIP_PATH); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([]);
+                ctx.lineWidth = 7; ctx.strokeStyle = PZ_INK; ctx.stroke(cp); ctx.lineWidth = 3; ctx.strokeStyle = '#dfe5ee'; ctx.stroke(cp);
+                ctx.restore();
+            }
+        }
+
+        // 글꼴이 준비된 뒤에 다시 그려요(처음 한 번은 기본 글꼴로 보일 수 있어서).
+        let posterDrawToken = 0;
+        function loadPosterFonts() {
+            if (!document.fonts || !document.fonts.load) return Promise.resolve();
+            const text = posterAllText();
+            if (selectedTargetJob) pzIcon(selectedTargetJob.icon);
+            const tasks = [document.fonts.load(`900 24px ${pzIconFamily}`)]
+                .concat([600, 700, 800].map(w => document.fonts.load(`${w} 24px "Noto Sans KR"`, text)));
+            return Promise.race([Promise.all(tasks).catch(() => {}), new Promise(r => setTimeout(r, 2500))]);
+        }
+        function drawAllPosters() {
+            const big = document.getElementById('posterCanvas');
+            if (big) drawPoster(big, posterTemplate, posterTheme, false);
+            document.querySelectorAll('canvas.pz-thumb').forEach(c => drawPoster(c, c.dataset.tpl, posterTheme, false));
+        }
+        function schedulePosterDraw() {
+            drawAllPosters();
+            const token = ++posterDrawToken;
+            loadPosterFonts().then(() => { if (token === posterDrawToken) drawAllPosters(); });
+        }
+
+        function posterPickCount() { const p = pickedByGroup(); return p.tasks.length + p.places.length + p.skills.length + p.summary.length; }
+
+        function renderPosterPicks() {
+            const box = document.getElementById('posterPicksBox'); if (!box) return;
+            const hasAi = !!aiJobCache[selectedTargetJob.id];
+            box.innerHTML = POSTER_GROUPS.filter(g => g.id !== 'summary' || hasAi).map(g => {
+                const items = currentPosterList.map((it, idx) => ({ it, idx })).filter(o => o.it.group === g.id);
+                const n = items.filter(o => posterPicks.has(o.it.key)).length;
+                return `<div class="${g.box} border p-4 rounded-2xl space-y-2">
+                    <h4 class="font-extrabold ${g.head} flex items-center gap-1.5"><i class="fa-solid ${g.icon}"></i><span>${g.label}</span><span class="ml-auto text-xs font-bold opacity-70">${n}/${g.id === 'summary' ? 1 : POSTER_MAX}</span></h4>
+                    <div class="space-y-2">${items.map(({ it, idx }) => {
+                        const on = posterPicks.has(it.key);
+                        return `<button type="button" aria-pressed="${on}" onclick="togglePosterPick(${idx})"
+                            class="w-full text-left p-3 rounded-xl border-2 text-sm font-semibold flex items-start gap-2 transition ${on ? 'border-blue-600 bg-white ring-2 ring-blue-300/50' : 'border-transparent bg-white/70 hover:bg-white'}">
+                            <span class="mt-0.5 w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center text-xs ${on ? 'bg-blue-600 text-white' : 'bg-slate-200 text-transparent'}"><i class="fa-solid fa-check"></i></span>
+                            <span class="flex-1 leading-snug">${esc(it.text)}</span>
+                            ${srcTag(it.src)}
+                        </button>`;
+                    }).join('')}</div></div>`;
+            }).join('');
+        }
+        function renderPosterDesign() {
+            const box = document.getElementById('posterDesignBox'); if (!box) return;
+            box.innerHTML = `
+                <p class="text-xs font-bold text-slate-600 mb-2">모양 (세 가지 중에서 골라요)</p>
+                <div class="grid grid-cols-3 gap-3 mb-4">${POSTER_TEMPLATES.map(t => `
+                    <button type="button" aria-pressed="${posterTemplate === t.id}" onclick="setPosterTemplate('${t.id}')" class="tpl-btn ${posterTemplate === t.id ? 'on' : ''}">
+                        <canvas class="pz-thumb" data-tpl="${t.id}" width="240" height="320" aria-hidden="true"></canvas>
+                        <span class="font-extrabold text-sm">${t.name}</span>
+                    </button>`).join('')}</div>
+                <p class="text-xs font-bold text-slate-600 mb-2">색깔</p>
+                <div class="flex flex-wrap gap-2">${POSTER_THEMES.map(c => `
+                    <button type="button" aria-label="${c.name}" aria-pressed="${posterTheme === c.id}" onclick="setPosterTheme('${c.id}')"
+                        class="sw-btn ${posterTheme === c.id ? 'on' : ''}" style="background:${c.main}"><i class="fa-solid fa-check"></i><span class="sw-name">${c.name}</span></button>`).join('')}</div>`;
+        }
+        function updatePosterPreview() {
+            const box = document.getElementById('posterPreviewBox');
+            if (box && !document.getElementById('posterCanvas')) box.innerHTML = '<canvas id="posterCanvas" class="pz-canvas" width="1440" height="1920"></canvas>';
+            const cv = document.getElementById('posterCanvas');
+            if (cv) { cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', `${selectedTargetJob.name} 직업 포스터. ` + posterText().replace(/\n/g, '. ')); }
+            const n = posterPickCount();
+            ['posterSaveBtn', 'posterPrintBtn', 'posterReadBtn'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = n === 0; });
+            const hint = document.getElementById('posterEmptyHint'); if (hint) hint.classList.toggle('hidden', n > 0);
+        }
+        function refreshPoster() {
+            renderPosterPicks(); renderPosterDesign(); updatePosterPreview(); schedulePosterDraw();
+        }
+        function setPosterTemplate(id) { posterTemplate = id; saveState(); renderPosterDesign(); updatePosterPreview(); schedulePosterDraw(); }
+        function setPosterTheme(id) { posterTheme = id; saveState(); renderPosterDesign(); updatePosterPreview(); schedulePosterDraw(); }
+        function onPosterMaker(v) { posterMaker = v; updatePosterPreview(); schedulePosterDraw(); }
+
+        async function makePosterCanvas() {
+            await loadPosterFonts();
+            const c = document.createElement('canvas'); c.width = PZ_W * 2; c.height = PZ_H * 2;
+            drawPoster(c, posterTemplate, posterTheme, true);
+            return c;
+        }
+        async function downloadPoster() {
+            if (!selectedTargetJob || posterPickCount() === 0) return;
+            const btn = document.getElementById('posterSaveBtn');
+            const original = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>만드는 중...</span>';
+            try {
+                const canvas = await makePosterCanvas();
+                const name = (posterMaker || '').trim() || '나의';
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `${name}_${selectedTargetJob.name}_직업포스터.png`.replace(/[\\/:*?"<>|]/g, '');
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                activity.posterSaved = true; saveState();
+            } catch (e) {
+                alert('이미지를 만들지 못했어요. 선생님께 도움을 요청해요.');
+            } finally {
+                btn.disabled = false; btn.innerHTML = original;
+            }
+        }
+        async function printPoster() {
+            if (!selectedTargetJob || posterPickCount() === 0) return;
+            try {
+                const canvas = await makePosterCanvas();
+                let area = document.getElementById('posterPrintArea');
+                if (!area) { area = document.createElement('div'); area.id = 'posterPrintArea'; document.body.appendChild(area); }
+                const img = new Image();
+                img.alt = selectedTargetJob.name + ' 직업 포스터';
+                img.src = canvas.toDataURL('image/png');
+                if (img.decode) { try { await img.decode(); } catch (e) {} }
+                area.innerHTML = ''; area.appendChild(img);
+                activity.posterPrinted = true; saveState();
+                window.addEventListener('afterprint', () => { area.innerHTML = ''; }, { once: true });
+                window.print();
+            } catch (e) {
+                alert('인쇄 준비를 하지 못했어요. 선생님께 도움을 요청해요.');
+            }
+        }
+
         function renderPosterStep() {
             const area = document.getElementById('posterArea');
             const job = selectedTargetJob;
@@ -1275,21 +1631,7 @@
             currentPosterList = buildPosterList();
             const hasAi = !!aiJobCache[job.id];
             const hasCareer = !!careerCache[job.id];
-            const groupsHtml = POSTER_GROUPS.filter(g => g.id !== 'summary' || hasAi).map(g => {
-                const items = currentPosterList.map((it, idx) => ({ it, idx })).filter(o => o.it.group === g.id);
-                return `<div class="${g.box} border p-4 rounded-2xl space-y-2">
-                    <h4 class="font-extrabold ${g.head} flex items-center gap-1.5"><i class="fa-solid ${g.icon}"></i><span>${g.label}</span></h4>
-                    <div class="space-y-2">${items.map(({ it, idx }) => {
-                        const on = posterPicks.has(it.key);
-                        return `<button type="button" aria-pressed="${on}" onclick="togglePosterPick(${idx})"
-                            class="w-full text-left p-3 rounded-xl border-2 text-sm font-semibold flex items-start gap-2 transition ${on ? 'border-blue-600 bg-white ring-2 ring-blue-300/50' : 'border-transparent bg-white/70 hover:bg-white'}">
-                            <span class="mt-0.5 w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center text-xs ${on ? 'bg-blue-600 text-white' : 'bg-slate-200 text-transparent'}"><i class="fa-solid fa-check"></i></span>
-                            <span class="flex-1 leading-snug">${esc(it.text)}</span>
-                            ${srcTag(it.src)}
-                        </button>`;
-                    }).join('')}</div></div>`;
-            }).join('');
-
+            const canvaUrl = getCanva('poster');
             area.innerHTML = `
             <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -1302,49 +1644,73 @@
                 </div>
             </div>
 
-            ${careerPanelHtml(job)}
-
-            <div class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 space-y-3">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h3 class="font-extrabold text-purple-900 flex items-center gap-2"><i class="fa-solid fa-robot"></i>AI 선생님께 쉬운 말로 바꿔 달라고 해요</h3>
-                        <p class="text-xs text-purple-800 mt-1">${hasCareer ? '커리어넷에서 가져온 글을 AI가 쉬운 말로 바꿔 줘요. ' : ''}AI가 알려 준 내용은 틀릴 수 있어요. 선생님과 함께 확인하고, 포스터에 넣고 싶은 것만 골라요.</p>
+            <div class="space-y-4">
+                <h3 class="step-h"><span class="num n1">1</span>직업 정보 더 알아보기 <small>(해 보고 싶을 때)</small></h3>
+                ${careerPanelHtml(job)}
+                <div class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-extrabold text-purple-900 flex items-center gap-2"><i class="fa-solid fa-robot"></i>AI 선생님께 쉬운 말로 바꿔 달라고 해요</h3>
+                            <p class="text-xs text-purple-800 mt-1">${hasCareer ? '커리어넷에서 가져온 글을 AI가 쉬운 말로 바꿔 줘요. ' : ''}AI가 알려 준 내용은 틀릴 수 있어요. 선생님과 함께 확인하고, 포스터에 넣고 싶은 것만 골라요.</p>
+                        </div>
+                        <button id="aiJobInfoBtn" onclick="askAiJobInfo()" class="px-5 py-3 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl shadow flex items-center gap-2 disabled:opacity-60">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i><span>${hasAi ? '다시 물어보기' : (hasCareer ? '쉬운 말로 바꾸기' : 'AI에게 물어보기')}</span>
+                        </button>
                     </div>
-                    <button id="aiJobInfoBtn" onclick="askAiJobInfo()" class="px-5 py-3 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl shadow flex items-center gap-2 disabled:opacity-60">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i><span>${hasAi ? '다시 물어보기' : (hasCareer ? '쉬운 말로 바꾸기' : 'AI에게 물어보기')}</span>
-                    </button>
+                    <p id="aiJobInfoMsg" class="text-xs font-bold text-purple-900"></p>
                 </div>
-                <p id="aiJobInfoMsg" class="text-xs font-bold text-purple-900"></p>
             </div>
 
-            <div>
-                <p class="font-bold text-slate-700 mb-2"><i class="fa-solid fa-hand-pointer text-blue-600 mr-1"></i>포스터에 넣고 싶은 내용을 눌러서 골라요.</p>
-                <div class="grid md:grid-cols-3 gap-4">${groupsHtml}</div>
+            <div class="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)] gap-8 items-start">
+                <div class="space-y-8 min-w-0">
+                    <div>
+                        <h3 class="step-h"><span class="num n2">2</span>포스터에 넣을 내용 고르기</h3>
+                        <p class="text-sm text-slate-600 mt-1"><i class="fa-solid fa-hand-pointer text-blue-600 mr-1"></i>눌러서 고르면 <b>'내 포스터'</b>에 바로 나타나요. 한 칸에 ${POSTER_MAX}개까지 넣을 수 있어요.</p>
+                        <p id="posterMsg" role="status" class="hidden mt-2 text-sm font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2"></p>
+                        <div id="posterPicksBox" class="space-y-4 mt-3"></div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+                        <h3 class="font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-circle-question text-amber-500"></i>이 직업을 왜 골랐나요? <small class="text-xs font-bold text-slate-500">(포스터에 같이 나와요)</small></h3>
+                        <div id="reasonChips" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div>
+                        <h3 class="step-h"><span class="num n3">3</span>포스터 모양 고르기</h3>
+                        <div id="posterDesignBox" class="mt-3 bg-white rounded-2xl p-5 border border-slate-200"></div>
+                        <div class="mt-3">
+                            <label for="posterMakerInput" class="block text-xs font-bold text-slate-600 mb-1">만든 사람 (이름 또는 별명, 쓰고 싶을 때만) <span class="text-emerald-700">· AI에게는 보내지 않아요</span></label>
+                            <input type="text" id="posterMakerInput" maxlength="20" value="${esc(posterMaker)}" oninput="onPosterMaker(this.value)" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm bg-white" placeholder="이름 또는 별명">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 lg:sticky lg:top-40 min-w-0">
+                    <h3 class="step-h"><span class="num n4">4</span>내 포스터</h3>
+                    <div id="posterPreviewBox"></div>
+                    <p id="posterEmptyHint" class="hidden text-sm font-bold text-slate-500 text-center">왼쪽에서 내용을 고르면 포스터가 만들어져요.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="posterSaveBtn" onclick="downloadPoster()" class="col-span-2 px-4 py-3 bg-slate-900 hover:bg-slate-700 text-white font-extrabold rounded-xl flex items-center justify-center gap-2 disabled:opacity-40"><i class="fa-solid fa-download"></i><span>이미지로 저장하기</span></button>
+                        <button id="posterPrintBtn" onclick="printPoster()" class="px-4 py-2.5 bg-white border-2 border-slate-900 font-bold rounded-xl text-sm disabled:opacity-40"><i class="fa-solid fa-print mr-1"></i>인쇄하기</button>
+                        <button id="posterReadBtn" onclick="readPosterPicks()" class="px-4 py-2.5 bg-white border-2 border-slate-900 font-bold rounded-xl text-sm disabled:opacity-40"><i class="fa-solid fa-volume-high mr-1"></i>읽어주기</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-5 border-2 border-blue-300 shadow-sm space-y-3">
-                <h3 class="font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-clipboard-list text-blue-600"></i>내 포스터 재료</h3>
-                <div id="posterSummaryBox" class="text-sm space-y-1"></div>
-                <div class="flex flex-wrap gap-2 pt-1">
-                    <button onclick="copyPosterText()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm"><i class="fa-regular fa-copy mr-1"></i>포스터 재료 복사하기</button>
-                    <button onclick="readPosterPicks()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-sm"><i class="fa-solid fa-volume-high text-blue-600 mr-1"></i>읽어주기</button>
-                    <a id="canvaPosterLink" href="#" target="_blank" rel="noopener" class="hidden px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i>캔바 포스터 템플릿 열기</a>
+            <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-5 space-y-3">
+                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-palette"></i>더 꾸미고 싶으면 캔바에서 이어서 해요 <small class="text-xs font-bold text-sky-700">(선택)</small></h3>
+                <p class="text-sm text-sky-900">여기서 만든 포스터로 충분해요. 글자 위치를 바꾸거나 그림을 더 넣고 싶을 때만 캔바를 써요.</p>
+                <ol class="text-sm text-sky-900 space-y-1 list-decimal pl-5">
+                    <li>아래 <b>[포스터 내용 복사하기]</b>를 눌러요.</li>
+                    <li><b>[캔바 열기]</b>를 눌러 캔바를 열어요.</li>
+                    <li>캔바에 붙여 넣고 마음대로 꾸며요.</li>
+                </ol>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="copyPosterText()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm"><i class="fa-regular fa-copy mr-1"></i>포스터 내용 복사하기</button>
+                    <a href="${esc(canvaUrl || 'https://www.canva.com/')}" target="_blank" rel="noopener" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i>${canvaUrl ? '캔바 포스터 템플릿 열기' : '캔바 열기'}</a>
                 </div>
                 <p id="copyToastPoster" class="hidden text-xs font-bold text-emerald-700"><i class="fa-solid fa-check"></i> 복사했어요! 캔바에 붙여 넣어요.</p>
-                <p class="text-xs text-slate-500">복사한 글을 선생님이 준비한 캔바 포스터 템플릿에 붙여 넣어요.</p>
-            </div>
-
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
-                <h3 class="font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-circle-question text-amber-500"></i>이 직업을 왜 골랐나요?</h3>
-                <p class="text-xs text-slate-500">내 마음과 가까운 것을 골라요. 여러 개를 골라도 괜찮아요.</p>
-                <div id="reasonChips" class="flex flex-wrap gap-2"></div>
             </div>`;
-
-            const link = document.getElementById('canvaPosterLink');
-            const cu = getCanva('poster');
-            if (link && cu) { link.href = cu; link.classList.remove('hidden'); }
             renderReasons();
-            renderPosterSummary();
+            refreshPoster();
         }
 
         function chipHtml(on, onclick, icon, text) {
@@ -1369,29 +1735,36 @@
             saveState(); renderExpressModes();
         }
 
+        const POSTER_MAX = 4;   // 포스터 한 칸에 넣을 수 있는 내용 수
+        let posterMsgTimer = null;
+        function flashPosterMsg(text) {
+            const el = document.getElementById('posterMsg'); if (!el) return;
+            el.textContent = text; el.classList.remove('hidden');
+            clearTimeout(posterMsgTimer); posterMsgTimer = setTimeout(() => el.classList.add('hidden'), 3500);
+        }
         function togglePosterPick(idx) {
             const it = currentPosterList[idx];
             if (!it) return;
-            if (posterPicks.has(it.key)) posterPicks.delete(it.key); else posterPicks.add(it.key);
+            if (posterPicks.has(it.key)) {
+                posterPicks.delete(it.key);
+            } else {
+                const cap = it.group === 'summary' ? 1 : POSTER_MAX;
+                const n = currentPosterList.filter(x => x.group === it.group && posterPicks.has(x.key)).length;
+                if (n >= cap) {
+                    const label = (POSTER_GROUPS.find(g => g.id === it.group) || {}).label || '';
+                    flashPosterMsg(it.group === 'summary' ? '소개 문장은 한 개만 넣을 수 있어요. 고른 것을 한 번 더 눌러 빼고 골라요.' : `포스터에는 "${label.replace(' (AI)', '')}"을(를) ${POSTER_MAX}개까지 넣을 수 있어요. 고른 것을 한 번 더 눌러 빼고 골라요.`);
+                    return;
+                }
+                posterPicks.add(it.key);
+            }
             saveState();
-            renderPosterStep();
+            refreshPoster();
         }
 
         function pickedByGroup() {
             const out = { tasks: [], places: [], skills: [], summary: [] };
             currentPosterList.forEach(it => { if (posterPicks.has(it.key)) out[it.group].push(it.text); });
             return out;
-        }
-
-        function renderPosterSummary() {
-            const box = document.getElementById('posterSummaryBox');
-            if (!box) return;
-            const p = pickedByGroup();
-            const total = p.tasks.length + p.places.length + p.skills.length + p.summary.length;
-            if (total === 0) { box.innerHTML = '<p class="text-slate-400">아직 고른 내용이 없어요. 위에서 눌러서 골라요.</p>'; return; }
-            const row = (label, arr) => arr.length ? `<p><span class="font-extrabold text-slate-700">${label}:</span> ${arr.map(esc).join(' / ')}</p>` : '';
-            box.innerHTML = `<p><span class="font-extrabold text-slate-700">직업 이름:</span> ${esc(selectedTargetJob.name)}</p>` +
-                row('하는 일', p.tasks) + row('일하는 장소', p.places) + row('필요한 능력', p.skills) + row('소개 문장', p.summary);
         }
 
         function posterText() {
@@ -1793,7 +2166,7 @@
             if (!selectedTargetJob) { alert('먼저 희망 직업을 골라요.'); return; }
             if (await copyToClipboard(cardText())) { activity.cardCopied = true; saveState(); flashToast('copyToastCard'); } else alert('복사가 안 돼요. 선생님께 도움을 요청해요.');
         }
-        function printDreamCard() { activity.printed = true; saveState(); window.print(); }
+        function printDreamCard() { const pa = document.getElementById('posterPrintArea'); if (pa) pa.innerHTML = ''; activity.printed = true; saveState(); window.print(); }
 
         async function downloadDreamCardImage() {
             const area = document.getElementById('dreamCardPrintArea');
@@ -1944,7 +2317,8 @@
                 prep: prepItem() ? prepItem().short : '',
                 promiseType,
                 express: EXPRESS_MODES.filter(m => expressModes.has(m.id)).map(m => m.text).join(', '),
-                posterDone: activity.posterCopied ? '재료 복사함' : '',
+                posterDone: [activity.posterSaved ? '이미지 저장' : '', activity.posterPrinted ? '인쇄' : '', activity.posterCopied ? '캔바용 내용 복사' : ''].filter(Boolean).join(', '),
+                posterStyle: (POSTER_TEMPLATES.find(t => t.id === posterTemplate) || {}).name + ' · ' + (POSTER_THEMES.find(t => t.id === posterTheme) || {}).name,
                 cardDone: [activity.cardSaved ? '이미지 저장' : '', activity.printed ? '인쇄' : '', activity.cardCopied ? '글 복사' : ''].filter(Boolean).join(', ')
             };
         }
@@ -1990,10 +2364,10 @@
                         <p class="font-extrabold text-slate-800 mb-2">학생이 한 활동 (자동 기록)</p>
                         <table class="w-full text-sm"><tbody>
                             ${row('희망 직업', a.job)}${row('나의 강점', a.strengths)}${row('직업을 고른 이유', a.reasons)}
-                            ${row('포스터 재료', `기본 ${a.posterBase}개 · 커리어넷 ${a.posterCareer}개 · AI ${a.posterAi}개`)}
+                            ${row('포스터 내용', `기본 ${a.posterBase}개 · 커리어넷 ${a.posterCareer}개 · AI ${a.posterAi}개`)}
                             ${row('AI 직업 정보', a.aiJobInfo)}${row('AI 진로 상담', a.aiCounsel + (a.aiCounsel === '사용' ? ` (내 생각과 맞는 조언 ${a.advicePicked}개 고름)` : ''))}
                             ${row('연습하고 싶은 것', a.prep)}${row('실천 다짐', a.promiseType)}${row('발표 방법', a.express)}
-                            ${row('포스터 재료', a.posterDone)}${row('미래 직업 카드', a.cardDone)}
+                            ${row('포스터 만들기', a.posterDone)}${row('포스터 모양', a.posterStyle)}${row('미래 직업 카드', a.cardDone)}
                         </tbody></table>
                     </div>
                     <div class="space-y-3">
@@ -2092,8 +2466,8 @@
         function exportRecords() {
             const recs = getRecords();
             if (!recs.length) { alert('저장된 기록이 없어요.'); return; }
-            const head = ['기록 시각', '번호/별명', '희망 직업', '나의 강점', '고른 이유', '포스터 재료(기본)', '포스터 재료(커리어넷)', '포스터 재료(AI)', 'AI 직업 정보', 'AI 상담', '고른 AI 조언 수', '연습하고 싶은 것', '실천 다짐 유형', '발표 방법', '포스터 재료 복사', '카드 저장·인쇄', ...RATING_ITEMS, '메모'];
-            const rows = recs.map(r => { const a = r.summary; return [r.time, r.id, a.job, a.strengths, a.reasons, a.posterBase, a.posterCareer, a.posterAi, a.aiJobInfo, a.aiCounsel, a.advicePicked, a.prep, a.promiseType, a.express, a.posterDone, a.cardDone, ...r.ratings, r.memo]; });
+            const head = ['기록 시각', '번호/별명', '희망 직업', '나의 강점', '고른 이유', '포스터 내용(기본)', '포스터 내용(커리어넷)', '포스터 내용(AI)', 'AI 직업 정보', 'AI 상담', '고른 AI 조언 수', '연습하고 싶은 것', '실천 다짐 유형', '발표 방법', '포스터 만들기', '포스터 모양', '카드 저장·인쇄', ...RATING_ITEMS, '메모'];
+            const rows = recs.map(r => { const a = r.summary; return [r.time, r.id, a.job, a.strengths, a.reasons, a.posterBase, a.posterCareer, a.posterAi, a.aiJobInfo, a.aiCounsel, a.advicePicked, a.prep, a.promiseType, a.express, a.posterDone, a.posterStyle, a.cardDone, ...r.ratings, r.memo]; });
             const csv = '﻿' + [head, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
@@ -2153,7 +2527,7 @@
             const b = l.querySelector('.btn-ink'); if (b) b.focus();
         }
         function readLanding() {
-            speakText('꿈차근, 직업탐색기. 나의 강점으로 미래 직업을 찾아요. 먼저 나의 강점을 찾고, 어울리는 직업을 살펴보고, 포스터에 넣을 내용을 고르고, 준비할 것을 정하고, 미래 직업 카드를 만들어요.');
+            speakText('꿈차근, 직업탐색기. 나의 강점으로 미래 직업을 찾아요. 먼저 나의 강점을 찾고, 어울리는 직업을 살펴보고, 직업 소개 포스터를 만들고, 준비할 것을 정하고, 미래 직업 카드를 만들어요.');
         }
 
         window.onload = function () { loadState(); initTeacherPanel(); initApp(); renderLanding(); const b = document.querySelector('#landing .btn-ink'); if (b) b.focus(); };
