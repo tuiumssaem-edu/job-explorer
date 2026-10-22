@@ -219,7 +219,7 @@
                 <p class="chapter-label">STEP 02</p>
                 <h2 class="chapter-title">나에게 어울리는 직업을 찾아볼까요?</h2>
                 <hr class="chapter-rule">
-                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 내 강점과 관심에서 검색어를 떠올려 커리어넷에서 직업을 찾아보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 내 강점과 관심에서 분류를 골라 주니어커리어넷에서 직업을 찾아보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
             </div>
 
             <div id="careerSearchBox" class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-4 md:p-6 space-y-3"></div>
@@ -431,11 +431,12 @@
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-1">
                     <h4 class="font-extrabold text-slate-800 flex items-center gap-1.5 text-base"><i class="fa-solid fa-circle-info text-indigo-500"></i><span>어떤 일을 하나요?</span></h4>
                     <p id="modalDescription" class="text-slate-600 leading-relaxed" style="white-space:pre-line"></p>
+                    <div id="modalVideos" class="flex flex-wrap gap-2 pt-1"></div>
                 </div>
                 <div class="grid sm:grid-cols-2 gap-3">
                     <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 space-y-1">
                         <h4 class="font-extrabold text-emerald-900 flex items-center gap-1.5"><i class="fa-solid fa-check-double text-emerald-600"></i><span>필요한 능력</span></h4>
-                        <p id="modalSkillsHint" class="text-[11px] text-emerald-700 hidden">나는 어떤지 눌러서 골라요.</p>
+                        <p id="modalSkillsHint" class="text-[11px] text-emerald-700 hidden">이 직업에 필요한 적성이에요. 나는 어떤지 눌러서 골라요.</p>
                         <ul id="modalSkills" class="text-xs text-emerald-800 space-y-1 list-disc list-inside"></ul>
                     </div>
                     <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-1">
@@ -644,26 +645,37 @@
 // 기본(수업용 예시) 직업 목록은 없애고, 직업은 모두 커리어넷에서 찾아요.
         const LOCAL_JOBS_DB = [];
 
-        // 강점에서 떠올릴 수 있는 커리어넷 검색어 (앱이 정한 예시예요. 커리어넷의 추천 결과가 아니에요)
-        const STRENGTH_KEYWORDS = {
-            S1: ['서비스', '안내', '판매'], S2: ['조립', '공예', '제작'], S3: ['정리', '물류', '사서'],
-            S4: ['동물', '식물', '원예'], S5: ['청소', '세탁', '환경'], S6: ['컴퓨터', '사무', '데이터'],
-            S7: ['사무', '우편', '안전'], S8: ['디저트', '제과', '바리스타', '조리'], S9: ['배송', '농업', '운반'],
-            S10: ['검수', '포장', '검사']
+        // 주니어커리어넷이 쓰는 공식 분류 (코드는 커리어넷 Open API 안내문의 순서를 따랐어요. 교사 설정의 '연결 테스트'로 확인해 주세요)
+        const JR_THEMES = [['112590', 'AI/로봇'], ['112591', '동물'], ['112592', '미용/패션'], ['112593', '방송'], ['112594', '우주/항공'], ['112595', '의료/바이오'], ['112596', '환경/생태'], ['112597', '공학'], ['112598', '공공/사회'], ['112599', '경영/경제'], ['112600', '문화/예술'], ['112601', '생활/서비스']];
+        const JR_APTS = [['112602', '신체·운동능력'], ['112603', '손재능'], ['112604', '공간지각력'], ['112605', '음악능력'], ['112606', '창의력'], ['112607', '언어능력'], ['112608', '수리·논리력'], ['112609', '자기성찰능력'], ['112610', '대인관계능력'], ['112611', '자연친화력'], ['112612', '예술시각능력']];
+        const JR_ITRS = [['101895', '현실형(뚝딱이)'], ['101896', '탐구형(탐험이)'], ['101897', '예술형(멋쟁이)'], ['101898', '사회형(친절이)'], ['101899', '진취형(씩씩이)'], ['101900', '관습형(성실이)']];
+        const JR_LABEL = { theme: '관심 주제', aptd: '적성', itrst: '흥미' };
+        const jrFind = (kind, label) => { const L = kind === 'theme' ? JR_THEMES : kind === 'aptd' ? JR_APTS : JR_ITRS; const x = L.find(a => a[1] === label); return { kind, code: x[0], label: x[1] }; };
+        // 내 강점과 이어지는 분류 (앱이 정한 연결이에요. 커리어넷이 추천한 것이 아니에요)
+        const STRENGTH_FILTERS = {
+            S1: [['aptd', '대인관계능력'], ['itrst', '사회형(친절이)']],
+            S2: [['aptd', '손재능'], ['itrst', '현실형(뚝딱이)']],
+            S3: [['itrst', '관습형(성실이)'], ['aptd', '공간지각력']],
+            S4: [['theme', '동물'], ['theme', '환경/생태'], ['aptd', '자연친화력']],
+            S5: [['theme', '생활/서비스'], ['itrst', '현실형(뚝딱이)']],
+            S6: [['aptd', '수리·논리력'], ['theme', 'AI/로봇']],
+            S7: [['itrst', '관습형(성실이)']],
+            S8: [['theme', '생활/서비스'], ['aptd', '손재능']],
+            S9: [['aptd', '신체·운동능력'], ['itrst', '현실형(뚝딱이)']],
+            S10: [['itrst', '관습형(성실이)'], ['aptd', '수리·논리력']]
         };
-        const INTEREST_KEYWORDS = ['디저트', '청소', '동물', '식물', '컴퓨터', '요리', '정리', '포장', '자동차', '음악'];
         const ABILITY_CHOICES = [{ id: 'good', text: '잘해요' }, { id: 'help', text: '도움 받으면 할 수 있어요' }, { id: 'practice', text: '연습하고 싶어요' }];
 
         // 커리어넷에서 가져온 직업은 careerCache('CN_번호')에 저장돼 있고, 필요할 때 직업 정보로 바꿔서 써요.
         const CN_PREFIX = 'CN_';
-        const CN_PREP_LABEL = { recruit: '취업 방법', training: '직업훈련', certificate: '관련 자격증', curriculum: '관련 교육' };
+        const CN_PREP_LABEL = { howto: '되는 방법', methods: '경험해 보기' };
         function makeCareerJob(cc) {
             const pr = cc.prepare || {};
             const pathway = Object.keys(CN_PREP_LABEL).map(k => (pr[k] || []).length ? CN_PREP_LABEL[k] + ': ' + pr[k].join(' / ') : '').filter(Boolean).join('\n');
             return {
-                id: CN_PREFIX + cc.seq, name: cc.name, category: 'CAREERNET', categoryName: cc.group || '커리어넷 직업백과',
+                id: CN_PREFIX + cc.seq, name: cc.name, category: 'CAREERNET', categoryName: cc.group || '주니어커리어넷',
                 icon: 'fa-briefcase', strengths: [], source: '커리어넷',
-                summary: (cc.works || [])[0] || '', skills: (cc.abilities || []).slice(0, 6), places: [],
+                summary: cc.summary || (cc.works || [])[0] || '', skills: (cc.abilities || []).slice(0, 6), places: [],
                 pathway: pathway, tip: '', cc: cc
             };
         }
@@ -787,10 +799,10 @@
             document.getElementById('modalTitle').innerText = job.name;
             document.getElementById('modalCategory').innerText = job.categoryName;
             const src = document.getElementById('modalSource');
-            src.innerText = isCn ? '출처: 커리어넷 직업백과' : '수업용 예시 (공식 출처 아님)';
+            src.innerText = isCn ? '출처: 주니어커리어넷' : '수업용 예시 (공식 출처 아님)';
             src.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full ' + (isCn ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-500');
-            document.getElementById('modalDescription').innerText = isCn ? ((cc.works || []).join('\n') || '내용이 비어 있어요.') : job.summary;
-            document.getElementById('modalPathway').innerText = job.pathway || (isCn ? '커리어넷에 정리된 준비 방법이 없어요.' : '');
+            document.getElementById('modalDescription').innerText = isCn ? ([cc.summary].concat(cc.works || []).filter(Boolean).join('\n') || '내용이 비어 있어요.') : job.summary;
+            document.getElementById('modalPathway').innerText = job.pathway || (isCn ? '주니어커리어넷에 정리된 준비 방법이 없어요.' : '');
             document.getElementById('modalTipHead').innerHTML = isCn ? '<i class="fa-solid fa-scale-balanced text-amber-500"></i>내 강점과 견주어 봐요' : '<i class="fa-solid fa-heart text-amber-500"></i>꿀팁';
             const checks = abilityChecks[job.id] || {};
             if (isCn) {
@@ -803,6 +815,7 @@
                 document.getElementById('modalTip').innerText = job.tip;
             }
             document.getElementById('modalIcon').innerHTML = `<i class="fa-solid ${job.icon}"></i>`;
+            document.getElementById('modalVideos').innerHTML = isCn ? (cc.videos || []).filter(v => /^https?:\/\//i.test(v.url || '')).map(v => `<a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold hover:bg-rose-100"><i class="fa-solid fa-circle-play mr-1"></i>${esc(v.title || '관련 영상 보기')}</a>`).join('') : '';
             document.getElementById('modalSkillsHint').classList.toggle('hidden', !(isCn && job.skills.length));
             document.getElementById('modalSkills').innerHTML = isCn && job.skills.length
                 ? job.skills.map((t, i) => `<li class="list-none border-b border-emerald-100 pb-2"><span class="font-bold">${esc(t)}</span>
@@ -852,7 +865,7 @@
             { id: 'E4', text: '글로 써요', icon: 'fa-pen' },
             { id: 'E5', text: '선생님이 도와줘요', icon: 'fa-hands-holding-child' }
         ];
-        const PREPARE_LABEL = { recruit: '취업 방법', training: '직업훈련', certificate: '관련 자격증', curriculum: '관련 교육' };
+        const PREPARE_LABEL = { howto: '되는 방법', methods: '경험해 보기' };
 
         function buildPosterList() {
             const job = selectedTargetJob;
@@ -902,7 +915,8 @@
             const parts = [];
             if (cc.name) parts.push('직업명: ' + cc.name);
             if ((cc.works || []).length) parts.push('하는 일: ' + cc.works.join(' / '));
-            if ((cc.abilities || []).length) parts.push('핵심 능력: ' + cc.abilities.join(', '));
+            if (cc.summary) parts.push('소개: ' + cc.summary);
+            if ((cc.abilities || []).length) parts.push('필요한 적성: ' + cc.abilities.join(', '));
             const pr = cc.prepare || {};
             Object.keys(PREPARE_LABEL).forEach(k => { if ((pr[k] || []).length) parts.push(PREPARE_LABEL[k] + ': ' + pr[k].join(' / ')); });
             return parts.join('\n').slice(0, 1400);
@@ -922,12 +936,13 @@
             const prepRows = Object.keys(PREPARE_LABEL).map(k => ((cc.prepare || {})[k] || []).length ? `<p><span class="font-bold">${PREPARE_LABEL[k]}:</span> ${cc.prepare[k].map(esc).join(' / ')}</p>` : '').join('');
             return `
             <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-5 space-y-2">
-                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>커리어넷 직업백과 정보</h3>
+                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>주니어커리어넷 직업 정보</h3>
                 <div class="bg-white border border-sky-200 rounded-xl p-3 text-xs space-y-1 leading-relaxed">
                     ${(cc.works || []).length ? `<p><span class="font-bold">하는 일:</span> ${cc.works.map(esc).join(' / ')}</p>` : ''}
-                    ${(cc.abilities || []).length ? `<p><span class="font-bold">핵심 능력:</span> ${cc.abilities.map(esc).join(', ')}</p>` : ''}
+                    ${cc.summary ? `<p><span class="font-bold">소개:</span> ${esc(cc.summary)}</p>` : ''}
+                    ${(cc.abilities || []).length ? `<p><span class="font-bold">필요한 적성:</span> ${cc.abilities.map(esc).join(', ')}</p>` : ''}
                     ${prepRows}
-                    <p class="text-slate-500">하는 일과 핵심 능력은 아래 칸에서 눌러서 고를 수 있어요. 출처: 커리어넷 직업백과</p>
+                    <p class="text-slate-500">하는 일과 필요한 적성은 아래 칸에서 눌러서 고를 수 있어요. 출처: 주니어커리어넷</p>
                 </div>
             </div>`;
         }
@@ -939,30 +954,40 @@
             const mine = selectedStrengths.map(strengthShort).join(', ');
             const results = careerResults.map((r, i) => `
                 <button type="button" onclick="pickCareer(${i})" class="w-full text-left p-3 rounded-xl border-2 border-sky-100 bg-white hover:border-sky-400 transition">
-                    <span class="block font-extrabold text-sky-900 text-sm">${esc(r.name)} ${r.group ? `<span class="text-[11px] font-bold text-slate-500">· ${esc(r.group)}</span>` : ''}</span>
-                    <span class="block text-xs text-slate-600 mt-0.5">${esc(r.work)}</span>
+                    <span class="block font-extrabold text-sky-900 text-sm">${esc(r.name)}</span>
+                    <span class="block text-xs text-slate-600 mt-0.5">${esc(r.summary)}</span>
                 </button>`).join('');
-            const seen = {}, fromStrength = [];
-            selectedStrengths.forEach(id => (STRENGTH_KEYWORDS[id] || []).forEach(k => { if (!seen[k]) { seen[k] = 1; fromStrength.push({ k, from: strengthShort(id) }); } }));
-            const chip = (k, tip) => `<button type="button" onclick="useKeyword('${k}')" ${careerBusy ? 'disabled' : ''} class="px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-sky-300 text-sky-900 hover:bg-sky-100 disabled:opacity-60" ${tip ? `title="${esc(tip)}"` : ''}>${esc(k)}</button>`;
+            const seen = {}, linked = [];
+            selectedStrengths.forEach(id => (STRENGTH_FILTERS[id] || []).forEach(([kind, label]) => {
+                const key = kind + label;
+                if (seen[key]) { seen[key].from.push(strengthShort(id)); return; }
+                seen[key] = { ...jrFind(kind, label), from: [strengthShort(id)] }; linked.push(seen[key]);
+            }));
+            const chip = (f, tip) => `<button type="button" onclick="useFilter('${f.kind}', '${f.code}', '${esc(f.label)}')" ${careerBusy ? 'disabled' : ''} class="px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-sky-300 text-sky-900 hover:bg-sky-100 disabled:opacity-60" ${tip ? `title="${esc(tip)}"` : ''}>${esc(f.label)}</button>`;
+            const all = (kind, L) => L.map(([code, label]) => chip({ kind, code, label })).join('');
             const kwHtml = `
-                <div class="bg-white/70 rounded-xl p-3 space-y-2">
-                    <p class="text-xs font-extrabold text-sky-900">① 검색어를 골라요 <span class="font-medium text-slate-500">(눌러서 바로 찾아요)</span></p>
-                    ${fromStrength.length
-                        ? `<div><p class="text-[11px] font-bold text-slate-600 mb-1">내 강점에서 떠오르는 말</p><div class="flex flex-wrap gap-1.5">${fromStrength.map(x => chip(x.k, x.from)).join('')}</div></div>`
-                        : '<p class="text-[11px] text-slate-500">1번 탭에서 강점을 고르면, 강점에서 떠오르는 검색어가 나와요.</p>'}
-                    <div><p class="text-[11px] font-bold text-slate-600 mb-1">관심 있는 것</p><div class="flex flex-wrap gap-1.5">${INTEREST_KEYWORDS.map(k => chip(k)).join('')}</div></div>
-                    <p class="text-[11px] text-slate-500">검색어는 앱이 정한 예시예요. 커리어넷이 추천한 것이 아니에요. 선생님과 함께 골라요. 아래 칸에 직접 써도 돼요.</p>
+                <div class="bg-white/70 rounded-xl p-3 space-y-3">
+                    <p class="text-xs font-extrabold text-sky-900">① 분류를 골라요 <span class="font-medium text-slate-500">(눌러서 바로 찾아요)</span></p>
+                    ${linked.length
+                        ? `<div><p class="text-[11px] font-bold text-slate-600 mb-1">내 강점과 이어지는 분류</p><div class="flex flex-wrap gap-1.5">${linked.map(f => chip(f, '이어지는 강점: ' + f.from.join(', ') + ' · ' + JR_LABEL[f.kind])).join('')}</div></div>`
+                        : '<p class="text-[11px] text-slate-500">1번 탭에서 강점을 고르면, 강점과 이어지는 분류가 나와요.</p>'}
+                    <div><p class="text-[11px] font-bold text-slate-600 mb-1">관심 주제</p><div class="flex flex-wrap gap-1.5">${all('theme', JR_THEMES)}</div></div>
+                    <details class="text-xs"><summary class="cursor-pointer font-bold text-sky-800">적성·흥미로 찾기</summary>
+                        <div class="mt-2 space-y-2"><div><p class="text-[11px] font-bold text-slate-600 mb-1">적성</p><div class="flex flex-wrap gap-1.5">${all('aptd', JR_APTS)}</div></div>
+                        <div><p class="text-[11px] font-bold text-slate-600 mb-1">흥미</p><div class="flex flex-wrap gap-1.5">${all('itrst', JR_ITRS)}</div></div></div>
+                    </details>
+                    <p class="text-[11px] text-slate-500">분류는 주니어커리어넷의 공식 분류예요. 강점과 이어 놓은 것은 앱이 정한 예시이고, 커리어넷이 추천한 것이 아니에요. 선생님과 함께 골라요.</p>
                 </div>`;
             const focus = document.activeElement && document.activeElement.id === 'careerQueryInput';
             box.innerHTML = `
-                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>커리어넷 직업백과에서 직업 찾기</h3>
-                <p class="text-xs text-sky-800 leading-relaxed">나라에서 운영하는 직업 정보(커리어넷)에서 직업을 찾아요. 하는 일, 필요한 능력, 준비 방법에 <strong>출처</strong>가 붙어요. 직업을 열면, 필요한 능력마다 <strong>나는 어떤지</strong> 골라 볼 수 있어요.${mine ? ` <span class="font-bold">내 강점: ${esc(mine)}</span>` : ''}</p>
+                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>주니어커리어넷에서 직업 찾기</h3>
+                <p class="text-xs text-sky-800 leading-relaxed">나라에서 운영하는 초·중학생용 직업 정보(주니어커리어넷)에서 직업을 찾아요. 하는 일, 필요한 적성, 되는 방법에 <strong>출처</strong>가 붙어요. 직업을 열면, 필요한 적성마다 <strong>나는 어떤지</strong> 골라 볼 수 있어요.${mine ? ` <span class="font-bold">내 강점: ${esc(mine)}</span>` : ''}</p>
                 ${kwHtml}
+                <p class="text-xs font-extrabold text-sky-900">또는 직업 이름으로 찾아요</p>
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" id="careerQueryInput" value="${esc(careerQuery)}" oninput="careerQuery = this.value" onkeyup="if(event.key==='Enter') searchCareer()" maxlength="20" aria-label="커리어넷에서 찾을 직업 이름"
-                        class="flex-1 p-2.5 border border-sky-300 rounded-xl text-sm bg-white" placeholder="찾을 직업 이름 (예: 바리스타, 사서, 조경)">
-                    <button onclick="searchCareer()" ${careerBusy ? 'disabled' : ''} class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid fa-magnifying-glass mr-1"></i>커리어넷에서 찾기</button>
+                    <input type="text" id="careerQueryInput" value="${esc(careerQuery)}" oninput="careerQuery = this.value" onkeyup="if(event.key==='Enter') searchCareer()" maxlength="20" aria-label="주니어커리어넷에서 찾을 직업 이름"
+                        class="flex-1 p-2.5 border border-sky-300 rounded-xl text-sm bg-white" placeholder="찾을 직업 이름 (예: 사육사, 요리사)">
+                    <button onclick="searchCareer()" ${careerBusy ? 'disabled' : ''} class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid fa-magnifying-glass mr-1"></i>이름으로 찾기</button>
                 </div>
                 <p class="text-xs font-extrabold text-sky-900">② 직업을 골라요</p>
                 <p class="text-xs font-bold text-sky-900" role="status">${esc(careerMsg)}</p>
@@ -976,7 +1001,7 @@
             return '커리어넷에서 정보를 가져오지 못했어요. 기본 정보로 이어서 해요.';
         }
 
-        function useKeyword(k) { careerQuery = k; searchCareer(); }
+        function useFilter(kind, code, label) { careerQuery = ''; searchCareer({ kind, code, label }); }
 
         function renderViewedJobs() {
             const box = document.getElementById('viewedJobs'); if (!box) return;
@@ -989,15 +1014,17 @@
             </div>`;
         }
 
-        async function searchCareer() {
+        async function searchCareer(filter) {
             if (careerBusy) return;
-            const q = (careerQuery || '').trim();
-            if (!q) { careerMsg = '찾을 직업 이름을 입력해요.'; renderCareerSearch(); return; }
-            careerBusy = true; careerMsg = '커리어넷에서 찾고 있어요...'; careerResults = []; renderCareerSearch();
+            const q = filter ? '' : (careerQuery || '').trim();
+            if (!filter && !q) { careerMsg = '위에서 분류를 누르거나, 직업 이름을 입력해요.'; renderCareerSearch(); return; }
+            const payload = filter ? { [filter.kind]: filter.code } : { query: q };
+            const what = filter ? `${JR_LABEL[filter.kind]}: ${filter.label}` : `"${q}"`;
+            careerBusy = true; careerMsg = `${what}(으)로 찾고 있어요...`; careerResults = []; renderCareerSearch();
             try {
-                const r = await callAi('career-search', { query: q });
+                const r = await callAi('junior-search', payload);
                 careerResults = (Array.isArray(r.jobs) ? r.jobs : []).filter(j => j && j.seq && j.name);
-                careerMsg = careerResults.length ? `${careerResults.length}개를 찾았어요. 알고 싶은 직업을 눌러요.` : '찾은 직업이 없어요. 다른 낱말로 찾아봐요.';
+                careerMsg = careerResults.length ? `${what}: ${careerResults.length}개를 찾았어요. 알고 싶은 직업을 눌러요.` : `${what}: 찾은 직업이 없어요. 다른 분류나 이름으로 찾아봐요.`;
             } catch (e) { careerMsg = careerErrorMsg(e); }
             careerBusy = false; renderCareerSearch(); renderViewedJobs();
         }
@@ -1007,17 +1034,18 @@
             if (!r || careerBusy) return;
             careerBusy = true; careerMsg = '자세한 내용을 가져오고 있어요...'; renderCareerSearch();
             try {
-                const d = await callAi('career-detail', { seq: r.seq });
+                const d = await callAi('junior-detail', { seq: r.seq });
                 const arr = v => (Array.isArray(v) ? v : []).map(x => String(x == null ? '' : x).trim()).filter(Boolean);
-                const pr = d.prepare || {};
                 const cc = {
-                    seq: String(d.seq || r.seq).replace(/\D/g, ''), name: asStr(d.name) || r.name, group: asStr(d.group),
-                    works: arr(d.works).slice(0, 6), abilities: arr(d.abilities).slice(0, 8), aptitudes: arr(d.aptitudes).slice(0, 5),
-                    prepare: { recruit: arr(pr.recruit), training: arr(pr.training), certificate: arr(pr.certificate), curriculum: arr(pr.curriculum) }
+                    seq: String(d.seq || r.seq).replace(/\D/g, ''), name: asStr(d.name) || r.name, group: arr(d.themes).slice(0, 2).join(' · '),
+                    summary: asStr(d.summary) || asStr(r.summary),
+                    works: arr(d.works).slice(0, 6), abilities: arr(d.aptitudes).slice(0, 6), aptitudes: arr(d.interests).slice(0, 4),
+                    prepare: { howto: arr(d.howto).slice(0, 4), methods: arr(d.methods).slice(0, 4) },
+                    videos: (Array.isArray(d.videos) ? d.videos : []).filter(v => v && /^https?:\/\//i.test(String(v.url || ''))).slice(0, 3).map(v => ({ title: asStr(v.title), url: String(v.url) }))
                 };
-                if (cc.seq && (cc.works.length || cc.abilities.length)) {
+                if (cc.seq && (cc.works.length || cc.abilities.length || cc.summary)) {
                     careerCache[CN_PREFIX + cc.seq] = cc; saveState();
-                    careerMsg = '커리어넷 정보를 가져왔어요.';
+                    careerMsg = '주니어커리어넷 정보를 가져왔어요.';
                     openJobDetail(CN_PREFIX + cc.seq);
                 } else {
                     careerMsg = '이 직업은 보여 줄 내용이 비어 있어요. 다른 직업을 눌러 봐요.';
@@ -2089,7 +2117,7 @@
                     <div class="flex flex-wrap gap-2">
                         <button onclick="teacherSave()" class="px-4 py-2.5 bg-slate-800 text-white font-bold rounded-xl">이 기기에 저장</button>
                         <button onclick="teacherTestAi()" class="px-4 py-2.5 bg-indigo-600 text-white font-bold rounded-xl">AI 연결 테스트</button>
-                        <button onclick="teacherTestCareer()" class="px-4 py-2.5 bg-sky-600 text-white font-bold rounded-xl">커리어넷 연결 테스트</button>
+                        <button onclick="teacherTestCareer()" class="px-4 py-2.5 bg-sky-600 text-white font-bold rounded-xl">주니어커리어넷 연결 테스트</button>
                     </div>
                     <p id="tp-result" class="font-bold text-slate-700"></p>
                     <p class="text-xs text-slate-500 leading-relaxed">여기서 저장한 값은 이 기기의 이 브라우저에만 남아요. 모든 학생 기기에 똑같이 적용하려면 앱 파일 위쪽 설정값(AI_ENDPOINT, CANVA_POSTER_URL, CANVA_CARD_URL)을 고쳐 주세요.</p>
@@ -2172,16 +2200,17 @@
         async function teacherTestCareer() {
             const out = document.getElementById('tp-result');
             LS.set('jx_ai_endpoint', document.getElementById('tp-endpoint').value.trim());
-            out.innerText = '커리어넷 연결 확인 중...';
+            out.innerText = '주니어커리어넷 연결 확인 중...';
             try {
-                const s = await callAi('career-search', { query: '바리스타' });
+                const s = await callAi('junior-search', { theme: '112591' });
                 const jobs = Array.isArray(s.jobs) ? s.jobs : [];
-                if (!jobs.length) { out.innerText = '커리어넷에 연결됐지만 검색 결과가 없어요. 응답 모양을 확인해야 해요.'; return; }
-                const d = await callAi('career-detail', { seq: jobs[0].seq });
-                const n = (Array.isArray(d.works) ? d.works.length : 0) + (Array.isArray(d.abilities) ? d.abilities.length : 0);
-                out.innerText = `커리어넷 연결 성공! "${jobs[0].name}" 상세에서 하는 일·핵심 능력 ${n}개를 가져왔어요.` + (n === 0 ? ' (내용이 비어 있어요. 응답 모양을 확인해야 해요.)' : '');
+                if (!jobs.length) { out.innerText = '주니어커리어넷에 연결됐지만 "동물" 분류 검색 결과가 없어요. 응답 모양이나 분류 코드를 확인해야 해요.'; return; }
+                const d = await callAi('junior-detail', { seq: jobs[0].seq });
+                const c = k => (Array.isArray(d[k]) ? d[k].length : 0);
+                out.innerText = `주니어커리어넷 연결 성공! 관심 주제 "동물"로 ${jobs.length}개를 찾았고, 첫 직업 "${jobs[0].name}"의 소개 ${d.summary ? '있음' : '없음'} · 하는 일 ${c('works')} · 적성 ${c('aptitudes')} · 되는 방법 ${c('howto')} · 영상 ${c('videos')}. ` +
+                    '목록의 직업이 정말 동물과 관련 있는지 눈으로 확인해 주세요(분류 코드 확인).' + (c('works') + c('aptitudes') === 0 && !d.summary ? ' (내용이 비어 있어요. 응답 모양을 확인해야 해요.)' : '');
             } catch (e) {
-                out.innerText = '커리어넷 연결 실패: ' + (e && e.code === 'NO_CAREER_KEY' ? '서버에 CAREERNET_API_KEY가 없어요.' : (e && e.message ? e.message : '알 수 없는 오류'));
+                out.innerText = '주니어커리어넷 연결 실패: ' + (e && e.code === 'NO_CAREER_KEY' ? '서버에 CAREERNET_API_KEY가 없어요.' : (e && e.message ? e.message : '알 수 없는 오류'));
             }
         }
 

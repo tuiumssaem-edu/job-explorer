@@ -1,7 +1,7 @@
-// 꿈차근! 직업탐색기 서버(Cloudflare Worker) v2
-// 하는 일: ① Gemini(AI) 요청 대신 보내기  ② 커리어넷 직업백과 조회 대신 하기
+// 꿈차근! 직업탐색기 서버(Cloudflare Worker) v3
+// 하는 일: ① Gemini(AI) 요청 대신 보내기  ② 주니어커리어넷 직업정보 조회 대신 하기(초·중학생 눈높이)
 // 필요한 Secret: GEMINI_API_KEY (AI), CAREERNET_API_KEY (커리어넷, 발급 후 추가)
-// 앱과 주고받는 mode: job-info, future-card, career-search, career-detail
+// 앱과 주고받는 mode: job-info, future-card, junior-search, junior-detail (career-search/career-detail은 일반 직업백과용으로 남겨 둠)
 const ALLOWED_ORIGIN = "https://tuiumssaem-edu.github.io";
 const MODEL = "gemini-2.5-flash";
 const CAREER_BASE = "https://www.career.go.kr/cnet/front/openapi";
@@ -36,6 +36,21 @@ function collect(v, key, max) {
   if (typeof v === "object") return key in v ? collect(v[key], key, max) : [];
   const t = cleanText(v, max);
   return t ? [t] : [];
+}
+
+// 어떤 모양(목록/객체/글)으로 와도 사람이 읽는 글만 모아요. 코드·주소·번호 같은 값은 건너뛰어요.
+const SKIP_KEY = /(seq|_cd|code|_yn|cnt|count|id|url|thumbnail|date|dt|sort)$/i;
+function leafTexts(v, max, out, depth) {
+  out = out || []; depth = depth || 0;
+  if (v == null || depth > 4) return out;
+  if (Array.isArray(v)) { v.forEach(x => leafTexts(x, max, out, depth + 1)); return out; }
+  if (typeof v === "object") {
+    Object.keys(v).forEach(k => { if (!SKIP_KEY.test(k)) leafTexts(v[k], max, out, depth + 1); });
+    return out;
+  }
+  const t = cleanText(v, max);
+  if (t && !/^\d+$/.test(t) && out.indexOf(t) === -1) out.push(t);
+  return out;
 }
 
 class CareerError extends Error {
@@ -97,6 +112,47 @@ async function careerDetail(seq, env) {
   };
 }
 
+// ---------- 주니어커리어넷 ----------
+const CODE = /^\d{1,8}$/;
+async function juniorSearch(body, env) {
+  const params = { pageIndex: 1 };
+  const q = String(body.query || "").trim().slice(0, 40);
+  if (q) params.searchJobNm = q;
+  if (CODE.test(String(body.theme || ""))) params.searchThemeCode = String(body.theme);
+  if (CODE.test(String(body.itrst || ""))) params.searchItrstCode = String(body.itrst);
+  if (CODE.test(String(body.aptd || ""))) params.searchAptdCode = String(body.aptd);
+  const data = await careerFetch("juniorjobsinfo.json", params, env);
+  const list = Array.isArray(data.jobs) ? data.jobs : [];
+  return {
+    total: Number(data.count) || list.length,
+    jobs: list.slice(0, 12).map(j => ({
+      seq: String(j.junior_seq == null ? "" : j.junior_seq).replace(/\D/g, ""),
+      name: cleanText(j.job_nm, 60),
+      summary: cleanText(j.job_summary, 140)
+    })).filter(j => j.seq && j.name)
+  };
+}
+
+async function juniorDetail(seq, env) {
+  const data = await careerFetch("juniorjobinfo.json", { juniorSeq: seq }, env);
+  const base = data.baseInfo || {};
+  const videos = [].concat(data.video == null ? [] : data.video)
+    .map(v => ({ title: cleanText(v && v.title, 100), url: String((v && v.url) || "").trim() }))
+    .filter(v => /^https?:\/\//i.test(v.url)).slice(0, 3);
+  return {
+    seq,
+    name: cleanText(base.job_nm, 60),
+    summary: cleanText(base.job_summary, 200),
+    works: leafTexts(data.what_list, 200).slice(0, 6),
+    aptitudes: leafTexts(data.aptd_list, 80).slice(0, 6),
+    interests: leafTexts(data.itrst_list, 60).slice(0, 4),
+    themes: leafTexts(data.thema_list, 60).slice(0, 4),
+    howto: leafTexts(data.howto_list, 300).slice(0, 4),
+    methods: leafTexts(data.mth_list, 300).slice(0, 4),
+    videos
+  };
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -120,8 +176,16 @@ export default {
     const mode = body && body.mode;
 
     // ---------- 커리어넷 ----------
-    if (mode === "career-search" || mode === "career-detail") {
+    if (mode === "career-search" || mode === "career-detail" || mode === "junior-search" || mode === "junior-detail") {
       try {
+        if (mode === "junior-search") {
+          return json({ result: await juniorSearch(body, env) }, 200, headers);
+        }
+        if (mode === "junior-detail") {
+          const jseq = String(body.seq || "");
+          if (!/^\d{1,10}$/.test(jseq)) return json({ error: "직업 코드가 올바르지 않습니다." }, 400, headers);
+          return json({ result: await juniorDetail(jseq, env) }, 200, headers);
+        }
         if (mode === "career-search") {
           const query = String(body.query || "").trim().slice(0, 40);
           if (!query) return json({ error: "검색어를 입력해 주세요." }, 400, headers);
