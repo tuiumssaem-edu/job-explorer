@@ -29,10 +29,7 @@
             box-shadow: 7px 8px 0 0 #ece9e4, 7px 8px 0 2px var(--ink); }
         .pin { position: absolute; top: -20px; left: -16px; width: 26px; height: 26px; border-radius: 50%; background: var(--desk); border: 3px solid var(--ink); z-index: 2; }
         .pin::before { content: ''; position: absolute; top: -13px; left: -8px; width: 8px; height: 24px; background: var(--ink); border-radius: 6px; transform: rotate(48deg); z-index: -1; }
-        .index-tabs { position: absolute; top: 70px; right: -17px; display: flex; flex-direction: column; gap: 10px; z-index: 0; }
-        .index-tabs i { display: block; width: 22px; height: 46px; border: 2px solid var(--ink); border-left: 0; border-radius: 0 10px 10px 0; }
-        .index-tabs i:nth-child(1) { background: var(--cream); } .index-tabs i:nth-child(2) { background: var(--sage); } .index-tabs i:nth-child(3) { background: var(--sky); }
-        @media (max-width: 640px) { #appContent { width: calc(100% - 28px); padding: 22px 14px 26px; } .index-tabs { display: none; } .pin { left: -10px; } }
+        @media (max-width: 640px) { #appContent { width: calc(100% - 28px); padding: 22px 14px 26px; } .pin { left: -10px; } }
 
         .chapter { text-align: center; padding: 4px 0 6px; }
         .chapter-label { font-size: 12px; font-weight: 800; letter-spacing: .28em; color: #b9b4ab; }
@@ -54,9 +51,50 @@
         #appContent .bg-white.rounded-2xl { border: 1.5px solid var(--ink); box-shadow: none; }
         #appContent .border-slate-200 { border-color: #bdb8af; }
         #appContent .bg-white.rounded-2xl.border-slate-200 { border-color: var(--ink); }
+
+        /* ----- 로고·제목 ----- */
+        :root { --lav:#e6def7; --peach:#fbdccf; }
+        header.sticky { background: var(--paper); border-bottom: 0; }
+        .brand { display: flex; align-items: center; gap: 12px; text-align: left; background: none; border: 0; padding: 2px 6px 2px 0; border-radius: 12px; cursor: pointer; }
+        .brand:hover .logo { transform: rotate(-4deg) scale(1.05); }
+        .logo { width: 50px; height: 50px; flex: none; transition: transform .15s; }
+        .logo-lg { width: 84px; height: 84px; margin: 10px auto 4px; display: block; }
+        .brand-text { display: flex; flex-direction: column; }
+        .brand-sub { font-size: 11px; font-weight: 800; letter-spacing: .06em; color: #8b867d; }
+        .brand-title { display: flex; align-items: baseline; gap: 7px; line-height: 1.15; }
+        .brand-a { font-size: clamp(1.5rem, 4.5vw, 1.9rem); font-weight: 900; letter-spacing: -.03em; color: var(--ink); background: linear-gradient(transparent 60%, var(--cream) 60%); padding: 0 3px; }
+        .brand-b { font-size: clamp(1rem, 3vw, 1.25rem); font-weight: 800; color: var(--ink); }
+
+        /* ----- 위쪽 색깔 인덱스 탭 ----- */
+        .idx-nav { background: var(--desk); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); padding: 10px 14px 0; }
+        .idx-row { max-width: 72rem; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; align-items: end; }
+        nav .idx { --tc: #fff; background: var(--tc); border: 2px solid var(--ink); border-bottom: 0; border-radius: 12px 12px 0 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 7px 3px 8px; margin-top: 9px;
+            font-weight: 700; font-size: .72rem; line-height: 1.2; color: #333; filter: saturate(.8); transition: margin .12s, filter .12s; }
+        nav .idx:hover { margin-top: 5px; filter: none; }
+        nav .idx1 { --tc: var(--cream); } nav .idx2 { --tc: var(--sage); } nav .idx3 { --tc: var(--sky); } nav .idx4 { --tc: var(--lav); } nav .idx5 { --tc: var(--peach); }
+        nav .idx.tab-active { margin-top: 0; padding-top: 11px; margin-bottom: -2px; padding-bottom: 12px; filter: none; font-weight: 900; color: var(--ink); background: var(--tc); border-bottom: 0; position: relative; z-index: 1; }
+        .idx .num { background: #fff; }
+        @media (min-width: 768px) { nav .idx { flex-direction: row; gap: 8px; font-size: 1rem; } }
+
+        /* ----- 시작 화면 ----- */
+        .landing { position: fixed; inset: 0; z-index: 45; background: var(--desk); overflow-y: auto; display: flex; align-items: flex-start; justify-content: center; padding: 48px 18px 40px; }
+        .landing.hidden { display: none; }
+        .landing-card { position: relative; width: 100%; max-width: 600px; margin: auto; background: var(--paper); border: 2px solid var(--ink); border-radius: 18px;
+            box-shadow: 7px 8px 0 0 #ece9e4, 7px 8px 0 2px var(--ink); padding: 34px 28px 28px; text-align: center; }
+        .landing-title { font-size: clamp(1.9rem, 7vw, 2.6rem); font-weight: 900; letter-spacing: -.03em; line-height: 1.25; color: var(--ink); margin-top: 6px; }
+        .landing-title .brand-a { font-size: inherit; }
+        .landing-steps { list-style: none; margin: 18px 0 0; padding: 0; text-align: left; }
+        .landing-actions { display: flex; flex-direction: column; gap: 10px; margin: 22px 0 14px; }
+        .btn-ink { background: var(--ink); color: #fff; border: 2px solid var(--ink); border-radius: 14px; padding: 15px 24px; font-size: 1.15rem; font-weight: 900; box-shadow: 4px 4px 0 var(--desk); }
+        .btn-ink:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--desk); }
+        .btn-line { background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 14px; padding: 12px 24px; font-weight: 800; }
+        .btn-line:hover { background: var(--cream); }
+        .landing-read { font-size: 13px; }
+        .guide .n1, .guide-row .n1 { background: var(--cream); } .guide-row .n2 { background: var(--sage); } .guide-row .n3 { background: var(--sky); } .guide-row .n4 { background: var(--lav); } .guide-row .n5 { background: var(--peach); }
         @media print {
             body * { visibility: hidden; }
-            .pin, .index-tabs { display: none !important; }
+            .pin, #landing { display: none !important; }
             #dreamCardPrintArea, #dreamCardPrintArea * { visibility: visible; }
             #dreamCardPrintArea { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: 2px solid #000 !important; color: #000 !important; background: #fff !important; }
         }
@@ -64,18 +102,25 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <symbol id="logo-mark" viewBox="0 0 56 56">
+            <rect x="4" y="36" width="14" height="14" rx="3" fill="#fdf0c4" stroke="#1c1c1c" stroke-width="2.5"/>
+            <rect x="21" y="26" width="14" height="24" rx="3" fill="#d3e2c4" stroke="#1c1c1c" stroke-width="2.5"/>
+            <rect x="38" y="16" width="14" height="34" rx="3" fill="#d3e4fa" stroke="#1c1c1c" stroke-width="2.5"/>
+            <polygon points="45.0,2.3 46.6,6.3 50.9,6.6 47.6,9.3 48.6,13.5 45.0,11.2 41.4,13.5 42.4,9.3 39.1,6.6 43.4,6.3" fill="#f6c445" stroke="#1c1c1c" stroke-width="2" stroke-linejoin="round"/>
+        </symbol>
+    </svg>
+
     <!-- 상단 헤더 -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
-            <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white p-3 rounded-2xl shadow-md flex items-center justify-center">
-                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
-                </div>
-                <div>
-                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">진로와 직업 · 나의 강점으로 미래 직업 찾기</span>
-                    <h1 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">꿈차근! 직업탐색기</h1>
-                </div>
-            </div>
+            <button type="button" onclick="goHome()" class="brand" aria-label="꿈차근 직업탐색기 시작 화면으로 가기">
+                <svg class="logo" viewBox="0 0 56 56" aria-hidden="true"><use href="#logo-mark"/></svg>
+                <span class="brand-text">
+                    <span class="brand-sub">진로와 직업 · 나의 강점으로 미래 직업 찾기</span>
+                    <span class="brand-title"><span class="brand-a">꿈차근!</span><span class="brand-b">직업탐색기</span></span>
+                </span>
+            </button>
             <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl text-sm">
                 <div id="ttsStatusBanner" class="hidden items-center gap-2 px-2.5 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold animate-pulse">
                     <i class="fa-solid fa-volume-high"></i>
@@ -93,27 +138,22 @@
         </div>
 
         <!-- 5단계 탭 (1차시: 1~3 / 2차시: 4~5) -->
-        <nav class="bg-slate-100 border-t border-slate-200">
-            <div class="max-w-6xl mx-auto grid grid-cols-5 text-center font-bold text-xs md:text-base">
-                <button onclick="switchTab('step1')" id="tab-step1" class="tab-btn tab-active py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 transition hover:bg-white/60">
-                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-blue-100 text-blue-700 text-xs flex items-center justify-center font-extrabold">1</span>
-                    <span>나의 강점</span>
+        <nav class="idx-nav" aria-label="단계">
+            <div class="idx-row">
+                <button onclick="switchTab('step1')" id="tab-step1" class="tab-btn idx idx1 tab-active">
+                    <span class="num">1</span><span class="idx-label">나의 강점</span>
                 </button>
-                <button onclick="switchTab('step2')" id="tab-step2" class="tab-btn py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 border-transparent transition hover:bg-white/60">
-                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-extrabold">2</span>
-                    <span>직업 탐색</span>
+                <button onclick="switchTab('step2')" id="tab-step2" class="tab-btn idx idx2">
+                    <span class="num">2</span><span class="idx-label">직업 탐색</span>
                 </button>
-                <button onclick="switchTab('step3')" id="tab-step3" class="tab-btn py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 border-transparent transition hover:bg-white/60">
-                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-sky-100 text-sky-700 text-xs flex items-center justify-center font-extrabold">3</span>
-                    <span>포스터 재료</span>
+                <button onclick="switchTab('step3')" id="tab-step3" class="tab-btn idx idx3">
+                    <span class="num">3</span><span class="idx-label">포스터 재료</span>
                 </button>
-                <button onclick="switchTab('step4')" id="tab-step4" class="tab-btn py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 border-transparent transition hover:bg-white/60">
-                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs flex items-center justify-center font-extrabold">4</span>
-                    <span>취업 역량 체크</span>
+                <button onclick="switchTab('step4')" id="tab-step4" class="tab-btn idx idx4">
+                    <span class="num">4</span><span class="idx-label">취업 역량 체크</span>
                 </button>
-                <button onclick="switchTab('step5')" id="tab-step5" class="tab-btn py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 border-transparent transition hover:bg-white/60">
-                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-amber-100 text-amber-700 text-xs flex items-center justify-center font-extrabold">5</span>
-                    <span>AI 상담·직업 카드</span>
+                <button onclick="switchTab('step5')" id="tab-step5" class="tab-btn idx idx5">
+                    <span class="num">5</span><span class="idx-label">AI 상담·직업 카드</span>
                 </button>
             </div>
         </nav>
@@ -121,7 +161,6 @@
 
     <main id="appContent" class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
         <span class="pin" aria-hidden="true"></span>
-        <span class="index-tabs" aria-hidden="true"><i></i><i></i><i></i></span>
         <div id="lessonGuide"></div>
 
         <!-- ========== STEP 1: 나의 강점 ========== -->
@@ -444,6 +483,28 @@
     </div>
 
     <!-- 교사용 도구 (주소 뒤에 ?teacher=1 을 붙여야 버튼이 보여요) -->
+
+    <!-- 시작 화면 -->
+    <div id="landing" class="landing" role="dialog" aria-modal="true" aria-labelledby="landingTitle">
+        <div class="landing-card">
+            <span class="pin" aria-hidden="true"></span>
+            <p class="chapter-label">CAREER EXPLORER · 진로와 직업</p>
+            <svg class="logo logo-lg" viewBox="0 0 56 56" aria-hidden="true"><use href="#logo-mark"/></svg>
+            <h1 id="landingTitle" class="landing-title"><span class="brand-a">꿈차근!</span> 직업탐색기</h1>
+            <hr class="chapter-rule">
+            <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 나의 강점으로 미래 직업을 찾아요</p>
+            <ol class="landing-steps">
+                <li class="guide-row"><span class="num n1">1</span><span><b>나의 강점</b> 내가 잘하는 것 찾기</span></li>
+                <li class="guide-row"><span class="num n2">2</span><span><b>직업 탐색</b> 어울리는 직업 살펴보기</span></li>
+                <li class="guide-row"><span class="num n3">3</span><span><b>포스터 재료</b> 직업 소개 내용 고르기</span></li>
+                <li class="guide-row"><span class="num n4">4</span><span><b>취업 역량 체크</b> 준비할 것 정하기</span></li>
+                <li class="guide-row"><span class="num n5">5</span><span><b>미래 직업 카드</b> AI 조언 듣고 카드 만들기</span></li>
+            </ol>
+            <div id="landingActions" class="landing-actions"></div>
+            <button type="button" onclick="readLanding()" class="guide-read landing-read"><i class="fa-solid fa-volume-high"></i> 읽어주기</button>
+        </div>
+    </div>
+
     <div id="teacherPanelWrap" class="hidden fixed bottom-4 right-4 z-50">
         <button onclick="openTeacher()" class="w-12 h-12 rounded-full bg-slate-800 text-white shadow-lg" title="교사용 도구" aria-label="교사용 도구"><i class="fa-solid fa-chalkboard-user"></i></button>
     </div>
@@ -2059,7 +2120,43 @@
             renderStep5();
             switchTab('step1');
         }
-        window.onload = function () { loadState(); initTeacherPanel(); initApp(); };
+
+        // ---------- 시작 화면 ----------
+        function hasSavedProgress() {
+            return selectedStrengths.length > 0 || !!selectedTargetJob || checkedSkills.size > 0 || !!chosenPrep;
+        }
+        function resumeTab() {
+            if (chosenPrep) return 'step5';
+            if (selectedTargetJob) return 'step3';
+            if (selectedStrengths.length) return 'step2';
+            return 'step1';
+        }
+        function renderLanding() {
+            const box = document.getElementById('landingActions'); if (!box) return;
+            box.innerHTML = hasSavedProgress()
+                ? `<button type="button" class="btn-ink" onclick="startApp('resume')">이어서 하기 <i class="fa-solid fa-arrow-right"></i></button>
+                   <button type="button" class="btn-line" onclick="startApp('fresh')">처음부터 새로 시작</button>`
+                : `<button type="button" class="btn-ink" onclick="startApp('new')">시작하기 <i class="fa-solid fa-arrow-right"></i></button>`;
+        }
+        function startApp(how) {
+            if (how === 'fresh') {
+                if (!confirm('지금까지 고른 것을 모두 지우고 처음부터 시작할까요?')) return;
+                resetAll(true);
+            }
+            document.getElementById('landing').classList.add('hidden');
+            switchTab(how === 'resume' ? resumeTab() : 'step1');
+        }
+        function goHome() {
+            renderLanding();
+            const l = document.getElementById('landing');
+            l.classList.remove('hidden'); l.scrollTop = 0;
+            const b = l.querySelector('.btn-ink'); if (b) b.focus();
+        }
+        function readLanding() {
+            speakText('꿈차근, 직업탐색기. 나의 강점으로 미래 직업을 찾아요. 먼저 나의 강점을 찾고, 어울리는 직업을 살펴보고, 포스터에 넣을 내용을 고르고, 준비할 것을 정하고, 미래 직업 카드를 만들어요.');
+        }
+
+        window.onload = function () { loadState(); initTeacherPanel(); initApp(); renderLanding(); const b = document.querySelector('#landing .btn-ink'); if (b) b.focus(); };
     </script>
 </body>
 </html>
