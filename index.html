@@ -4,607 +4,563 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>꿈을 향해 차근차근! 장애학생 맞춤형 진로직업 탐색기</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Noto Sans KR) -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- HTML2Canvas (카드 이미지 다운로드) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                        },
-                        edu: {
-                            blue: '#2563eb',
-                            purple: '#7c3aed',
-                            yellow: '#f59e0b',
-                            coral: '#ff6b6b'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Noto Sans KR', 'sans-serif'],
-                    }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Noto Sans KR', 'sans-serif'] } } } }
     </script>
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; word-break: keep-all; font-size: 16px; }
         .tab-active { border-bottom: 4px solid #2563eb; color: #2563eb; font-weight: bold; background-color: #eff6ff; }
-        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04); }
-        
-        /* 인쇄 전용 스타일 */
+        button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
         @media print {
             body * { visibility: hidden; }
             #dreamCardPrintArea, #dreamCardPrintArea * { visibility: visible; }
-            #dreamCardPrintArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                box-shadow: none !important;
-                border: 2px solid #000 !important;
-                color: #000 !important;
-                background: #fff !important;
-            }
+            #dreamCardPrintArea { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: 2px solid #000 !important; color: #000 !important; background: #fff !important; }
         }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- 상단 헤더 & Accessibility Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <!-- 상단 헤더 -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
             <div class="flex items-center gap-3">
                 <div class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white p-3 rounded-2xl shadow-md flex items-center justify-center">
                     <i class="fa-solid fa-graduation-cap text-2xl"></i>
                 </div>
                 <div>
-                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">중등 특수교육 진로직업</span>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">진로와 직업 · 나의 강점으로 미래 직업 찾기</span>
                     <h1 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">꿈차근! 직업탐색기</h1>
                 </div>
             </div>
-
-            <!-- 접근성 지원 도구 -->
             <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl text-sm">
                 <div id="ttsStatusBanner" class="hidden items-center gap-2 px-2.5 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold animate-pulse">
                     <i class="fa-solid fa-volume-high"></i>
-                    <span id="ttsStatusMsg">구글 AI 음성 재생 중...</span>
-                    <button onclick="stopSpeech()" class="ml-1 px-1.5 py-0.5 bg-white/20 hover:bg-white/30 rounded text-[10px]" title="음성 정지">
-                        <i class="fa-solid fa-stop"></i> 정지
-                    </button>
+                    <span id="ttsStatusMsg">읽는 중...</span>
+                    <button onclick="stopSpeech()" class="ml-1 px-1.5 py-0.5 bg-white/20 hover:bg-white/30 rounded text-[10px]" title="음성 정지"><i class="fa-solid fa-stop"></i> 정지</button>
                 </div>
                 <span id="ttsDefaultHint" class="px-2.5 py-1.5 text-xs font-bold text-slate-500 flex items-center gap-1.5">
                     <i class="fa-solid fa-volume-high text-blue-600"></i>
-                    <span class="hidden sm:inline">'읽어주기' 버튼으로 음성 듣기</span>
+                    <span class="hidden sm:inline">'읽어주기' 버튼으로 듣기</span>
                 </span>
-                <button onclick="adjustFontSize(1)" class="px-2.5 py-1.5 bg-white text-slate-700 rounded-lg shadow-sm font-bold hover:bg-slate-50 transition" title="글자 확대">A+</button>
-                <button onclick="adjustFontSize(-1)" class="px-2.5 py-1.5 bg-white text-slate-700 rounded-lg shadow-sm font-bold hover:bg-slate-50 transition" title="글자 축소">A-</button>
+                <button onclick="adjustFontSize(1)" class="px-2.5 py-1.5 bg-white text-slate-700 rounded-lg shadow-sm font-bold hover:bg-slate-50" title="글자 확대">A+</button>
+                <button onclick="adjustFontSize(-1)" class="px-2.5 py-1.5 bg-white text-slate-700 rounded-lg shadow-sm font-bold hover:bg-slate-50" title="글자 축소">A-</button>
+                <button onclick="resetAll()" class="px-2.5 py-1.5 bg-white text-rose-600 rounded-lg shadow-sm font-bold hover:bg-rose-50" title="처음부터 다시 하기"><i class="fa-solid fa-rotate-left"></i> <span class="hidden sm:inline">처음부터</span></button>
             </div>
         </div>
 
-        <!-- 4단계 활동 탭 스텝바 -->
+        <!-- 5단계 탭 (1차시: 1~3 / 2차시: 4~5) -->
         <nav class="bg-slate-100 border-t border-slate-200">
-            <div class="max-w-6xl mx-auto grid grid-cols-4 text-center font-bold text-sm md:text-base">
-                <button onclick="switchTab('step1')" id="tab-step1" class="tab-btn tab-active py-3.5 px-2 flex flex-col md:flex-row justify-center items-center gap-1.5 border-b-4 transition hover:bg-white/60">
-                    <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-xs flex items-center justify-center font-extrabold">1</span>
-                    <span>나의 강점 찾기</span>
+            <div class="max-w-6xl mx-auto grid grid-cols-5 text-center font-bold text-xs md:text-base">
+                <button onclick="switchTab('step1')" id="tab-step1" class="tab-btn tab-active py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 transition hover:bg-white/60">
+                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-blue-100 text-blue-700 text-xs flex items-center justify-center font-extrabold">1</span>
+                    <span>나의 강점</span>
                 </button>
-                <button onclick="switchTab('step2')" id="tab-step2" class="tab-btn py-3.5 px-2 flex flex-col md:flex-row justify-center items-center gap-1.5 border-b-4 border-transparent transition hover:bg-white/60">
-                    <span class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-extrabold">2</span>
-                    <span>직업 탐색하기</span>
+                <button onclick="switchTab('step2')" id="tab-step2" class="tab-btn py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 border-transparent transition hover:bg-white/60">
+                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-extrabold">2</span>
+                    <span>직업 탐색</span>
                 </button>
-                <button onclick="switchTab('step3')" id="tab-step3" class="tab-btn py-3.5 px-2 flex flex-col md:flex-row justify-center items-center gap-1.5 border-b-4 border-transparent transition hover:bg-white/60">
-                    <span class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs flex items-center justify-center font-extrabold">3</span>
+                <button onclick="switchTab('step3')" id="tab-step3" class="tab-btn py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 border-transparent transition hover:bg-white/60">
+                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-sky-100 text-sky-700 text-xs flex items-center justify-center font-extrabold">3</span>
+                    <span>포스터 재료</span>
+                </button>
+                <button onclick="switchTab('step4')" id="tab-step4" class="tab-btn py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 border-transparent transition hover:bg-white/60">
+                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs flex items-center justify-center font-extrabold">4</span>
                     <span>취업 역량 체크</span>
                 </button>
-                <button onclick="switchTab('step4')" id="tab-step4" class="tab-btn py-3.5 px-2 flex flex-col md:flex-row justify-center items-center gap-1.5 border-b-4 border-transparent transition hover:bg-white/60">
-                    <span class="w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-xs flex items-center justify-center font-extrabold">4</span>
-                    <span>꿈 카드 & AI상담</span>
+                <button onclick="switchTab('step5')" id="tab-step5" class="tab-btn py-3 px-1 flex flex-col md:flex-row justify-center items-center gap-1 border-b-4 border-transparent transition hover:bg-white/60">
+                    <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-amber-100 text-amber-700 text-xs flex items-center justify-center font-extrabold">5</span>
+                    <span>AI 상담·직업 카드</span>
                 </button>
+            </div>
+            <div class="max-w-6xl mx-auto grid grid-cols-5 text-center text-[10px] md:text-xs font-bold">
+                <div class="col-span-3 bg-blue-600 text-white py-0.5">1차시 · 내가 소개하는 직업 포스터</div>
+                <div class="col-span-2 bg-amber-500 text-white py-0.5">2차시 · 나의 미래 직업 카드</div>
             </div>
         </nav>
     </header>
 
-    <!-- 메인 컨텐츠 영역 -->
     <main id="appContent" class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+        <div id="lessonGuide"></div>
 
-        <!-- ==================== STEP 1: 나의 강점과 흥미 찾기 ==================== -->
+        <!-- ========== STEP 1: 나의 강점 ========== -->
         <section id="step1" class="tab-content space-y-6">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
                 <div class="relative z-10 space-y-2">
-                    <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">STEP 1. 흥미 & 강점 발견</span>
+                    <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">1차시 · 나의 강점 찾기</span>
                     <h2 class="text-2xl md:text-3xl font-extrabold">내가 잘하고 좋아하는 것은 무엇인가요?</h2>
-                    <p class="text-blue-100 text-sm md:text-base max-w-2xl">
-                        나의 성향과 어울리는 강점 카드를 <strong>2개 이상</strong> 선택해 보세요. 클릭하여 선택할 수 있습니다.
-                    </p>
+                    <p class="text-blue-100 text-sm md:text-base max-w-2xl">나와 어울리는 강점 카드를 눌러 골라 보세요. 여러 개를 골라도 괜찮아요.</p>
                 </div>
                 <i class="fa-solid fa-star absolute -right-4 -bottom-6 text-9xl text-white/10"></i>
             </div>
 
-            <!-- 강점 카드가 들어갈 그리드 -->
-            <div id="strengthGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- JS로 동적 생성됨 -->
-            </div>
+            <div id="strengthGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
 
-            <!-- 선택된 강점 요약 바 -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-3 w-full md:w-auto">
-                    <div class="bg-amber-100 text-amber-600 p-3 rounded-xl font-bold text-lg">
-                        <i class="fa-solid fa-thumbs-up"></i>
-                    </div>
+                    <div class="bg-amber-100 text-amber-600 p-3 rounded-xl font-bold text-lg"><i class="fa-solid fa-thumbs-up"></i></div>
                     <div>
-                        <h4 class="font-bold text-slate-800">내가 선택한 나의 강점</h4>
-                        <div id="selectedStrengthsList" class="flex flex-wrap gap-2 mt-1 text-sm text-slate-500">
-                            <span>선택한 항목이 아직 없습니다. 위의 카드를 눌러보세요!</span>
-                        </div>
+                        <h4 class="font-bold text-slate-800">내가 고른 나의 강점</h4>
+                        <div id="selectedStrengthsList" class="flex flex-wrap gap-2 mt-1 text-sm text-slate-500"></div>
                     </div>
                 </div>
                 <div class="flex items-center gap-2 w-full md:w-auto">
-                    <button onclick="readSelectedStrengths()" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition flex items-center justify-center gap-1.5 text-sm">
-                        <i class="fa-solid fa-volume-high text-blue-600"></i>
-                        <span>선택목록 읽기</span>
+                    <button onclick="readSelectedStrengths()" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl flex items-center justify-center gap-1.5 text-sm">
+                        <i class="fa-solid fa-volume-high text-blue-600"></i><span>읽어주기</span>
                     </button>
-                    <button onclick="goToStep2WithFilter()" class="flex-1 md:flex-none px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
-                        <span>맞춤 직업 추천받기</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                    <button onclick="goToStep2WithFilter()" class="flex-1 md:flex-none px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2">
+                        <span>어울리는 직업 보기</span><i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- ==================== STEP 2: 직업 탐색하기 ==================== -->
+        <!-- ========== STEP 2: 직업 탐색 ========== -->
         <section id="step2" class="tab-content hidden space-y-6">
             <div class="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-3xl p-6 md:p-8 text-white shadow-lg">
-                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">STEP 2. 세분화된 직업 탐색</span>
+                <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">1차시 · 직업 탐색</span>
                 <h2 class="text-2xl md:text-3xl font-extrabold mt-2">나에게 어울리는 직업을 찾아볼까요?</h2>
-                <p class="text-indigo-100 text-sm md:text-base mt-1">
-                    특수교육 맞춤 세부 직업 DB 및 커리어넷 직업정보 기반으로 필요한 역량과 취업 방법을 안내합니다.
-                </p>
+                <p class="text-indigo-100 text-sm md:text-base mt-1">직업을 살펴보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
             </div>
 
-            <!-- 선택한 강점 맞춤 추천 안내 배너 -->
-            <div id="recommendationBanner" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
+            <div id="recommendationBanner" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-4 md:p-5 shadow-sm">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                            <span class="bg-emerald-600 text-white text-xs font-black px-2.5 py-1 rounded-lg animate-pulse">🎯 강점 맞춤 필터링 적용 중</span>
-                            <span id="recommendCountBadge" class="text-xs font-bold text-emerald-800">총 0개 추천</span>
-                        </div>
-                        <h3 class="font-extrabold text-slate-900 text-base md:text-lg" id="recommendBannerTitle">
-                            선택한 강점 기반 맞춤 직업
-                        </h3>
-                        <p class="text-xs text-slate-600" id="recommendBannerSubtitle">
-                            선택하신 강점과 연관성이 높은 직업순으로 정렬되었습니다.
-                        </p>
+                        <span id="recommendCountBadge" class="text-xs font-bold text-emerald-800"></span>
+                        <h3 class="font-extrabold text-slate-900 text-base md:text-lg" id="recommendBannerTitle"></h3>
+                        <p class="text-xs text-slate-600" id="recommendBannerSubtitle"></p>
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <button id="showOnlyRecBtn" onclick="toggleMatchFilter(true)" class="flex-1 sm:flex-none px-3.5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow transition">
-                            추천 직업만 보기
-                        </button>
-                        <button id="showAllJobsBtn" onclick="toggleMatchFilter(false)" class="flex-1 sm:flex-none px-3.5 py-2 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 text-xs font-bold rounded-xl transition">
-                            전체 직업 보기
-                        </button>
+                        <button id="showOnlyRecBtn" onclick="toggleMatchFilter(true)" class="flex-1 sm:flex-none px-3.5 py-2 text-xs font-bold rounded-xl">추천 직업만 보기</button>
+                        <button id="showAllJobsBtn" onclick="toggleMatchFilter(false)" class="flex-1 sm:flex-none px-3.5 py-2 text-xs font-bold rounded-xl">전체 직업 보기</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 검색 및 세분화 분류 필터 -->
             <div class="bg-white rounded-2xl p-4 md:p-6 border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col md:flex-row gap-3">
                     <div class="relative flex-grow">
                         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="text" id="jobSearchInput" onkeyup="handleSearchKey(event)" placeholder="직업 이름을 검색해 보세요 (예: 바리스타, 마트, 사무, 식물)" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base">
+                        <input type="text" id="jobSearchInput" onkeyup="handleSearchKey(event)" placeholder="직업 이름을 검색해 보세요 (예: 카페, 마트, 사무, 식물)" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:border-indigo-500 text-base">
                     </div>
-                    <button onclick="searchJobs()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-search"></i>
-                        <span>검색</span>
-                    </button>
-                    <button onclick="toggleApiKeyInput()" class="px-4 py-3 bg-slate-100 text-slate-600 font-semibold rounded-xl hover:bg-slate-200 transition text-sm flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-key"></i>
-                        <span>API 설정</span>
+                    <button onclick="searchJobs()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-search"></i><span>검색</span>
                     </button>
                 </div>
-
-                <!-- API Key 설정 창 및 알림 메세지 -->
-                <div id="apiKeyContainer" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-900 space-y-3">
-                    <div class="font-bold flex items-center justify-between border-b border-amber-200/60 pb-2">
-                        <span><i class="fa-solid fa-sliders text-amber-600 mr-1"></i> 서비스 API 키 설정</span>
-                        <span class="text-xs text-slate-500 font-normal">* 미입력 시 브라우저 기본 음성과 자체 직업 DB로 동작합니다.</span>
-                    </div>
-                    
-                    <div class="grid md:grid-cols-2 gap-3">
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-amber-900">Google Cloud TTS API Key (음성합성)</label>
-                            <div class="flex gap-2">
-                                <input type="password" id="googleTtsApiKey" placeholder="Google TTS API Key 입력" class="flex-grow p-2 border border-amber-300 rounded-lg text-xs bg-white">
-                                <button onclick="testGoogleTts()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg font-bold text-xs hover:bg-indigo-700 whitespace-nowrap">테스트</button>
-                            </div>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-amber-900">커리어넷 OpenAPI Key (직업DB)</label>
-                            <input type="password" id="careerNetApiKey" placeholder="커리어넷 API Key 입력" class="w-full p-2 border border-amber-300 rounded-lg text-xs bg-white">
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end gap-2 pt-1">
-                        <button onclick="saveApiKey()" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold text-xs hover:bg-amber-700 transition">
-                            <i class="fa-solid fa-floppy-disk mr-1"></i> API 키 전체 저장
-                        </button>
-                    </div>
-                    <p id="apiToastMsg" class="hidden text-xs font-bold text-emerald-700 mt-1"><i class="fa-solid fa-check"></i> API 키 설정이 성공적으로 저장되었습니다.</p>
-                </div>
-
-                <!-- 세분화된 카테고리 필터 버튼 -->
-                <div id="categoryFilters" class="flex flex-wrap gap-2 pt-2">
-                    <button onclick="filterCategory('ALL')" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 text-white">전체 보기</button>
-                    <button onclick="filterCategory('SERVICE')" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">식음료 & 서비스</button>
-                    <button onclick="filterCategory('BAKERY')" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">제과제빵 & 식품가공</button>
-                    <button onclick="filterCategory('OFFICE')" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">사무지원 & 도서관</button>
-                    <button onclick="filterCategory('MANUFACTURING')" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">물류포장 & 부품조립</button>
-                    <button onclick="filterCategory('NATURE')" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">원예스마트팜 & 동물돌봄</button>
-                    <button onclick="filterCategory('CLEAN')" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">클리닝 & 세탁위생</button>
+                <div id="categoryFilters" class="flex flex-wrap gap-2 pt-1">
+                    <button data-cat="ALL" onclick="filterCategory('ALL', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 text-white">전체 보기</button>
+                    <button data-cat="SERVICE" onclick="filterCategory('SERVICE', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">식음료 &amp; 서비스</button>
+                    <button data-cat="BAKERY" onclick="filterCategory('BAKERY', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">제과제빵 &amp; 식품가공</button>
+                    <button data-cat="OFFICE" onclick="filterCategory('OFFICE', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">사무지원 &amp; 도서관</button>
+                    <button data-cat="MANUFACTURING" onclick="filterCategory('MANUFACTURING', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">물류포장 &amp; 부품조립</button>
+                    <button data-cat="NATURE" onclick="filterCategory('NATURE', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">원예스마트팜 &amp; 동물돌봄</button>
+                    <button data-cat="CLEAN" onclick="filterCategory('CLEAN', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">클리닝 &amp; 세탁위생</button>
                 </div>
             </div>
 
-            <!-- 직업 카드 리스트 -->
-            <div id="jobListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                <!-- JS에서 동적으로 직업 카드가 삽입됨 -->
-            </div>
+            <div id="jobListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </section>
 
-        <!-- ==================== STEP 3: 취업 역량 & 기초 직무 준비 체크업 ==================== -->
+        <!-- ========== STEP 3: 직업 정보 · 포스터 재료 ========== -->
         <section id="step3" class="tab-content hidden space-y-6">
+            <div class="bg-gradient-to-r from-sky-600 to-blue-700 rounded-3xl p-6 md:p-8 text-white shadow-lg">
+                <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">1차시 · 직업 정보 · 포스터 재료</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">포스터에 넣을 내용을 골라요!</h2>
+                <p class="text-sky-100 text-sm md:text-base mt-1">직업이 하는 일, 일하는 장소, 필요한 능력을 살펴보고 포스터에 넣을 내용만 골라요. 고른 내용은 캔바 포스터에 붙여 넣어요.</p>
+            </div>
+            <div id="posterArea" class="space-y-6"></div>
+        </section>
+
+        <!-- ========== STEP 4: 취업 역량 체크 ========== -->
+        <section id="step4" class="tab-content hidden space-y-6">
             <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-6 md:p-8 text-white shadow-lg">
-                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">STEP 3. 취업 태도 및 기초 역량 점검</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">멋진 직장인이 되기 위한 준비태도!</h2>
-                <p class="text-emerald-100 text-sm md:text-base mt-1">
-                    원활한 취업과 직장생활을 위해 준비해야 할 핵심 역량을 하나씩 스스로 확인해보아요.
-                </p>
+                <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">2차시 · 취업 역량 체크</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">멋진 직장인이 되기 위한 준비!</h2>
+                <p class="text-emerald-100 text-sm md:text-base mt-1">내가 잘할 수 있는 것에 체크하고, 앞으로 연습하고 싶은 것을 <strong>한 가지</strong> 골라요.</p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-6">
-                <!-- 핵심 직업 기초 능력 체크리스트 -->
-                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xl">
-                                <i class="fa-solid fa-clipboard-check"></i>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl"><i class="fa-solid fa-clipboard-check"></i></div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">내가 잘할 수 있는 것</h3>
+                                    <p class="text-xs text-slate-500">잘하는 것에 체크해요.</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-extrabold text-slate-900 text-lg">기초 직장 태도 체크리스트</h3>
-                                <p class="text-xs text-slate-500">내가 잘할 수 있는 준비 항목에 체크해 보세요.</p>
-                            </div>
-                        </div>
-                        <button onclick="readChecklist()" class="px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold rounded-xl transition text-xs flex items-center gap-1">
-                            <i class="fa-solid fa-volume-high text-emerald-600"></i>
-                            <span>읽어주기</span>
-                        </button>
-                    </div>
-
-                    <div id="skillChecklist" class="space-y-3">
-                        <!-- JS에서 동적 체크박스 생성 -->
-                    </div>
-                </div>
-
-                <!-- 직업 역량 향상 팁 & 특수교육 안내 -->
-                <div class="space-y-4">
-                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-extrabold text-amber-900 flex items-center gap-2 text-lg">
-                                <i class="fa-solid fa-lightbulb text-amber-500"></i>
-                                <span>특수교사 선생님의 꿀팁!</span>
-                            </h4>
-                            <button onclick="readTeacherTips()" class="px-3 py-1.5 bg-amber-100 text-amber-800 hover:bg-amber-200 font-bold rounded-xl transition text-xs flex items-center gap-1">
-                                <i class="fa-solid fa-volume-high text-amber-600"></i>
-                                <span>읽어주기</span>
+                            <button onclick="readChecklist()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs flex items-center gap-1">
+                                <i class="fa-solid fa-volume-high text-emerald-600"></i><span>읽어주기</span>
                             </button>
                         </div>
-                        <ul id="teacherTipsList" class="text-sm text-amber-900/80 space-y-2 list-disc list-inside leading-relaxed">
-                            <li><strong>시간 약속 지키기:</strong> 정해진 시각보다 10분 일찍 도착하는 연습을 해봅시다.</li>
-                            <li><strong>단정한 복장:</strong> 작업에 맞는 깨끗한 옷차림과 깔끔한 손 씻기가 기본이에요.</li>
-                            <li><strong>도움 요청하기:</strong> 일을 하다 모르는 것이 생기면 "선생님, 다시 알려주세요"라고 말해요.</li>
-                            <li><strong>안전 수칙 준수:</strong> 기계나 도구를 사용할 때는 항상 안전을 최우선으로 생각하세요!</li>
-                        </ul>
+                        <div id="skillChecklist" class="space-y-3"></div>
                     </div>
 
-                    <!-- 나의 역량 점수 게이지 -->
                     <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm text-center space-y-3">
-                        <h4 class="font-bold text-slate-700">나의 취업 준비 배지 달성도</h4>
+                        <h4 class="font-bold text-slate-700">나의 취업 준비 달성도</h4>
                         <div class="text-4xl font-extrabold text-emerald-600" id="readinessScore">0 %</div>
                         <div class="w-full bg-slate-200 h-4 rounded-full overflow-hidden">
                             <div id="readinessProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
                         </div>
-                        <p id="readinessMessage" class="text-xs font-semibold text-slate-500">체크리스트를 작성하여 나의 준비도를 올려보세요!</p>
+                        <p id="readinessMessage" class="text-xs font-semibold text-slate-500"></p>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white rounded-2xl p-6 border-2 border-emerald-300 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-extrabold text-slate-900 text-lg flex items-center gap-2"><i class="fa-solid fa-bullseye text-emerald-600"></i>앞으로 연습하고 싶은 것 한 가지</h3>
+                            <button onclick="readPrepOptions()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs flex items-center gap-1">
+                                <i class="fa-solid fa-volume-high text-emerald-600"></i><span>읽어주기</span>
+                            </button>
+                        </div>
+                        <div id="prepChoiceList" class="space-y-2"></div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-extrabold text-amber-900 flex items-center gap-2 text-lg"><i class="fa-solid fa-lightbulb text-amber-500"></i><span>선생님 꿀팁!</span></h4>
+                            <button onclick="readTeacherTips()" class="px-3 py-1.5 bg-amber-100 text-amber-800 hover:bg-amber-200 font-bold rounded-xl text-xs flex items-center gap-1">
+                                <i class="fa-solid fa-volume-high text-amber-600"></i><span>읽어주기</span>
+                            </button>
+                        </div>
+                        <ul id="teacherTipsList" class="text-sm text-amber-900/80 space-y-2 list-disc list-inside leading-relaxed">
+                            <li><strong>시간 약속 지키기:</strong> 정해진 시각보다 10분 일찍 도착하는 연습을 해요.</li>
+                            <li><strong>단정한 복장:</strong> 깨끗한 옷차림과 깔끔한 손 씻기가 기본이에요.</li>
+                            <li><strong>도움 요청하기:</strong> 모르는 것이 생기면 "선생님, 다시 알려주세요"라고 말해요.</li>
+                            <li><strong>안전 지키기:</strong> 도구나 기계를 쓸 때는 안전을 가장 먼저 생각해요.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
             <div class="flex justify-end">
-                <button onclick="switchTab('step4')" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition flex items-center gap-2">
-                    <span>최종 꿈 카드 작성 & AI 상담 받기</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+                <button onclick="switchTab('step5')" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md flex items-center gap-2">
+                    <span>AI 상담 · 미래 직업 카드</span><i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </section>
 
-        <!-- ==================== STEP 4: 나의 꿈 직업 카드 & AI 진로 선생님 ==================== -->
-        <section id="step4" class="tab-content hidden space-y-6">
+        <!-- ========== STEP 5: AI 상담 · 미래 직업 카드 ========== -->
+        <section id="step5" class="tab-content hidden space-y-6">
             <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl p-6 md:p-8 text-white shadow-lg">
-                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">STEP 4. 나의 진로 포트폴리오</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">나만의 꿈 직업 카드 완성하기!</h2>
-                <p class="text-amber-100 text-sm md:text-base mt-1">
-                    탐색한 직업 중 내가 도전하고 싶은 목표 직업을 정하고, AI 특수교사 선생님의 맞춤 격려와 조언을 받아보세요.
-                </p>
+                <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">2차시 · AI 진로 상담 · 미래 직업 카드</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">나의 미래 직업 카드를 만들어요!</h2>
+                <p class="text-amber-100 text-sm md:text-base mt-1">AI 선생님의 조언을 읽고, <strong>내 생각과 맞는 것만</strong> 골라요. 결정은 내가 해요.</p>
             </div>
 
             <div class="grid lg:grid-cols-2 gap-8">
-                <!-- 꿈 카드 완성 폼 & 카드 프리뷰 -->
-                <div class="space-y-4">
+                <!-- 왼쪽: 내 선택 + AI 상담 + 다짐 고르기 -->
+                <div class="space-y-5">
                     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
-                        <h3 class="font-extrabold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-id-card text-amber-500"></i>
-                            <span>카드 정보 입력하기</span>
-                        </h3>
+                        <h3 class="font-extrabold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2"><i class="fa-solid fa-id-card text-amber-500"></i><span>1. 내가 정한 것</span></h3>
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">학생 이름</label>
-                            <input type="text" id="studentNameInput" placeholder="이름을 입력하세요 (예: 김꿈돌)" oninput="updateDreamCard()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-300">
+                            <label for="targetJobSelect" class="block text-xs font-bold text-slate-600 mb-1">내가 고른 희망 직업</label>
+                            <select id="targetJobSelect" onchange="handleJobSelectChange()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-bold text-indigo-700"></select>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">내가 고른 희망 직업</label>
-                            <select id="targetJobSelect" onchange="handleJobSelectChange()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-300 font-bold text-indigo-700">
-                                <!-- JS에서 동적 옵션 생성 -->
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">나의 각오 한 마디!</label>
-                            <input type="text" id="studentGoalInput" placeholder="예: 매일 시간 약속을 잘 지키고 인사를 밝게 할 거예요!" oninput="updateDreamCard()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-300">
+                        <div class="text-sm space-y-1">
+                            <p><span class="font-bold text-slate-600">나의 강점:</span> <span id="step5Strengths" class="text-slate-800"></span></p>
+                            <p><span class="font-bold text-slate-600">연습하고 싶은 것:</span> <span id="step5Prep" class="text-slate-800"></span></p>
                         </div>
                     </div>
 
-                    <!-- 생성된 직업 카드 (인쇄/저장용) -->
+                    <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-600 text-white flex items-center justify-center text-xl shadow-md"><i class="fa-solid fa-robot"></i></div>
+                            <div>
+                                <h3 class="font-extrabold text-slate-900 text-lg">2. AI 선생님 진로 상담</h3>
+                                <p class="text-xs text-slate-500">AI는 도와주는 친구예요. 내 생각과 맞는지 살펴봐요.</p>
+                            </div>
+                        </div>
+                        <div id="aiResponseContainer" class="space-y-3 min-h-[120px]"></div>
+                        <button onclick="askAiCounsel()" id="aiConsultBtn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold rounded-2xl shadow-lg flex items-center justify-center gap-2 text-base disabled:opacity-60">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i><span>AI 선생님께 조언 듣기</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+                        <h3 class="font-extrabold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2"><i class="fa-solid fa-pen text-amber-500"></i><span>3. 실천 다짐 고르기</span></h3>
+                        <div id="promiseOptions" class="space-y-2"></div>
+                        <div>
+                            <label for="studentNameInput" class="block text-xs font-bold text-slate-600 mb-1">카드에 쓸 이름 (쓰고 싶을 때만) <span class="text-emerald-700">· AI에게는 보내지 않아요</span></label>
+                            <input type="text" id="studentNameInput" placeholder="이름 또는 별명" oninput="updateDreamCard()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm">
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+                        <h3 class="font-extrabold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2"><i class="fa-solid fa-microphone-lines text-amber-500"></i><span>4. 발표할 때 이렇게 해요</span></h3>
+                        <p class="text-xs text-slate-500">내가 편한 방법을 골라요. 여러 개를 골라도 괜찮아요.</p>
+                        <div id="expressModes" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 미래 직업 카드 -->
+                <div class="space-y-4">
                     <div id="dreamCardPrintArea" class="bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900 text-white rounded-3xl p-6 shadow-2xl space-y-4 border-4 border-amber-400 relative overflow-hidden">
                         <div class="flex justify-between items-start">
                             <div>
-                                <span class="bg-amber-400 text-slate-900 font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider">CAREER ID CARD</span>
-                                <h4 class="text-2xl font-black mt-2 tracking-tight" id="cardJobTitle">바리스타 보조</h4>
+                                <span class="bg-amber-400 text-slate-900 font-black text-xs px-3 py-1 rounded-full tracking-wider">나의 미래 직업 카드</span>
+                                <p class="text-xs text-slate-300 mt-3">나의 희망 직업</p>
+                                <h4 class="text-2xl font-black tracking-tight" id="cardJobTitle"></h4>
                             </div>
-                            <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl text-amber-300 border border-white/20" id="cardJobIcon">
-                                <i class="fa-solid fa-mug-hot"></i>
-                            </div>
+                            <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl text-amber-300 border border-white/20" id="cardJobIcon"><i class="fa-solid fa-briefcase"></i></div>
                         </div>
-
                         <div class="border-t border-white/10 pt-3 space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-slate-400 text-xs">학생 이름</span>
-                                <span id="cardStudentName" class="font-bold text-amber-200">김꿈돌</span>
+                            <div id="cardNameRow" class="hidden justify-between">
+                                <span class="text-slate-400 text-xs">이름</span>
+                                <span id="cardStudentName" class="font-bold text-amber-200"></span>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-400 text-xs">나의 강점</span>
-                                <span id="cardStrengths" class="font-medium text-slate-200 text-xs text-right">친절함, 손재주</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-400 text-xs">취업 준비도</span>
-                                <span id="cardReadiness" class="font-bold text-emerald-400">0% 준비 완료</span>
+                            <div class="flex justify-between gap-3">
+                                <span class="text-slate-400 text-xs whitespace-nowrap">나의 강점</span>
+                                <span id="cardStrengths" class="font-medium text-slate-100 text-sm text-right"></span>
                             </div>
                         </div>
-
-                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/10">
-                            <span class="text-[10px] text-amber-300 font-bold block mb-1">나의 꿈 다짐:</span>
-                            <p id="cardGoalText" class="text-xs italic text-slate-100">"매일 즐거운 마음으로 일하며 사람들에게 행복을 주는 직장인이 될 거예요!"</p>
+                        <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                            <span class="text-xs text-amber-300 font-bold block mb-1">미래를 위한 실천 다짐</span>
+                            <p id="cardGoalText" class="text-base font-bold text-slate-50 leading-relaxed"></p>
                         </div>
-
-                        <div class="text-right text-[10px] text-slate-400 border-t border-white/10 pt-2 flex justify-between items-center">
-                            <span>꿈을 향해 차근차근! 진로직업탐색</span>
-                            <span class="font-mono">특수교육 인증 카드</span>
-                        </div>
+                        <div class="text-right text-[10px] text-slate-400 border-t border-white/10 pt-2">꿈을 향해 차근차근! 꿈차근 직업탐색기</div>
                     </div>
 
-                    <div class="flex gap-2">
-                        <button id="downloadCardBtn" onclick="downloadDreamCardImage()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2 text-sm">
-                            <i class="fa-solid fa-download"></i>
-                            <span>카드 이미지 다운로드</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="downloadCardBtn" onclick="downloadDreamCardImage()" class="flex-1 min-w-[10rem] py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-download"></i><span>카드 이미지 저장</span>
                         </button>
-                        <button onclick="printDreamCard()" class="py-3 px-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-1.5 text-sm whitespace-nowrap">
-                            <i class="fa-solid fa-print"></i>
-                            <span>인쇄</span>
+                        <button onclick="printDreamCard()" class="py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow flex items-center justify-center gap-1.5 text-sm">
+                            <i class="fa-solid fa-print"></i><span>인쇄</span>
                         </button>
-                        <button onclick="speakDreamCard()" class="py-3 px-3 bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold rounded-xl transition flex items-center justify-center gap-1.5 text-sm whitespace-nowrap">
-                            <i class="fa-solid fa-volume-high"></i>
-                            <span>읽기</span>
+                        <button onclick="speakDreamCard()" class="py-3 px-4 bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold rounded-xl flex items-center justify-center gap-1.5 text-sm">
+                            <i class="fa-solid fa-volume-high"></i><span>읽기</span>
                         </button>
                     </div>
-                </div>
-
-                <!-- AI 특수교사 진로 상담 영역 -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-md">
-                                    <i class="fa-solid fa-robot"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-extrabold text-slate-900 text-lg">AI 특수교사 진로 상담실</h3>
-                                    <p class="text-xs text-slate-500">Gemini AI가 내 강점과 희망 직업에 맞게 칭찬과 가이드를 드려요!</p>
-                                </div>
-                            </div>
-                            <button id="speakAiTextBtn" onclick="speakAiResponse()" class="hidden px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-volume-high"></i>
-                                <span>상담 내용 읽어주기</span>
-                            </button>
+                    <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 text-sm text-sky-900 space-y-2">
+                        <p class="font-bold"><i class="fa-solid fa-palette mr-1"></i>캔바로 카드 완성하기</p>
+                        <p class="text-xs leading-relaxed">희망 직업, 나의 강점, 실천 다짐을 캔바 미래 직업 카드 템플릿에 넣어 완성해요.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="copyCardText()" class="px-4 py-2 bg-white border border-sky-300 hover:bg-sky-100 text-sky-800 font-bold rounded-xl text-xs"><i class="fa-regular fa-copy mr-1"></i>카드 글 복사하기</button>
+                            <a id="canvaCardLink" href="#" target="_blank" rel="noopener" class="hidden px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs"><i class="fa-solid fa-up-right-from-square mr-1"></i>캔바 카드 템플릿 열기</a>
                         </div>
-
-                        <div id="aiResponseContainer" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-h-[220px] text-sm leading-relaxed space-y-2 text-slate-700">
-                            <div class="text-center py-8 text-slate-400 space-y-2">
-                                <i class="fa-solid fa-comment-dots text-3xl text-indigo-300"></i>
-                                <p>아래 [AI 선생님께 진로 조언 듣기] 버튼을 누르면<br>맞춤형 피드백과 취업 성공 팁이 작성됩니다!</p>
-                            </div>
-                        </div>
+                        <p id="copyToastCard" class="hidden text-xs font-bold text-emerald-700"><i class="fa-solid fa-check"></i> 복사했어요!</p>
                     </div>
-
-                    <button onclick="askGeminiTeacher()" id="aiConsultBtn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold rounded-2xl shadow-lg transition flex items-center justify-center gap-2 text-base">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        <span>AI 선생님께 진로 조언 듣기</span>
-                    </button>
                 </div>
             </div>
         </section>
-
     </main>
 
-    <!-- 상세 직업 정보 팝업 모달 -->
+    <!-- 직업 상세 팝업 -->
     <div id="jobDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 p-6 space-y-5 relative">
-            <button onclick="closeModal()" class="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-lg transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-5 relative">
+            <button onclick="closeModal()" class="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-lg" aria-label="닫기"><i class="fa-solid fa-xmark"></i></button>
             <div class="flex items-center gap-4 border-b border-slate-100 pb-4">
-                <div id="modalIcon" class="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 text-3xl flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-briefcase"></i>
-                </div>
+                <div id="modalIcon" class="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 text-3xl flex items-center justify-center"><i class="fa-solid fa-briefcase"></i></div>
                 <div>
-                    <span id="modalCategory" class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-full">서비스</span>
-                    <h3 id="modalTitle" class="text-2xl font-black text-slate-900 mt-1">직업 이름</h3>
+                    <span id="modalCategory" class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-full"></span>
+                    <h3 id="modalTitle" class="text-2xl font-black text-slate-900 mt-1"></h3>
                 </div>
             </div>
-
-            <!-- 쉽게 설명된 내용 -->
             <div class="space-y-4 text-sm">
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-1">
-                    <h4 class="font-extrabold text-slate-800 flex items-center gap-1.5 text-base">
-                        <i class="fa-solid fa-circle-info text-indigo-500"></i>
-                        <span>어떤 일을 하나요? (직업 소개)</span>
-                    </h4>
-                    <p id="modalDescription" class="text-slate-600 leading-relaxed">직업 설명 들어감</p>
+                    <h4 class="font-extrabold text-slate-800 flex items-center gap-1.5 text-base"><i class="fa-solid fa-circle-info text-indigo-500"></i><span>어떤 일을 하나요?</span></h4>
+                    <p id="modalDescription" class="text-slate-600 leading-relaxed"></p>
                 </div>
-
                 <div class="grid sm:grid-cols-2 gap-3">
                     <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 space-y-1">
-                        <h4 class="font-extrabold text-emerald-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-check-double text-emerald-600"></i>
-                            <span>필요한 역량과 기술</span>
-                        </h4>
-                        <ul id="modalSkills" class="text-xs text-emerald-800 space-y-1 list-disc list-inside">
-                            <!-- JS 삽입 -->
-                        </ul>
+                        <h4 class="font-extrabold text-emerald-900 flex items-center gap-1.5"><i class="fa-solid fa-check-double text-emerald-600"></i><span>필요한 능력</span></h4>
+                        <ul id="modalSkills" class="text-xs text-emerald-800 space-y-1 list-disc list-inside"></ul>
                     </div>
-
                     <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-1">
-                        <h4 class="font-extrabold text-blue-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-route text-blue-600"></i>
-                            <span>취업하려면 어떻게 해야 하나요?</span>
-                        </h4>
-                        <p id="modalPathway" class="text-xs text-blue-800 leading-relaxed">준비 과정 들어감</p>
+                        <h4 class="font-extrabold text-blue-900 flex items-center gap-1.5"><i class="fa-solid fa-route text-blue-600"></i><span>취업하려면 어떻게 해야 하나요?</span></h4>
+                        <p id="modalPathway" class="text-xs text-blue-800 leading-relaxed"></p>
                     </div>
                 </div>
-
-                <!-- 특수교육 맞춤 지원 정보 -->
                 <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-1">
-                    <span class="font-bold flex items-center gap-1">
-                        <i class="fa-solid fa-heart text-amber-500"></i>
-                        현장 맞춤형 취업 꿀팁:
-                    </span>
-                    <p id="modalTip" class="leading-relaxed">특수학교 전공과, 장애인고용공단 맞춤 훈련을 활용해 연습하면 할 수 있어요!</p>
+                    <span class="font-bold flex items-center gap-1"><i class="fa-solid fa-heart text-amber-500"></i>꿀팁</span>
+                    <p id="modalTip" class="leading-relaxed"></p>
                 </div>
             </div>
-
             <div class="flex gap-3 pt-2">
-                <button id="modalSelectBtn" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition text-sm">
-                    내 희망 직업으로 선택하기
-                </button>
-                <button onclick="readModalContent()" class="px-4 py-3 bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold rounded-xl transition text-sm flex items-center gap-1.5">
-                    <i class="fa-solid fa-volume-high text-indigo-600"></i>
-                    <span>읽어주기</span>
+                <button id="modalSelectBtn" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow text-sm">이 직업으로 포스터 재료 만들기</button>
+                <button onclick="readModalContent()" class="px-4 py-3 bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold rounded-xl text-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-volume-high text-indigo-600"></i><span>읽어주기</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 하단 푸터 -->
+    <!-- 선생님 확인 (AI 결과를 학생에게 보여 주기 전 검토) -->
+    <div id="reviewModal" class="hidden fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4" style="z-index:60">
+        <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-4">
+            <h3 class="font-extrabold text-xl text-slate-900"><i class="fa-solid fa-user-check text-emerald-600 mr-2"></i>선생님 확인</h3>
+            <p id="reviewDesc" class="text-sm text-slate-600"></p>
+            <div id="reviewList" class="space-y-2"></div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="approveReview()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl">확인 완료 (체크한 것만 보여 주기)</button>
+                <button onclick="discardReview()" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-sm">모두 지우기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 교사용 도구 (주소 뒤에 ?teacher=1 을 붙여야 버튼이 보여요) -->
+    <div id="teacherPanelWrap" class="hidden fixed bottom-4 right-4 z-50">
+        <button onclick="openTeacher()" class="w-12 h-12 rounded-full bg-slate-800 text-white shadow-lg" title="교사용 도구" aria-label="교사용 도구"><i class="fa-solid fa-chalkboard-user"></i></button>
+    </div>
+    <div id="teacherModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4" style="z-index:55">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl p-6 space-y-4 relative">
+            <button onclick="closeTeacher()" class="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-lg" aria-label="닫기"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="font-extrabold text-xl text-slate-900 pr-12">교사용 도구 <span class="text-xs font-bold text-slate-500">(학생 화면에는 보이지 않아요)</span></h3>
+            <div id="teacherTabs" class="flex flex-wrap gap-2 text-sm font-bold"></div>
+            <div id="teacherBody"></div>
+        </div>
+    </div>
+
     <footer class="bg-white border-t border-slate-200 py-4 mt-8 text-center text-xs text-slate-500">
-        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2">
-            <span>© 장애학생 진로직업교육 특수교육 지원 프로그램 | 커리어넷 OpenAPI 연동</span>
-            <span>중등 특수교사 자문 및 쉬운 언어(Plain Language) 설계 적용</span>
+        <div class="max-w-6xl mx-auto px-4 space-y-1">
+            <p>AI가 알려 주는 내용은 틀릴 수 있어요. 선생님과 함께 확인하고, 내 생각과 맞는 것만 골라요.</p>
+            <p>이름이나 사진 같은 개인정보는 AI에게 보내지 않아요.</p>
         </div>
     </footer>
 
     <script>
-        // 글로벌 상태 변수
+        // ======================= 교사 설정값 (여기만 고치면 돼요) =======================
+        // Cloudflare Worker 주소. 예) 'https://job-explorer-ai.내계정.workers.dev'
+        // 비워 두면 AI 없이 '기본 정보'로 수업이 진행돼요.
+        const AI_ENDPOINT = 'https://job-explorer-ai.tuiumssaem.workers.dev/';
+        // 캔바 교사 제공 템플릿 링크 (비워 두면 버튼이 보이지 않아요)
+        const CANVA_POSTER_URL = '';
+        const CANVA_CARD_URL = '';
+        // ===============================================================================
+
         let selectedStrengths = [];
         let selectedTargetJob = null;
         let checkedSkills = new Set();
-        let currentAiMessageText = "";
+        let chosenPrep = null;            // 연습하고 싶은 것 id
+        let aiJobCache = {};              // { jobId: {tasks, places, skills, posterSummary} }
+        let posterPicks = new Set();      // 포스터 재료로 고른 항목 key
+        let aiAdvice = null;              // { source:'AI'|'기본', items:[{id,kind,label,text}] }
+        let advicePicks = new Set();
+        let promiseChoice = 'custom';
+        let customPromise = '';
         let currentFontSize = 16;
-        let careerNetApiKey = localStorage.getItem('careernet_api_key') || '';
-        let googleTtsApiKey = localStorage.getItem('google_tts_api_key') || '';
         let isOnlyRecommendedMode = false;
+        let currentCategory = 'ALL';
         let currentAudio = null;
+        let currentPosterList = [];
+        let aiBusy = false;
+        let careerCache = {};             // { jobId: 커리어넷에서 가져온 정보 }
+        let careerQuery = '', careerQueryFor = null, careerResults = [], careerMsg = '', careerBusy = false;
+        let choiceReasons = new Set();    // 직업을 고른 이유
+        let expressModes = new Set();     // 발표(표현) 방법
+        let activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false };
+        let reviewState = null;           // 교사 확인 대기 중인 AI 결과
 
+        const STATE_KEY = 'jx_state_v1';
 
-        // Tab switching function
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        // ---------- 탭 ----------
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            const selectedContent = document.getElementById(tabId);
-            if (selectedContent) selectedContent.classList.remove('hidden');
-
+            const content = document.getElementById(tabId);
+            if (content) content.classList.remove('hidden');
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('tab-active');
                 btn.classList.add('border-transparent');
             });
-            const activeBtn = document.getElementById(`tab-${tabId}`);
-            if (activeBtn) {
-                activeBtn.classList.add('tab-active');
-                activeBtn.classList.remove('border-transparent');
-            }
+            const activeBtn = document.getElementById('tab-' + tabId);
+            if (activeBtn) { activeBtn.classList.add('tab-active'); activeBtn.classList.remove('border-transparent'); }
 
-            if (tabId === 'step2' && selectedStrengths.length > 0 && isOnlyRecommendedMode) {
-                applyStrengthRecommendation();
-            }
+            if (tabId === 'step3') renderPosterStep();
+            if (tabId === 'step4') { renderSkillChecklist(); renderPrepChoices(); updateReadinessProgress(); }
+            if (tabId === 'step5') renderStep5();
+            renderLessonGuide(tabId);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Font size control function
         function adjustFontSize(delta) {
             currentFontSize = Math.max(13, Math.min(22, currentFontSize + delta));
             document.body.style.fontSize = currentFontSize + 'px';
         }
 
-        // 특수교육 학생을 위한 세분화된 강점 데이터
+        // ---------- 수업 안내 (학습 목표와 오늘 할 일) ----------
+        const LESSON_GUIDE = {
+            step1: { lesson: '1차시', goal: '내가 잘하거나 좋아하는 것을 떠올리며 나의 강점을 골라요.', todo: '강점 카드를 눌러 골라요.' },
+            step2: { lesson: '1차시', goal: '관심 있는 직업을 살펴보고 한 가지를 골라요.', todo: '직업 카드를 보고 [이 직업 고르기]를 눌러요.' },
+            step3: { lesson: '1차시', goal: '직업 정보를 살펴보고 포스터에 넣을 내용을 골라요.', todo: '하는 일, 일하는 장소, 필요한 능력 중에서 넣고 싶은 것을 골라요.' },
+            step4: { lesson: '2차시', goal: '직장생활에 필요한 태도와 능력을 살펴보고 준비할 것을 골라요.', todo: '잘하는 것에 체크하고, 연습하고 싶은 것을 한 가지 골라요.' },
+            step5: { lesson: '2차시', goal: '나의 강점과 희망 직업을 연결하고 실천 다짐을 정해요.', todo: 'AI 조언 중 내 생각과 맞는 것을 고르고, 다짐을 정해서 카드를 만들어요.' }
+        };
+        function renderLessonGuide(tabId) {
+            const g = LESSON_GUIDE[tabId];
+            const el = document.getElementById('lessonGuide');
+            if (!el || !g) return;
+            const first = g.lesson === '1차시';
+            el.innerHTML = `
+                <div class="mb-5 bg-white border-2 ${first ? 'border-blue-200' : 'border-amber-200'} rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <span class="${first ? 'bg-blue-600' : 'bg-amber-500'} text-white text-xs font-black px-3 py-1 rounded-full whitespace-nowrap">${g.lesson}</span>
+                        <div class="text-sm space-y-0.5">
+                            <p class="font-extrabold text-slate-900"><i class="fa-solid fa-bullseye mr-1 text-slate-500"></i>오늘의 목표: ${esc(g.goal)}</p>
+                            <p class="text-slate-600"><i class="fa-solid fa-hand-pointer mr-1 text-slate-400"></i>${esc(g.todo)}</p>
+                        </div>
+                    </div>
+                    <button onclick="readLessonGuide('${tabId}')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs flex items-center gap-1"><i class="fa-solid fa-volume-high text-blue-600"></i>읽어주기</button>
+                </div>`;
+        }
+        function readLessonGuide(tabId) {
+            const g = LESSON_GUIDE[tabId];
+            if (g) speakText(`${g.lesson}. 오늘의 목표. ${g.goal} ${g.todo}`);
+        }
+
+        // ---------- 데이터 ----------
         const STRENGTHS_DATA = [
-            { id: 'S1', title: '친절하고 인사를 잘해요', icon: 'fa-face-smile', category: 'SERVICE', desc: '사람들을 만나면 밝고 따뜻하게 인사해요' },
-            { id: 'S2', title: '손으로 조립/만들기를 잘해요', icon: 'fa-hands-holding-circle', category: 'MANUFACTURING', desc: '손재주가 있고 세심하게 물건을 다뤄요' },
-            { id: 'S3', title: '정리정돈과 라벨 맞추기를 잘해요', icon: 'fa-boxes-packing', category: 'OFFICE', desc: '물건을 제자리에 정돈하고 줄을 맞춰요' },
-            { id: 'S4', title: '동물과 식물을 사랑해요', icon: 'fa-seedling', category: 'NATURE', desc: '생명을 소중히 여기고 다정하게 돌봐요' },
-            { id: 'S5', title: '청소와 세척 위생관리를 잘해요', icon: 'fa-broom', category: 'CLEAN', desc: '깨끗하게 닦고 소독하는 일을 좋아해요' },
-            { id: 'S6', title: '컴퓨터/스마트기기를 다뤄요', icon: 'fa-desktop', category: 'OFFICE', desc: '키보드 입력이나 스캔 화면을 잘 봐요' },
-            { id: 'S7', title: '약속 시간과 규칙을 잘 지켜요', icon: 'fa-clock', category: 'ALL', desc: '시간을 잘 맞추고 규칙대로 성실히 행동해요' },
-            { id: 'S8', title: '음식과 디저트에 관심이 많아요', icon: 'fa-utensils', category: 'BAKERY', desc: '음료와 빵, 음식 준비하는 것을 좋아해요' },
-            { id: 'S9', title: '체력이 좋고 부지런히 움직여요', icon: 'fa-person-walking', category: 'CLEAN', desc: '몸을 움직이고 부지런하게 작업을 수행해요' },
-            { id: 'S10', title: '꼼꼼하게 개수를 세고 체크해요', icon: 'fa-calculator', category: 'MANUFACTURING', desc: '숫자 세기와 꼼꼼한 확인을 잘해요' }
+            { id: 'S1', title: '친절하고 인사를 잘해요', short: '친절하게 인사하기', icon: 'fa-face-smile', desc: '사람들을 만나면 밝고 따뜻하게 인사해요' },
+            { id: 'S2', title: '손으로 조립/만들기를 잘해요', short: '손으로 만들기', icon: 'fa-hands-holding-circle', desc: '손재주가 있고 세심하게 물건을 다뤄요' },
+            { id: 'S3', title: '정리정돈과 라벨 맞추기를 잘해요', short: '정리정돈', icon: 'fa-boxes-packing', desc: '물건을 제자리에 정돈하고 줄을 맞춰요' },
+            { id: 'S4', title: '동물과 식물을 사랑해요', short: '동물·식물 돌보기', icon: 'fa-seedling', desc: '생명을 소중히 여기고 다정하게 돌봐요' },
+            { id: 'S5', title: '청소와 세척 위생관리를 잘해요', short: '청소·위생관리', icon: 'fa-broom', desc: '깨끗하게 닦고 소독하는 일을 좋아해요' },
+            { id: 'S6', title: '컴퓨터/스마트기기를 다뤄요', short: '컴퓨터·스마트기기', icon: 'fa-desktop', desc: '키보드 입력이나 스캔 화면을 잘 봐요' },
+            { id: 'S7', title: '약속 시간과 규칙을 잘 지켜요', short: '시간·규칙 지키기', icon: 'fa-clock', desc: '시간을 잘 맞추고 규칙대로 성실히 행동해요' },
+            { id: 'S8', title: '음식과 디저트에 관심이 많아요', short: '음식·디저트', icon: 'fa-utensils', desc: '음료와 빵, 음식 준비하는 것을 좋아해요' },
+            { id: 'S9', title: '체력이 좋고 부지런히 움직여요', short: '부지런히 움직이기', icon: 'fa-person-walking', desc: '몸을 움직이고 부지런하게 작업을 수행해요' },
+            { id: 'S10', title: '꼼꼼하게 개수를 세고 체크해요', short: '꼼꼼하게 세고 확인하기', icon: 'fa-calculator', desc: '숫자 세기와 꼼꼼한 확인을 잘해요' }
         ];
 
-        // 기초 직장 태도 체크리스트 항목 데이터
         const CHECKLIST_ITEMS = [
-            { id: 'C1', text: '정해진 출근 시간보다 10분 일찍 도착할 수 있어요.' },
-            { id: 'C2', text: '단정한 옷차림을 하고 손을 깨끗이 씻어요.' },
-            { id: 'C3', text: '선생님과 동료를 만나면 웃으며 크게 인사해요.' },
-            { id: 'C4', text: '일을 하다 잘 모르는 것이 생기면 "다시 알려주세요"라고 물어봐요.' },
-            { id: 'C5', text: '지정된 자리에서 내 작업 도구를 깔끔하게 정돈해요.' },
-            { id: 'C6', text: '위험한 도구나 기계를 사용할 때는 지침을 꼭 지켜요.' }
+            { id: 'C1', text: '정해진 출근 시간보다 10분 일찍 도착할 수 있어요.', short: '10분 일찍 도착하기', icon: 'fa-clock' },
+            { id: 'C2', text: '단정한 옷차림을 하고 손을 깨끗이 씻어요.', short: '단정한 옷차림과 손 씻기', icon: 'fa-shirt' },
+            { id: 'C3', text: '선생님과 동료를 만나면 웃으며 크게 인사해요.', short: '웃으며 크게 인사하기', icon: 'fa-hand' },
+            { id: 'C4', text: '일을 하다 잘 모르는 것이 생기면 "다시 알려주세요"라고 물어봐요.', short: '모르면 "다시 알려주세요" 말하기', icon: 'fa-circle-question' },
+            { id: 'C5', text: '지정된 자리에서 내 작업 도구를 깔끔하게 정돈해요.', short: '작업 도구 깔끔하게 정돈하기', icon: 'fa-boxes-stacked' },
+            { id: 'C6', text: '위험한 도구나 기계를 사용할 때는 지침을 꼭 지켜요.', short: '위험한 도구는 안전 지침 지키기', icon: 'fa-helmet-safety' }
         ];
 
-        // 중등 특수교육 맞춤 세부 직업 DB (18개 세분화 직업군)
+        // 직업별 '일하는 장소' (직업 소개 문장을 바탕으로 작성. 교사가 확인·수정해 주세요)
+        const JOB_PLACES = {
+            JOB_BARISTA: ['카페'],
+            JOB_CAFE_CLEAN: ['카페 주방'],
+            JOB_MART_DISPLAY: ['마트 매장'],
+            JOB_BAKERY_PACK: ['빵집', '제과 작업장'],
+            JOB_FOOD_PREP: ['급식실', '식품 공장'],
+            JOB_COOK_HELPER: ['급식소', '조리실'],
+            JOB_OFFICE_SHRED: ['관공서', '사무실'],
+            JOB_LIBRARY_HELPER: ['도서관'],
+            JOB_MAIL_HELPER: ['회사 사무실'],
+            JOB_PACKING: ['물류센터', '작업장'],
+            JOB_ASSEMBLY: ['공장 작업장'],
+            JOB_LABELING: ['포장 작업장'],
+            JOB_SMART_FARM: ['실내 스마트팜'],
+            JOB_GARDENING: ['식물원', '농장'],
+            JOB_ANIMAL_CARE: ['반려동물 유치원', '반려동물 센터'],
+            JOB_HOTEL_TOWEL: ['호텔 세탁실'],
+            JOB_CLEANER: ['건물 안 복도·승강기·회의실'],
+            JOB_DISH_WASH: ['급식소', '대형 식당']
+        };
+
         const LOCAL_JOBS_DB = [
             {
                 id: 'JOB_BARISTA',
@@ -824,717 +780,1247 @@
             }
         ];
 
-        // 강점 카드 선택 및 렌더링
+
+        LOCAL_JOBS_DB.forEach(j => { j.places = JOB_PLACES[j.id] || []; });
+
+        const strengthShort = id => { const s = STRENGTHS_DATA.find(x => x.id === id); return s ? s.short : ''; };
+        const prepItem = () => CHECKLIST_ITEMS.find(c => c.id === chosenPrep) || null;
+
+        // ---------- 상태 저장 (같은 기기에서 1차시→2차시 이어서 하기) ----------
+        function saveState() {
+            try {
+                localStorage.setItem(STATE_KEY, JSON.stringify({
+                    strengths: selectedStrengths,
+                    jobId: selectedTargetJob ? selectedTargetJob.id : null,
+                    checked: [...checkedSkills],
+                    prep: chosenPrep,
+                    posterPicks: [...posterPicks],
+                    aiJobCache: aiJobCache,
+                    careerCache: careerCache,
+                    reasons: [...choiceReasons],
+                    express: [...expressModes],
+                    activity: activity
+                }));
+            } catch (e) { /* 저장 불가 환경이어도 수업은 계속돼요 */ }
+        }
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STATE_KEY);
+                if (!raw) return;
+                const st = JSON.parse(raw);
+                selectedStrengths = Array.isArray(st.strengths) ? st.strengths.filter(id => STRENGTHS_DATA.some(x => x.id === id)) : [];
+                selectedTargetJob = LOCAL_JOBS_DB.find(j => j.id === st.jobId) || null;
+                checkedSkills = new Set((st.checked || []).filter(id => CHECKLIST_ITEMS.some(c => c.id === id)));
+                chosenPrep = CHECKLIST_ITEMS.some(c => c.id === st.prep) ? st.prep : null;
+                posterPicks = new Set(st.posterPicks || []);
+                aiJobCache = st.aiJobCache && typeof st.aiJobCache === 'object' ? st.aiJobCache : {};
+                careerCache = st.careerCache && typeof st.careerCache === 'object' ? st.careerCache : {};
+                choiceReasons = new Set((st.reasons || []).filter(id => REASONS.some(r => r.id === id)));
+                expressModes = new Set((st.express || []).filter(id => EXPRESS_MODES.some(m => m.id === id)));
+                activity = Object.assign({ posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false }, st.activity || {});
+            } catch (e) { /* 무시 */ }
+        }
+        function resetAll(skipConfirm) {
+            if (skipConfirm !== true && !confirm('지금까지 고른 것을 모두 지우고 처음부터 다시 할까요?')) return;
+            try { localStorage.removeItem(STATE_KEY); } catch (e) {}
+            selectedStrengths = []; selectedTargetJob = null; checkedSkills = new Set(); chosenPrep = null;
+            aiJobCache = {}; careerCache = {}; posterPicks = new Set(); aiAdvice = null; advicePicks = new Set();
+            choiceReasons = new Set(); expressModes = new Set();
+            activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false };
+            careerQuery = ''; careerQueryFor = null; careerResults = []; careerMsg = '';
+            promiseChoice = 'custom'; customPromise = '';
+            teacherDraft = { id: '', ratings: ['', '', '', '', ''], memo: '' };
+            const nm = document.getElementById('studentNameInput'); if (nm) nm.value = '';
+            isOnlyRecommendedMode = false; currentCategory = 'ALL';
+            initApp();
+        }
+
+        // ---------- 1. 강점 ----------
         function toggleStrength(id) {
-            const index = selectedStrengths.indexOf(id);
-            if (index > -1) {
-                selectedStrengths.splice(index, 1);
-            } else {
-                selectedStrengths.push(id);
-            }
+            const i = selectedStrengths.indexOf(id);
+            if (i > -1) selectedStrengths.splice(i, 1); else selectedStrengths.push(id);
             renderStrengthCards();
             updateSelectedStrengthsSummary();
+            saveState();
         }
 
         function renderStrengthCards() {
             const grid = document.getElementById('strengthGrid');
-            if (!grid) return;
             grid.innerHTML = STRENGTHS_DATA.map(s => {
-                const isSelected = selectedStrengths.includes(s.id);
+                const on = selectedStrengths.includes(s.id);
                 return `
-                    <div onclick="toggleStrength('${s.id}')" 
-                         class="cursor-pointer p-4 rounded-2xl border-2 transition-all duration-200 flex flex-col justify-between space-y-3 ${isSelected ? 'border-blue-600 bg-blue-50/80 shadow-md ring-2 ring-blue-400/30' : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm'}">
-                        <div class="flex items-center justify-between">
-                            <div class="w-10 h-10 rounded-xl ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-blue-600'} flex items-center justify-center text-xl font-bold">
-                                <i class="fa-solid ${s.icon}"></i>
-                            </div>
-                            <span class="text-xs font-bold ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full">
-                                ${isSelected ? '선택됨 ✓' : '선택'}
-                            </span>
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-slate-900 text-sm md:text-base">${s.title}</h3>
-                            <p class="text-xs text-slate-500 mt-1">${s.desc}</p>
-                        </div>
+                <button type="button" aria-pressed="${on}" onclick="toggleStrength('${s.id}')"
+                    class="text-left p-4 rounded-2xl border-2 transition-all flex flex-col justify-between gap-3 ${on ? 'border-blue-600 bg-blue-50 shadow-md ring-2 ring-blue-400/30' : 'border-slate-200 bg-white hover:border-blue-300'}">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="w-10 h-10 rounded-xl ${on ? 'bg-blue-600 text-white' : 'bg-slate-100 text-blue-600'} flex items-center justify-center text-xl"><i class="fa-solid ${s.icon}"></i></div>
+                        <span class="text-xs font-bold ${on ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full">${on ? '선택됨 ✓' : '선택'}</span>
                     </div>
-                `;
+                    <div>
+                        <h3 class="font-extrabold text-slate-900 text-sm md:text-base">${esc(s.title)}</h3>
+                        <p class="text-xs text-slate-500 mt-1">${esc(s.desc)}</p>
+                    </div>
+                </button>`;
             }).join('');
         }
 
         function updateSelectedStrengthsSummary() {
-            const summaryList = document.getElementById('selectedStrengthsList');
-            if (!summaryList) return;
+            const el = document.getElementById('selectedStrengthsList');
             if (selectedStrengths.length === 0) {
-                summaryList.innerHTML = '<span>선택한 항목이 아직 없습니다. 위의 카드를 눌러보세요!</span>';
+                el.innerHTML = '<span>아직 고른 강점이 없어요. 위의 카드를 눌러 보세요!</span>';
             } else {
-                summaryList.innerHTML = selectedStrengths.map(id => {
-                    const item = STRENGTHS_DATA.find(s => s.id === id);
-                    return `<span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1"><i class="fa-solid fa-check text-blue-600"></i> ${item ? item.title.split(' ')[0] : ''}</span>`;
-                }).join('');
+                el.innerHTML = selectedStrengths.map(id =>
+                    `<span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1"><i class="fa-solid fa-check text-blue-600"></i> ${esc(strengthShort(id))}</span>`
+                ).join('');
             }
         }
 
-        // 강점으로 필터링하여 Step 2로 이동
+        // ---------- 2. 직업 탐색 ----------
         function goToStep2WithFilter() {
+            isOnlyRecommendedMode = selectedStrengths.length > 0;
+            currentCategory = 'ALL';
+            resetCategoryButtons('ALL');
             switchTab('step2');
-            if (selectedStrengths.length > 0) {
-                isOnlyRecommendedMode = true;
-                applyStrengthRecommendation();
-            } else {
-                isOnlyRecommendedMode = false;
-                document.getElementById('recommendationBanner').classList.add('hidden');
-                renderJobsGrid(LOCAL_JOBS_DB);
-            }
+            refreshJobList();
         }
 
-        // 강점 맞춤 추천 실행 함수
-        function applyStrengthRecommendation() {
+        function matchInfo(job) {
+            const matches = job.strengths.filter(s => selectedStrengths.includes(s));
+            return matches.length;
+        }
+
+        function refreshJobList() {
             const banner = document.getElementById('recommendationBanner');
-            const titleEl = document.getElementById('recommendBannerTitle');
-            const subtitleEl = document.getElementById('recommendBannerSubtitle');
-            const badgeEl = document.getElementById('recommendCountBadge');
-
-            if (selectedStrengths.length === 0) {
-                banner.classList.add('hidden');
-                renderJobsGrid(LOCAL_JOBS_DB);
-                return;
-            }
-
-            const strengthNames = selectedStrengths.map(id => {
-                const found = STRENGTHS_DATA.find(s => s.id === id);
-                return found ? found.title.split(' ')[0] : '';
-            }).filter(Boolean).join(', ');
-
-            const matchedJobs = LOCAL_JOBS_DB.map(job => {
-                const matches = job.strengths.filter(s => selectedStrengths.includes(s));
-                const score = matches.length;
-                const matchPct = Math.round((score / selectedStrengths.length) * 100);
-                return { ...job, matchScore: score, matchRatio: matchPct, matchedList: matches };
-            }).sort((a, b) => b.matchScore - a.matchScore || b.matchRatio - a.matchRatio);
-
-            const filteredOnlyMatched = matchedJobs.filter(j => j.matchScore > 0);
-
-            banner.classList.remove('hidden');
-            titleEl.innerText = `선택한 강점 [${strengthNames}] 맞춤 직업`;
-            subtitleEl.innerText = `총 ${filteredOnlyMatched.length}개의 직업이 강점과 일치하여 맞춤 추천되었습니다.`;
-            badgeEl.innerText = `추천 직업 ${filteredOnlyMatched.length}개 / 전체 ${LOCAL_JOBS_DB.length}개`;
-
-            if (isOnlyRecommendedMode) {
-                document.getElementById('showOnlyRecBtn').className = "flex-1 sm:flex-none px-3.5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow transition";
-                document.getElementById('showAllJobsBtn').className = "flex-1 sm:flex-none px-3.5 py-2 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 text-xs font-bold rounded-xl transition";
-                renderJobsGrid(filteredOnlyMatched);
+            let list = LOCAL_JOBS_DB.map(j => ({ ...j, matchScore: matchInfo(j) }));
+            if (selectedStrengths.length > 0) {
+                list.sort((a, b) => b.matchScore - a.matchScore);
+                const matched = list.filter(j => j.matchScore > 0);
+                const names = selectedStrengths.map(strengthShort).join(', ');
+                banner.classList.remove('hidden');
+                document.getElementById('recommendBannerTitle').innerText = `내 강점 [${names}]에 어울리는 직업`;
+                document.getElementById('recommendBannerSubtitle').innerText = `강점이 많이 맞는 직업이 앞에 보여요.`;
+                document.getElementById('recommendCountBadge').innerText = `추천 ${matched.length}개 / 전체 ${LOCAL_JOBS_DB.length}개`;
+                const on = "flex-1 sm:flex-none px-3.5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow";
+                const off = "flex-1 sm:flex-none px-3.5 py-2 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 text-xs font-bold rounded-xl";
+                document.getElementById('showOnlyRecBtn').className = isOnlyRecommendedMode ? on : off;
+                document.getElementById('showAllJobsBtn').className = isOnlyRecommendedMode ? off : on;
+                if (isOnlyRecommendedMode) list = matched;
             } else {
-                document.getElementById('showOnlyRecBtn').className = "flex-1 sm:flex-none px-3.5 py-2 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 text-xs font-bold rounded-xl transition";
-                document.getElementById('showAllJobsBtn').className = "flex-1 sm:flex-none px-3.5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow transition";
-                renderJobsGrid(matchedJobs);
+                banner.classList.add('hidden');
             }
+            if (currentCategory !== 'ALL') list = list.filter(j => j.category === currentCategory);
+            renderJobsGrid(list);
         }
 
-        function toggleMatchFilter(onlyRec) {
-            isOnlyRecommendedMode = onlyRec;
-            applyStrengthRecommendation();
-        }
+        function toggleMatchFilter(onlyRec) { isOnlyRecommendedMode = onlyRec; refreshJobList(); }
 
-        // 직업 목록 그리드 렌더링
         function renderJobsGrid(jobsList) {
             const container = document.getElementById('jobListGrid');
-            if (!container) return;
-
             if (jobsList.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full py-12 text-center text-slate-400 space-y-2 bg-white rounded-2xl border border-slate-200">
-                        <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300"></i>
-                        <p class="font-bold">선택한 강점 및 조건에 맞는 직업이 없습니다.</p>
-                        <p class="text-xs">상단 [전체 직업 보기]를 누르시거나 다른 강점을 선택해 보세요!</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 space-y-2 bg-white rounded-2xl border border-slate-200">
+                    <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300"></i>
+                    <p class="font-bold">맞는 직업이 없어요.</p>
+                    <p class="text-xs">[전체 직업 보기]를 누르거나 다른 강점을 골라 보세요!</p></div>`;
                 return;
             }
-
+            const maxMatch = Math.max(0, ...jobsList.map(j => matchInfo(j)));
             container.innerHTML = jobsList.map(job => {
-                const matchCount = job.strengths ? job.strengths.filter(s => selectedStrengths.includes(s)).length : 0;
-                const isTopMatch = matchCount > 0 && matchCount === Math.max(...jobsList.map(j => j.strengths ? j.strengths.filter(s => selectedStrengths.includes(s)).length : 0));
-                
-                let matchBadgeHtml = '';
+                const m = matchInfo(job);
+                const picked = selectedTargetJob && selectedTargetJob.id === job.id;
+                let badge = '';
                 if (selectedStrengths.length > 0) {
-                    if (matchCount > 0) {
-                        matchBadgeHtml = `
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                ${isTopMatch ? `
-                                    <span class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                                        <i class="fa-solid fa-crown"></i> 최고 추천
-                                    </span>
-                                ` : ''}
-                                <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                                    <i class="fa-solid fa-circle-check text-emerald-600"></i> 강점 ${matchCount}개 일치
-                                </span>
-                            </div>
-                        `;
-                    } else {
-                        matchBadgeHtml = `
-                            <span class="bg-slate-100 text-slate-400 text-[10px] font-medium px-2 py-0.5 rounded-full">
-                                일치 강점 없음
-                            </span>
-                        `;
-                    }
+                    badge = m > 0
+                        ? `<div class="flex items-center gap-1.5 flex-wrap">
+                            ${m === maxMatch ? '<span class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-crown"></i> 가장 잘 맞아요</span>' : ''}
+                            <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">강점 ${m}개 일치</span></div>`
+                        : '<span class="bg-slate-100 text-slate-400 text-[10px] font-medium px-2 py-0.5 rounded-full">일치하는 강점 없음</span>';
                 }
-
                 return `
-                    <div class="bg-white rounded-2xl p-5 border ${matchCount > 0 ? 'border-emerald-200 ring-2 ring-emerald-500/20' : 'border-slate-200'} shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4 relative">
-                        <div class="space-y-3">
-                            <div class="flex items-start justify-between gap-2">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-xl ${matchCount > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-600'} flex items-center justify-center text-2xl font-bold flex-shrink-0">
-                                        <i class="fa-solid ${job.icon}"></i>
-                                    </div>
-                                    <div>
-                                        <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">${job.categoryName}</span>
-                                        <h3 class="font-extrabold text-slate-900 text-lg tracking-tight mt-0.5">${job.name}</h3>
-                                    </div>
-                                </div>
+                <div class="bg-white rounded-2xl p-5 border ${picked ? 'border-indigo-500 ring-2 ring-indigo-400/40' : (m > 0 ? 'border-emerald-200 ring-2 ring-emerald-500/20' : 'border-slate-200')} shadow-sm hover:shadow-md transition flex flex-col justify-between gap-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl ${m > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-600'} flex items-center justify-center text-2xl flex-shrink-0"><i class="fa-solid ${job.icon}"></i></div>
+                            <div>
+                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">${esc(job.categoryName)}</span>
+                                <h3 class="font-extrabold text-slate-900 text-lg tracking-tight mt-0.5">${esc(job.name)}</h3>
                             </div>
-
-                            ${matchBadgeHtml}
-
-                            <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">${job.summary}</p>
                         </div>
-
-                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                            <button onclick="openJobDetail('${job.id}')" class="flex-1 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs transition flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-circle-info"></i>
-                                <span>상세 정보 및 준비방법</span>
-                            </button>
-                            <button onclick="selectJobAsTarget('${job.id}')" class="px-3 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow transition">
-                                선택
-                            </button>
-                        </div>
+                        ${badge}
+                        <p class="text-xs text-slate-600 leading-relaxed">${esc(job.summary)}</p>
                     </div>
-                `;
+                    <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
+                        <button onclick="openJobDetail('${job.id}')" class="flex-1 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1"><i class="fa-solid fa-circle-info"></i><span>자세히 보기</span></button>
+                        <button onclick="selectJobAsTarget('${job.id}')" class="px-4 py-2.5 ${picked ? 'bg-emerald-600' : 'bg-indigo-600 hover:bg-indigo-700'} text-white font-bold rounded-xl text-xs shadow">${picked ? '선택함 ✓' : '이 직업 고르기'}</button>
+                    </div>
+                </div>`;
             }).join('');
         }
 
-        function filterCategory(cat) {
-            const buttons = document.querySelectorAll('.cat-btn');
-            buttons.forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white');
-                btn.classList.add('bg-slate-100', 'text-slate-700');
+        function resetCategoryButtons(cat) {
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                const on = btn.dataset.cat === cat;
+                btn.classList.toggle('bg-indigo-600', on); btn.classList.toggle('text-white', on);
+                btn.classList.toggle('bg-slate-100', !on); btn.classList.toggle('text-slate-700', !on);
             });
-            if (event && event.target) {
-                event.target.classList.remove('bg-slate-100', 'text-slate-700');
-                event.target.classList.add('bg-indigo-600', 'text-white');
-            }
-
-            let targetList = LOCAL_JOBS_DB;
-            if (selectedStrengths.length > 0 && isOnlyRecommendedMode) {
-                targetList = LOCAL_JOBS_DB.filter(j => j.strengths.some(s => selectedStrengths.includes(s)));
-            }
-
-            if (cat === 'ALL') {
-                renderJobsGrid(targetList);
-            } else {
-                const filtered = targetList.filter(j => j.category === cat);
-                renderJobsGrid(filtered);
-            }
         }
-
-        function handleSearchKey(e) {
-            if (e.key === 'Enter') searchJobs();
+        function filterCategory(cat) {
+            currentCategory = cat;
+            resetCategoryButtons(cat);
+            document.getElementById('jobSearchInput').value = '';
+            refreshJobList();
         }
-
+        function handleSearchKey(e) { if (e.key === 'Enter') searchJobs(); }
         function searchJobs() {
-            const query = document.getElementById('jobSearchInput').value.trim().toLowerCase();
-            if (!query) {
-                renderJobsGrid(LOCAL_JOBS_DB);
-                return;
-            }
-            const filtered = LOCAL_JOBS_DB.filter(j => 
-                j.name.toLowerCase().includes(query) || 
-                j.summary.toLowerCase().includes(query) ||
-                j.categoryName.toLowerCase().includes(query)
-            );
-            renderJobsGrid(filtered);
-        }
-
-        function toggleApiKeyInput() {
-            const container = document.getElementById('apiKeyContainer');
-            if (container) {
-                container.classList.toggle('hidden');
-                const ttsInput = document.getElementById('googleTtsApiKey');
-                const careerInput = document.getElementById('careerNetApiKey');
-                if (ttsInput) ttsInput.value = googleTtsApiKey;
-                if (careerInput) careerInput.value = careerNetApiKey;
-            }
-        }
-
-        function saveApiKey() {
-            const careerInput = document.getElementById('careerNetApiKey');
-            const ttsInput = document.getElementById('googleTtsApiKey');
-            const toastMsg = document.getElementById('apiToastMsg');
-
-            if (careerInput) {
-                careerNetApiKey = careerInput.value.trim();
-                localStorage.setItem('careernet_api_key', careerNetApiKey);
-            }
-            if (ttsInput) {
-                googleTtsApiKey = ttsInput.value.trim();
-                localStorage.setItem('google_tts_api_key', googleTtsApiKey);
-            }
-
-            if (toastMsg) {
-                toastMsg.classList.remove('hidden');
-                setTimeout(() => toastMsg.classList.add('hidden'), 3000);
-            }
-        }
-
-        async function testGoogleTts() {
-            const ttsInput = document.getElementById('googleTtsApiKey');
-            const key = ttsInput ? ttsInput.value.trim() : googleTtsApiKey;
-            if (!key) {
-                alert('Google TTS API 키를 입력해주세요.');
-                return;
-            }
-            googleTtsApiKey = key;
-            localStorage.setItem('google_tts_api_key', googleTtsApiKey);
-            speakText('구글 인공지능 음성 서비스가 정상 작동합니다.');
-        }
-
-        function saveApiKey() {
-            const keyInput = document.getElementById('careerNetApiKey');
-            const toastMsg = document.getElementById('apiToastMsg');
-            if (keyInput) {
-                careerNetApiKey = keyInput.value.trim();
-                localStorage.setItem('careernet_api_key', careerNetApiKey);
-                if (toastMsg) {
-                    toastMsg.classList.remove('hidden');
-                    setTimeout(() => toastMsg.classList.add('hidden'), 3000);
-                }
-            }
+            const q = document.getElementById('jobSearchInput').value.trim().toLowerCase();
+            if (!q) { refreshJobList(); return; }
+            renderJobsGrid(LOCAL_JOBS_DB.filter(j =>
+                j.name.toLowerCase().includes(q) || j.summary.toLowerCase().includes(q) || j.categoryName.toLowerCase().includes(q)));
         }
 
         function openJobDetail(jobId) {
-            const job = LOCAL_JOBS_DB.find(j => j.id === jobId) || {
-                id: jobId,
-                name: '검색 직업',
-                categoryName: '일반 직업',
-                icon: 'fa-briefcase',
-                summary: '상세 정보가 준비 중입니다.',
-                skills: ['기초 직장 태도 습득'],
-                pathway: '특수학교 및 장애인 직업 훈련 기관 수강',
-                tip: '선생님과 상담해 보세요.'
-            };
-
+            const job = LOCAL_JOBS_DB.find(j => j.id === jobId);
+            if (!job) return;
             document.getElementById('modalTitle').innerText = job.name;
             document.getElementById('modalCategory').innerText = job.categoryName;
             document.getElementById('modalDescription').innerText = job.summary;
             document.getElementById('modalPathway').innerText = job.pathway;
             document.getElementById('modalTip').innerText = job.tip;
             document.getElementById('modalIcon').innerHTML = `<i class="fa-solid ${job.icon}"></i>`;
-            document.getElementById('modalSkills').innerHTML = job.skills.map(s => `<li>${s}</li>`).join('');
-
-            const selectBtn = document.getElementById('modalSelectBtn');
-            selectBtn.onclick = function() {
-                selectJobAsTarget(job.id);
-                closeModal();
-            };
-
+            document.getElementById('modalSkills').innerHTML = job.skills.map(s => `<li>${esc(s)}</li>`).join('');
+            document.getElementById('modalSelectBtn').onclick = function () { selectJobAsTarget(job.id); closeModal(); };
             document.getElementById('jobDetailModal').classList.remove('hidden');
         }
-
-        function closeModal() {
-            document.getElementById('jobDetailModal').classList.add('hidden');
-        }
+        function closeModal() { document.getElementById('jobDetailModal').classList.add('hidden'); }
 
         function selectJobAsTarget(jobId) {
             const job = LOCAL_JOBS_DB.find(j => j.id === jobId);
-            if (job) {
+            if (!job) return;
+            if (!selectedTargetJob || selectedTargetJob.id !== job.id) {
                 selectedTargetJob = job;
-                const dropdown = document.getElementById('targetJobSelect');
-                if (dropdown) dropdown.value = job.id;
-                updateDreamCard();
-                switchTab('step3');
+                posterPicks = new Set();     // 직업이 바뀌면 포스터 재료 선택을 새로 시작
+                aiAdvice = null; advicePicks = new Set();
+                promiseChoice = prepItem() ? 'prep' : 'custom';
+            }
+            saveState();
+            switchTab('step3');
+        }
+
+        // ---------- 3. 포스터 재료 ----------
+        const GROUP_LABEL = { tasks: '하는 일', places: '일하는 장소', skills: '필요한 능력', summary: '소개 문장' };
+
+        const REASONS = [
+            { id: 'R1', text: '내 강점과 잘 맞아요', icon: 'fa-thumbs-up' },
+            { id: 'R2', text: '좋아하는 일이에요', icon: 'fa-heart' },
+            { id: 'R3', text: '해 보고 싶어요', icon: 'fa-seedling' },
+            { id: 'R4', text: '잘할 수 있을 것 같아요', icon: 'fa-star' },
+            { id: 'R5', text: '선생님과 이야기하고 골랐어요', icon: 'fa-comments' },
+            { id: 'R6', text: '가족이나 친구에게 들었어요', icon: 'fa-users' }
+        ];
+        const EXPRESS_MODES = [
+            { id: 'E1', text: '말로 해요', icon: 'fa-comment' },
+            { id: 'E2', text: '손으로 가리켜요', icon: 'fa-hand-point-up' },
+            { id: 'E3', text: '그림·AAC로 해요', icon: 'fa-icons' },
+            { id: 'E4', text: '글로 써요', icon: 'fa-pen' },
+            { id: 'E5', text: '선생님이 도와줘요', icon: 'fa-hands-holding-child' }
+        ];
+        // 커리어넷 검색 기본 낱말 (직업 이름과 달라서 검색이 잘 안 되면 학생·교사가 고쳐서 찾을 수 있어요)
+        const CAREER_KEYWORD = {
+            JOB_BARISTA: '바리스타', JOB_CAFE_CLEAN: '식기', JOB_MART_DISPLAY: '마트', JOB_BAKERY_PACK: '제과',
+            JOB_FOOD_PREP: '조리', JOB_COOK_HELPER: '급식', JOB_OFFICE_SHRED: '사무', JOB_LIBRARY_HELPER: '사서',
+            JOB_MAIL_HELPER: '우편', JOB_PACKING: '물류', JOB_ASSEMBLY: '조립', JOB_LABELING: '포장',
+            JOB_SMART_FARM: '스마트팜', JOB_GARDENING: '원예', JOB_ANIMAL_CARE: '반려동물', JOB_HOTEL_TOWEL: '호텔',
+            JOB_CLEANER: '환경미화', JOB_DISH_WASH: '조리'
+        };
+        const PREPARE_LABEL = { recruit: '취업 방법', training: '직업훈련', certificate: '관련 자격증', curriculum: '관련 교육' };
+
+        function buildPosterList() {
+            const job = selectedTargetJob;
+            const ai = aiJobCache[job.id];
+            const cc = careerCache[job.id];
+            const list = [];
+            const add = (group, text, src) => {
+                text = String(text || '').trim();
+                if (!text) return;
+                if (list.some(x => x.group === group && x.text === text)) return;
+                list.push({ group, text, src, key: group + '|' + text });
+            };
+            add('tasks', job.summary, '기본');
+            (job.places || []).forEach(t => add('places', t, '기본'));
+            job.skills.forEach(t => add('skills', t, '기본'));
+            if (cc) {
+                (cc.works || []).forEach(t => add('tasks', t, '커리어넷'));
+                (cc.abilities || []).forEach(t => add('skills', t, '커리어넷'));
+            }
+            if (ai) {
+                (ai.tasks || []).forEach(t => add('tasks', t, 'AI'));
+                (ai.places || []).forEach(t => add('places', t, 'AI'));
+                (ai.skills || []).forEach(t => add('skills', t, 'AI'));
+                add('summary', ai.posterSummary, 'AI');
+            }
+            return list;
+        }
+
+        const POSTER_GROUPS = [
+            { id: 'tasks', label: '하는 일', icon: 'fa-hands', box: 'bg-indigo-50 border-indigo-100', head: 'text-indigo-900' },
+            { id: 'places', label: '일하는 장소', icon: 'fa-location-dot', box: 'bg-emerald-50 border-emerald-100', head: 'text-emerald-900' },
+            { id: 'skills', label: '필요한 능력', icon: 'fa-star', box: 'bg-amber-50 border-amber-100', head: 'text-amber-900' },
+            { id: 'summary', label: '소개 문장 (AI)', icon: 'fa-comment-dots', box: 'bg-purple-50 border-purple-100', head: 'text-purple-900' }
+        ];
+
+        function srcTag(src) {
+            if (src === 'AI') return '<span class="text-[10px] font-extrabold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">AI</span>';
+            if (src === '커리어넷') return '<span class="text-[10px] font-extrabold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">커리어넷</span>';
+            return '';
+        }
+
+        // 커리어넷에서 가져온 글을 AI가 쉬운 말로 바꿀 수 있게 하나의 글로 묶어요.
+        function careerContextText(job) {
+            const cc = careerCache[job.id];
+            if (!cc) return '';
+            const parts = [];
+            if (cc.name) parts.push('직업명: ' + cc.name);
+            if ((cc.works || []).length) parts.push('하는 일: ' + cc.works.join(' / '));
+            if ((cc.abilities || []).length) parts.push('핵심 능력: ' + cc.abilities.join(', '));
+            const pr = cc.prepare || {};
+            Object.keys(PREPARE_LABEL).forEach(k => { if ((pr[k] || []).length) parts.push(PREPARE_LABEL[k] + ': ' + pr[k].join(' / ')); });
+            return parts.join('\n').slice(0, 1400);
+        }
+
+        function careerPanelHtml(job) {
+            if (careerQueryFor !== job.id) {
+                careerQuery = CAREER_KEYWORD[job.id] || job.name.split(' ')[0];
+                careerQueryFor = job.id; careerResults = []; careerMsg = '';
+            }
+            const cc = careerCache[job.id];
+            const results = careerResults.map((r, i) => `
+                <button type="button" onclick="pickCareer(${i})" class="w-full text-left p-3 rounded-xl border-2 border-sky-100 bg-white hover:border-sky-400 transition">
+                    <span class="block font-extrabold text-sky-900 text-sm">${esc(r.name)} ${r.group ? `<span class="text-[11px] font-bold text-slate-500">· ${esc(r.group)}</span>` : ''}</span>
+                    <span class="block text-xs text-slate-600 mt-0.5">${esc(r.work)}</span>
+                </button>`).join('');
+            const detail = cc ? `
+                <div class="bg-white border border-sky-200 rounded-xl p-3 text-xs space-y-1 leading-relaxed">
+                    <p class="font-extrabold text-sky-900 text-sm">가져온 직업: ${esc(cc.name)}</p>
+                    ${(cc.works || []).length ? `<p><span class="font-bold">하는 일:</span> ${cc.works.map(esc).join(' / ')}</p>` : ''}
+                    ${(cc.abilities || []).length ? `<p><span class="font-bold">핵심 능력:</span> ${cc.abilities.map(esc).join(', ')}</p>` : ''}
+                    ${Object.keys(PREPARE_LABEL).map(k => ((cc.prepare || {})[k] || []).length ? `<p><span class="font-bold">${PREPARE_LABEL[k]}:</span> ${cc.prepare[k].map(esc).join(' / ')}</p>` : '').join('')}
+                    <p class="text-slate-500">하는 일과 핵심 능력은 아래 칸에서 눌러서 고를 수 있어요. 출처: 커리어넷</p>
+                </div>` : '';
+            return `
+            <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-5 space-y-3">
+                <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>커리어넷 공식 직업 정보 (선택)</h3>
+                <p class="text-xs text-sky-800">더 자세한 직업 정보를 커리어넷에서 찾아볼 수 있어요. 찾은 글이 어려우면 아래 AI가 쉬운 말로 바꿔 줘요.</p>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" value="${esc(careerQuery)}" oninput="careerQuery = this.value" onkeyup="if(event.key==='Enter') searchCareer()" maxlength="20" aria-label="커리어넷에서 찾을 직업 이름"
+                        class="flex-1 p-2.5 border border-sky-300 rounded-xl text-sm bg-white" placeholder="찾을 직업 이름">
+                    <button onclick="searchCareer()" ${careerBusy ? 'disabled' : ''} class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid fa-magnifying-glass mr-1"></i>커리어넷에서 찾기</button>
+                </div>
+                <p class="text-xs font-bold text-sky-900">${esc(careerMsg)}</p>
+                ${results ? `<div class="grid sm:grid-cols-2 gap-2">${results}</div>` : ''}
+                ${detail}
+            </div>`;
+        }
+
+        function careerErrorMsg(e) {
+            if (e && e.message === 'NO_ENDPOINT') return '지금은 서버가 연결되어 있지 않아요. 기본 정보로 이어서 해요.';
+            if (e && e.code === 'NO_CAREER_KEY') return '커리어넷 인증키가 아직 설정되지 않았어요. 선생님께 알려요. 기본 정보로 이어서 해요.';
+            return '커리어넷에서 정보를 가져오지 못했어요. 기본 정보로 이어서 해요.';
+        }
+
+        async function searchCareer() {
+            if (careerBusy || !selectedTargetJob) return;
+            const q = (careerQuery || '').trim();
+            if (!q) { careerMsg = '찾을 직업 이름을 입력해요.'; renderPosterStep(); return; }
+            careerBusy = true; careerMsg = '커리어넷에서 찾고 있어요...'; careerResults = []; renderPosterStep();
+            try {
+                const r = await callAi('career-search', { query: q });
+                careerResults = (Array.isArray(r.jobs) ? r.jobs : []).filter(j => j && j.seq && j.name);
+                careerMsg = careerResults.length ? `${careerResults.length}개를 찾았어요. 알고 싶은 직업을 눌러요.` : '찾은 직업이 없어요. 다른 낱말로 찾아봐요.';
+            } catch (e) { careerMsg = careerErrorMsg(e); }
+            careerBusy = false; renderPosterStep();
+        }
+
+        async function pickCareer(i) {
+            const r = careerResults[i];
+            const job = selectedTargetJob;
+            if (!r || !job || careerBusy) return;
+            careerBusy = true; careerMsg = '자세한 내용을 가져오고 있어요...'; renderPosterStep();
+            try {
+                const d = await callAi('career-detail', { seq: r.seq });
+                const arr = v => (Array.isArray(v) ? v : []).map(x => String(x == null ? '' : x).trim()).filter(Boolean);
+                const pr = d.prepare || {};
+                const cc = {
+                    seq: String(d.seq || r.seq), name: asStr(d.name) || r.name, group: asStr(d.group),
+                    works: arr(d.works).slice(0, 6), abilities: arr(d.abilities).slice(0, 8), aptitudes: arr(d.aptitudes).slice(0, 5),
+                    prepare: { recruit: arr(pr.recruit), training: arr(pr.training), certificate: arr(pr.certificate), curriculum: arr(pr.curriculum) }
+                };
+                if (cc.works.length || cc.abilities.length) {
+                    careerCache[job.id] = cc; saveState();
+                    careerMsg = '커리어넷 정보를 가져왔어요. 포스터에 넣고 싶은 것을 골라요.';
+                } else {
+                    careerMsg = '이 직업은 보여 줄 내용이 비어 있어요. 다른 직업을 눌러 봐요.';
+                }
+            } catch (e) { careerMsg = careerErrorMsg(e); }
+            careerBusy = false; renderPosterStep();
+        }
+
+        function renderPosterStep() {
+            const area = document.getElementById('posterArea');
+            const job = selectedTargetJob;
+            if (!job) {
+                area.innerHTML = `<div class="bg-white rounded-2xl p-10 text-center border border-slate-200 space-y-4">
+                    <i class="fa-solid fa-briefcase text-5xl text-slate-300"></i>
+                    <p class="font-bold text-slate-700">먼저 관심 있는 직업을 한 가지 골라요.</p>
+                    <button onclick="switchTab('step2')" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">직업 탐색하러 가기</button></div>`;
+                return;
+            }
+            currentPosterList = buildPosterList();
+            const hasAi = !!aiJobCache[job.id];
+            const hasCareer = !!careerCache[job.id];
+            const groupsHtml = POSTER_GROUPS.filter(g => g.id !== 'summary' || hasAi).map(g => {
+                const items = currentPosterList.map((it, idx) => ({ it, idx })).filter(o => o.it.group === g.id);
+                return `<div class="${g.box} border p-4 rounded-2xl space-y-2">
+                    <h4 class="font-extrabold ${g.head} flex items-center gap-1.5"><i class="fa-solid ${g.icon}"></i><span>${g.label}</span></h4>
+                    <div class="space-y-2">${items.map(({ it, idx }) => {
+                        const on = posterPicks.has(it.key);
+                        return `<button type="button" aria-pressed="${on}" onclick="togglePosterPick(${idx})"
+                            class="w-full text-left p-3 rounded-xl border-2 text-sm font-semibold flex items-start gap-2 transition ${on ? 'border-blue-600 bg-white ring-2 ring-blue-300/50' : 'border-transparent bg-white/70 hover:bg-white'}">
+                            <span class="mt-0.5 w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center text-xs ${on ? 'bg-blue-600 text-white' : 'bg-slate-200 text-transparent'}"><i class="fa-solid fa-check"></i></span>
+                            <span class="flex-1 leading-snug">${esc(it.text)}</span>
+                            ${srcTag(it.src)}
+                        </button>`;
+                    }).join('')}</div></div>`;
+            }).join('');
+
+            area.innerHTML = `
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 text-3xl flex items-center justify-center"><i class="fa-solid ${job.icon}"></i></div>
+                    <div><p class="text-xs font-bold text-slate-500">내가 고른 직업</p><h3 class="text-2xl font-black text-slate-900">${esc(job.name)}</h3></div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="readJobInfo()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs flex items-center gap-1"><i class="fa-solid fa-volume-high text-indigo-600"></i>읽어주기</button>
+                    <button onclick="switchTab('step2')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs">다른 직업 고르기</button>
+                </div>
+            </div>
+
+            ${careerPanelHtml(job)}
+
+            <div class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="font-extrabold text-purple-900 flex items-center gap-2"><i class="fa-solid fa-robot"></i>AI 선생님께 쉬운 말로 바꿔 달라고 해요</h3>
+                        <p class="text-xs text-purple-800 mt-1">${hasCareer ? '커리어넷에서 가져온 글을 AI가 쉬운 말로 바꿔 줘요. ' : ''}AI가 알려 준 내용은 틀릴 수 있어요. 선생님과 함께 확인하고, 포스터에 넣고 싶은 것만 골라요.</p>
+                    </div>
+                    <button id="aiJobInfoBtn" onclick="askAiJobInfo()" class="px-5 py-3 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl shadow flex items-center gap-2 disabled:opacity-60">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i><span>${hasAi ? '다시 물어보기' : (hasCareer ? '쉬운 말로 바꾸기' : 'AI에게 물어보기')}</span>
+                    </button>
+                </div>
+                <p id="aiJobInfoMsg" class="text-xs font-bold text-purple-900"></p>
+            </div>
+
+            <div>
+                <p class="font-bold text-slate-700 mb-2"><i class="fa-solid fa-hand-pointer text-blue-600 mr-1"></i>포스터에 넣고 싶은 내용을 눌러서 골라요.</p>
+                <div class="grid md:grid-cols-3 gap-4">${groupsHtml}</div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-5 border-2 border-blue-300 shadow-sm space-y-3">
+                <h3 class="font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-clipboard-list text-blue-600"></i>내 포스터 재료</h3>
+                <div id="posterSummaryBox" class="text-sm space-y-1"></div>
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <button onclick="copyPosterText()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm"><i class="fa-regular fa-copy mr-1"></i>포스터 재료 복사하기</button>
+                    <button onclick="readPosterPicks()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-sm"><i class="fa-solid fa-volume-high text-blue-600 mr-1"></i>읽어주기</button>
+                    <a id="canvaPosterLink" href="#" target="_blank" rel="noopener" class="hidden px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i>캔바 포스터 템플릿 열기</a>
+                </div>
+                <p id="copyToastPoster" class="hidden text-xs font-bold text-emerald-700"><i class="fa-solid fa-check"></i> 복사했어요! 캔바에 붙여 넣어요.</p>
+                <p class="text-xs text-slate-500">복사한 글을 선생님이 준비한 캔바 포스터 템플릿에 붙여 넣어요.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+                <h3 class="font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-circle-question text-amber-500"></i>이 직업을 왜 골랐나요?</h3>
+                <p class="text-xs text-slate-500">내 마음과 가까운 것을 골라요. 여러 개를 골라도 괜찮아요.</p>
+                <div id="reasonChips" class="flex flex-wrap gap-2"></div>
+            </div>`;
+
+            const link = document.getElementById('canvaPosterLink');
+            const cu = getCanva('poster');
+            if (link && cu) { link.href = cu; link.classList.remove('hidden'); }
+            renderReasons();
+            renderPosterSummary();
+        }
+
+        function chipHtml(on, onclick, icon, text) {
+            return `<button type="button" aria-pressed="${on}" onclick="${onclick}"
+                class="px-4 py-2.5 rounded-xl border-2 text-sm font-bold flex items-center gap-2 transition ${on ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-300/50 text-amber-900' : 'border-slate-200 bg-white hover:border-amber-300 text-slate-700'}">
+                <i class="fa-solid ${icon} ${on ? 'text-amber-600' : 'text-slate-400'}"></i><span>${esc(text)}</span>${on ? '<i class="fa-solid fa-check text-amber-600"></i>' : ''}</button>`;
+        }
+        function renderReasons() {
+            const box = document.getElementById('reasonChips'); if (!box) return;
+            box.innerHTML = REASONS.map(r => chipHtml(choiceReasons.has(r.id), `toggleReason('${r.id}')`, r.icon, r.text)).join('');
+        }
+        function toggleReason(id) {
+            if (choiceReasons.has(id)) choiceReasons.delete(id); else choiceReasons.add(id);
+            saveState(); renderReasons();
+        }
+        function renderExpressModes() {
+            const box = document.getElementById('expressModes'); if (!box) return;
+            box.innerHTML = EXPRESS_MODES.map(m => chipHtml(expressModes.has(m.id), `toggleExpress('${m.id}')`, m.icon, m.text)).join('');
+        }
+        function toggleExpress(id) {
+            if (expressModes.has(id)) expressModes.delete(id); else expressModes.add(id);
+            saveState(); renderExpressModes();
+        }
+
+        function togglePosterPick(idx) {
+            const it = currentPosterList[idx];
+            if (!it) return;
+            if (posterPicks.has(it.key)) posterPicks.delete(it.key); else posterPicks.add(it.key);
+            saveState();
+            renderPosterStep();
+        }
+
+        function pickedByGroup() {
+            const out = { tasks: [], places: [], skills: [], summary: [] };
+            currentPosterList.forEach(it => { if (posterPicks.has(it.key)) out[it.group].push(it.text); });
+            return out;
+        }
+
+        function renderPosterSummary() {
+            const box = document.getElementById('posterSummaryBox');
+            if (!box) return;
+            const p = pickedByGroup();
+            const total = p.tasks.length + p.places.length + p.skills.length + p.summary.length;
+            if (total === 0) { box.innerHTML = '<p class="text-slate-400">아직 고른 내용이 없어요. 위에서 눌러서 골라요.</p>'; return; }
+            const row = (label, arr) => arr.length ? `<p><span class="font-extrabold text-slate-700">${label}:</span> ${arr.map(esc).join(' / ')}</p>` : '';
+            box.innerHTML = `<p><span class="font-extrabold text-slate-700">직업 이름:</span> ${esc(selectedTargetJob.name)}</p>` +
+                row('하는 일', p.tasks) + row('일하는 장소', p.places) + row('필요한 능력', p.skills) + row('소개 문장', p.summary);
+        }
+
+        function posterText() {
+            const p = pickedByGroup();
+            const lines = [`직업 이름: ${selectedTargetJob.name}`];
+            if (p.tasks.length) lines.push('하는 일: ' + p.tasks.join(' / '));
+            if (p.places.length) lines.push('일하는 장소: ' + p.places.join(' / '));
+            if (p.skills.length) lines.push('필요한 능력: ' + p.skills.join(' / '));
+            if (p.summary.length) lines.push('소개 문장: ' + p.summary.join(' '));
+            if (choiceReasons.size) lines.push('고른 이유: ' + REASONS.filter(r => choiceReasons.has(r.id)).map(r => r.text).join(', '));
+            return lines.join('\n');
+        }
+
+        async function copyToClipboard(text) {
+            try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta); return ok;
+            } catch (e) { return false; }
+        }
+        function flashToast(id) {
+            const el = document.getElementById(id); if (!el) return;
+            el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 3000);
+        }
+        async function copyPosterText() {
+            const p = pickedByGroup();
+            if (p.tasks.length + p.places.length + p.skills.length + p.summary.length === 0) { alert('먼저 포스터에 넣을 내용을 골라요.'); return; }
+            if (await copyToClipboard(posterText())) { activity.posterCopied = true; saveState(); flashToast('copyToastPoster'); } else alert('복사가 안 돼요. 선생님께 도움을 요청해요.');
+        }
+        function readJobInfo() {
+            const job = selectedTargetJob;
+            if (!job) return;
+            speakText(`내가 고른 직업은 ${job.name} 입니다. 하는 일. ${job.summary} 일하는 장소. ${(job.places || []).join(', ')}. 필요한 능력. ${job.skills.join(', ')}.`);
+        }
+        function readPosterPicks() {
+            if (!selectedTargetJob) return;
+            speakText(posterText().replace(/\n/g, '. '));
+        }
+
+        // ---------- AI 호출 (Cloudflare Worker) ----------
+        function getEndpoint() {
+            try { return (localStorage.getItem('jx_ai_endpoint') || AI_ENDPOINT || '').trim(); } catch (e) { return (AI_ENDPOINT || '').trim(); }
+        }
+
+        async function callAi(mode, payload) {
+            const url = getEndpoint();
+            if (!url) throw new Error('NO_ENDPOINT');
+            let lastErr;
+            for (let attempt = 0; attempt < 2; attempt++) {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), 30000);
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mode, ...payload }),
+                        signal: ctrl.signal
+                    });
+                    clearTimeout(timer);
+                    const data = await res.json().catch(() => ({}));
+                    if (res.ok && data && data.result) return data.result;
+                    lastErr = new Error(data && data.error ? data.error : 'HTTP ' + res.status);
+                    lastErr.code = data && data.code;
+                    if (res.status < 500 || res.status === 501) break;       // 4xx는 다시 해도 같아요
+                } catch (e) { clearTimeout(timer); lastErr = e; }
+                await new Promise(r => setTimeout(r, 800));
+            }
+            throw lastErr || new Error('AI_FAILED');
+        }
+
+        const asStrArr = v => (Array.isArray(v) ? v : []).map(x => String(x == null ? '' : x).trim()).filter(Boolean).slice(0, 6);
+        const asStr = v => String(v == null ? '' : v).trim();
+
+        // AI가 만든 글을 학생에게 보여 주기 전에 선생님이 확인하도록 설정했다면(교사용 도구) 확인 창을 먼저 보여 줘요.
+        function isReviewOn() { try { return localStorage.getItem('jx_review') === '1'; } catch (e) { return false; } }
+        function deliverAi(kind, items, onCommit) {
+            if (!isReviewOn()) { onCommit(items); return false; }
+            reviewState = { kind, items, onCommit };
+            openReviewModal();
+            return true;
+        }
+        function openReviewModal() {
+            const rs = reviewState; if (!rs) return;
+            document.getElementById('reviewDesc').innerText = rs.kind === 'job'
+                ? 'AI가 쉬운 말로 정리한 직업 정보예요. 학생에게 알맞은 것만 남겨 주세요.'
+                : 'AI가 쓴 진로 조언이에요. 학생에게 알맞은 것만 남겨 주세요.';
+            document.getElementById('reviewList').innerHTML = rs.items.map((it, i) => `
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+                    <input type="checkbox" id="rv-${i}" checked class="mt-1 w-5 h-5 accent-emerald-600">
+                    <span class="text-sm"><span class="block text-xs font-extrabold text-indigo-700">${esc(it.label || GROUP_LABEL[it.group] || '')}</span>${esc(it.text)}</span>
+                </label>`).join('');
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+        function closeReview() { reviewState = null; document.getElementById('reviewModal').classList.add('hidden'); }
+        function approveReview() {
+            const rs = reviewState; if (!rs) return;
+            if (!teacherAuth()) return;
+            const kept = rs.items.filter((_, i) => { const c = document.getElementById('rv-' + i); return c && c.checked; });
+            closeReview(); rs.onCommit(kept);
+        }
+        function discardReview() {
+            const rs = reviewState; if (!rs) return;
+            if (!teacherAuth()) return;
+            closeReview(); rs.onCommit([]);
+        }
+
+        async function askAiJobInfo() {
+            if (aiBusy || !selectedTargetJob) return;
+            const job = selectedTargetJob;
+            const btn = document.getElementById('aiJobInfoBtn');
+            const msg = document.getElementById('aiJobInfoMsg');
+            aiBusy = true; btn.disabled = true;
+            msg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI 선생님이 쉬운 말로 정리하고 있어요...';
+            try {
+                const ctx = careerContextText(job);
+                const r = await callAi('job-info', ctx ? { job: job.name, context: ctx } : { job: job.name });
+                const items = [];
+                asStrArr(r.tasks).forEach(t => items.push({ group: 'tasks', text: t }));
+                asStrArr(r.places).forEach(t => items.push({ group: 'places', text: t }));
+                asStrArr(r.skills).forEach(t => items.push({ group: 'skills', text: t }));
+                if (asStr(r.posterSummary)) items.push({ group: 'summary', text: asStr(r.posterSummary) });
+                if (items.length === 0) throw new Error('EMPTY');
+                aiBusy = false;
+                const waiting = deliverAi('job', items, kept => {
+                    const out = { tasks: [], places: [], skills: [], posterSummary: '' };
+                    kept.forEach(it => { if (it.group === 'summary') out.posterSummary = it.text; else out[it.group].push(it.text); });
+                    aiJobCache[job.id] = out; activity.aiJobInfo = true; saveState();
+                    if (selectedTargetJob && selectedTargetJob.id === job.id) {
+                        renderPosterStep();
+                        const m = document.getElementById('aiJobInfoMsg');
+                        if (m) m.innerText = kept.length ? 'AI가 정리해 줬어요. AI 표시가 있는 내용도 눌러서 고를 수 있어요.' : '보여 줄 내용이 없어요. 기본 정보로 이어서 해요.';
+                    }
+                });
+                if (waiting) { btn.disabled = false; msg.innerText = '선생님이 AI가 쓴 내용을 확인하고 있어요. 잠시 기다려요.'; }
+            } catch (e) {
+                aiBusy = false; btn.disabled = false;
+                msg.innerText = (e && e.message === 'NO_ENDPOINT')
+                    ? '지금은 AI가 연결되어 있지 않아요. 기본 정보로 이어서 해요.'
+                    : 'AI 선생님과 연결되지 않았어요. 잠시 뒤에 다시 눌러 보거나, 기본 정보로 이어서 해요.';
             }
         }
 
+        // ---------- 4. 취업 역량 체크 ----------
         function renderSkillChecklist() {
-            const container = document.getElementById('skillChecklist');
-            if (!container) return;
-
-            container.innerHTML = CHECKLIST_ITEMS.map(item => `
-                <label class="flex items-start gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl cursor-pointer transition border border-slate-200">
-                    <input type="checkbox" onchange="toggleSkillCheck('${item.id}')" class="mt-1 w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
-                    <span class="text-sm font-semibold text-slate-800 leading-snug">${item.text}</span>
-                </label>
-            `).join('');
+            document.getElementById('skillChecklist').innerHTML = CHECKLIST_ITEMS.map(item => `
+                <label class="flex items-start gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl cursor-pointer border border-slate-200">
+                    <input type="checkbox" ${checkedSkills.has(item.id) ? 'checked' : ''} onchange="toggleSkillCheck('${item.id}')" class="mt-1 w-5 h-5 accent-emerald-600">
+                    <span class="text-sm font-semibold text-slate-800 leading-snug">${esc(item.text)}</span>
+                </label>`).join('');
         }
-
-        function toggleSkillCheck(skillId) {
-            if (checkedSkills.has(skillId)) {
-                checkedSkills.delete(skillId);
-            } else {
-                checkedSkills.add(skillId);
-            }
+        function toggleSkillCheck(id) {
+            if (checkedSkills.has(id)) checkedSkills.delete(id); else checkedSkills.add(id);
+            saveState();
             updateReadinessProgress();
         }
-
         function updateReadinessProgress() {
             const pct = Math.round((checkedSkills.size / CHECKLIST_ITEMS.length) * 100);
             document.getElementById('readinessScore').innerText = `${pct} %`;
             document.getElementById('readinessProgressBar').style.width = `${pct}%`;
+            const el = document.getElementById('readinessMessage');
+            if (pct === 100) { el.innerText = '멋져요! 직장생활 준비를 정말 잘하고 있어요! 👏'; el.className = 'text-xs font-extrabold text-emerald-600'; }
+            else if (pct >= 50) { el.innerText = '잘하고 있어요! 조금씩 더 연습해 봐요! 👍'; el.className = 'text-xs font-bold text-blue-600'; }
+            else { el.innerText = '잘할 수 있는 것에 체크해 보세요.'; el.className = 'text-xs font-semibold text-slate-500'; }
+        }
+        function renderPrepChoices() {
+            document.getElementById('prepChoiceList').innerHTML = CHECKLIST_ITEMS.map(item => {
+                const on = chosenPrep === item.id;
+                return `<button type="button" role="radio" aria-checked="${on}" onclick="choosePrep('${item.id}')"
+                    class="w-full text-left p-3 rounded-xl border-2 flex items-center gap-3 font-bold text-sm transition ${on ? 'border-emerald-600 bg-emerald-50 ring-2 ring-emerald-300/50' : 'border-slate-200 bg-white hover:border-emerald-300'}">
+                    <span class="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${on ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-emerald-600'}"><i class="fa-solid ${item.icon}"></i></span>
+                    <span class="flex-1">${esc(item.short)}</span>
+                    ${on ? '<span class="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">선택됨 ✓</span>' : ''}
+                </button>`;
+            }).join('');
+        }
+        function choosePrep(id) {
+            chosenPrep = id;
+            promiseChoice = 'prep';
+            saveState();
+            renderPrepChoices();
+        }
+        function readPrepOptions() { speakText('연습하고 싶은 것을 한 가지 골라요. ' + CHECKLIST_ITEMS.map((c, i) => `${i + 1}번. ${c.short}`).join('. ')); }
+        function readChecklist() { speakText('내가 잘할 수 있는 것을 체크해요. ' + CHECKLIST_ITEMS.map((c, i) => `${i + 1}번. ${c.text}`).join(' ')); }
+        function readTeacherTips() { speakText('선생님 꿀팁입니다. ' + document.getElementById('teacherTipsList').innerText); }
 
-            const msgEl = document.getElementById('readinessMessage');
-            if (pct === 100) {
-                msgEl.innerText = "멋져요! 취업할 준비가 완벽하게 되었어요! 👏";
-                msgEl.className = "text-xs font-extrabold text-emerald-600";
-            } else if (pct >= 50) {
-                msgEl.innerText = "잘하고 있어요! 조금만 더 차근차근 점검해 보세요! 👍";
-                msgEl.className = "text-xs font-bold text-blue-600";
-            } else {
-                msgEl.innerText = "체크리스트를 작성하여 나의 준비도를 올려보세요!";
-                msgEl.className = "text-xs font-semibold text-slate-500";
+        // ---------- 5. AI 상담 · 카드 ----------
+        function renderStep5() {
+            const sel = document.getElementById('targetJobSelect');
+            sel.innerHTML = '<option value="">직업을 골라요</option>' +
+                LOCAL_JOBS_DB.map(j => `<option value="${j.id}" ${selectedTargetJob && selectedTargetJob.id === j.id ? 'selected' : ''}>${esc(j.name)}</option>`).join('');
+            const st = selectedStrengths.map(strengthShort).join(', ');
+            document.getElementById('step5Strengths').innerHTML = st ? esc(st) : '<span class="text-slate-400">1번 탭에서 강점을 골라요</span>';
+            const pi = prepItem();
+            document.getElementById('step5Prep').innerHTML = pi ? esc(pi.short) : '<span class="text-slate-400">4번 탭에서 한 가지 골라요</span>';
+            renderAdvice();
+            renderPromiseOptions();
+            updateDreamCard();
+            const link = document.getElementById('canvaCardLink');
+            const cu = getCanva('card');
+            if (link && cu) { link.href = cu; link.classList.remove('hidden'); }
+            renderExpressModes();
+        }
+
+        function handleJobSelectChange() {
+            const found = LOCAL_JOBS_DB.find(j => j.id === document.getElementById('targetJobSelect').value) || null;
+            if (found && (!selectedTargetJob || selectedTargetJob.id !== found.id)) {
+                selectedTargetJob = found; posterPicks = new Set();
+            } else if (!found) { selectedTargetJob = null; posterPicks = new Set(); }
+            aiAdvice = null; advicePicks = new Set();
+            saveState();
+            renderStep5();
+        }
+
+        // AI가 안 될 때 쓰는 기본 조언 (학생에게는 'AI'가 아니라 '기본'으로 표시)
+        function buildFallbackAdvice() {
+            const job = selectedTargetJob;
+            const s1 = selectedStrengths.length ? strengthShort(selectedStrengths[0]) : '';
+            const pi = prepItem();
+            const items = [];
+            items.push({ kind: 'connect', label: '나의 강점과 직업', text: s1 ? `${job.name}에서는 "${s1}" 같은 나의 강점이 도움이 돼요.` : `${job.name}에서는 성실하게 배우는 마음이 도움이 돼요.` });
+            items.push({ kind: 'praise', label: '응원 한마디', text: '직업을 스스로 골라 보고 준비해 보는 모습이 멋져요.' });
+            items.push({ kind: 'action', label: '해 볼 수 있는 행동 1', text: job.tip });
+            if (pi) items.push({ kind: 'action', label: '해 볼 수 있는 행동 2', text: `${pi.short}, 이것을 매일 조금씩 연습해요.` });
+            if (pi) items.push({ kind: 'promise', label: '다짐 문장', text: `${pi.short}부터 차근차근 해 볼게요.` });
+            return items.map((it, i) => ({ ...it, id: 'a' + i }));
+        }
+
+        async function askAiCounsel() {
+            if (aiBusy) return;
+            const job = selectedTargetJob;
+            const box = document.getElementById('aiResponseContainer');
+            if (!job) { box.innerHTML = '<p class="text-sm font-bold text-rose-600">먼저 위에서 희망 직업을 골라요.</p>'; return; }
+            const btn = document.getElementById('aiConsultBtn');
+            aiBusy = true; btn.disabled = true;
+            advicePicks = new Set();
+            box.innerHTML = '<div class="flex flex-col items-center py-6 space-y-2"><i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-600"></i><p class="font-bold text-indigo-900 text-sm">AI 선생님이 조언을 쓰고 있어요...</p></div>';
+            const pi = prepItem();
+            const finish = () => {
+                promiseChoice = prepItem() ? 'prep' : 'custom';
+                renderAdvice(); renderPromiseOptions(); updateDreamCard();
+            };
+            try {
+                // AI에는 직업 이름, 강점 이름, 연습할 행동(목록에서 고른 것)만 보내요. 이름·자유 입력은 보내지 않아요.
+                const r = await callAi('future-card', {
+                    job: job.name,
+                    strengths: selectedStrengths.map(strengthShort),
+                    goal: pi ? pi.short : ''
+                });
+                const steps = asStrArr(r.actionSteps);
+                const items = [];
+                if (asStr(r.strengthConnection)) items.push({ kind: 'connect', label: '나의 강점과 직업', text: asStr(r.strengthConnection) });
+                if (asStr(r.praise)) items.push({ kind: 'praise', label: '응원 한마디', text: asStr(r.praise) });
+                steps.slice(0, 3).forEach((t, i) => items.push({ kind: 'action', label: `해 볼 수 있는 행동 ${i + 1}`, text: t }));
+                if (asStr(r.cardPromise)) items.push({ kind: 'promise', label: '다짐 문장', text: asStr(r.cardPromise) });
+                if (items.length === 0) throw new Error('EMPTY');
+                aiBusy = false; btn.disabled = false;
+                const waiting = deliverAi('advice', items, kept => {
+                    activity.aiCounsel = true;
+                    if (kept.length === 0) {
+                        aiAdvice = { source: '기본', note: '선생님이 AI 조언을 모두 지웠어요. 기본 조언을 보여 줄게요.', items: buildFallbackAdvice() };
+                    } else {
+                        aiAdvice = { source: 'AI', note: '', items: kept.map((it, i) => ({ ...it, id: 'a' + i })) };
+                    }
+                    advicePicks = new Set(); saveState(); finish();
+                });
+                if (waiting) box.innerHTML = '<p class="text-sm font-bold text-indigo-900 text-center py-8">선생님이 AI가 쓴 조언을 확인하고 있어요. 잠시 기다려요.</p>';
+            } catch (e) {
+                aiAdvice = {
+                    source: '기본',
+                    note: (e && e.message === 'NO_ENDPOINT') ? '지금은 AI가 연결되어 있지 않아요. 기본 조언을 보여 줄게요.' : 'AI 선생님과 연결되지 않았어요. 기본 조언을 보여 줄게요.',
+                    items: buildFallbackAdvice()
+                };
+                aiBusy = false; btn.disabled = false;
+                finish();
+            }
+        }
+
+        function renderAdvice() {
+            const box = document.getElementById('aiResponseContainer');
+            if (!aiAdvice) {
+                box.innerHTML = `<div class="text-center py-6 text-slate-400 space-y-2"><i class="fa-solid fa-comment-dots text-3xl text-indigo-300"></i>
+                    <p class="text-sm">아래 버튼을 누르면 AI 선생님의 조언이 나와요.<br>그중에서 내 생각과 맞는 것만 골라요.</p></div>`;
+                return;
+            }
+            box.innerHTML = `
+                ${aiAdvice.note ? `<p class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-2">${esc(aiAdvice.note)}</p>` : ''}
+                <p class="text-sm font-bold text-slate-700"><i class="fa-solid fa-hand-pointer text-indigo-600 mr-1"></i>내 생각과 맞는 것을 눌러서 골라요.</p>
+                ${aiAdvice.items.map((it, idx) => {
+                    const on = advicePicks.has(it.id);
+                    return `<button type="button" aria-pressed="${on}" onclick="toggleAdvice('${it.id}')"
+                        class="w-full text-left p-3 rounded-xl border-2 transition ${on ? 'border-indigo-600 bg-indigo-50 ring-2 ring-indigo-300/50' : 'border-slate-200 bg-white hover:border-indigo-300'}">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="text-xs font-extrabold text-indigo-700">${esc(it.label)}</span>
+                            <span class="text-[11px] font-bold ${on ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full">${on ? '내 생각과 같아요 ✓' : '눌러서 고르기'}</span>
+                        </div>
+                        <p class="text-sm leading-relaxed text-slate-800">${esc(it.text)}</p>
+                    </button>`;
+                }).join('')}
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-bold ${aiAdvice.source === 'AI' ? 'text-purple-700' : 'text-slate-500'}">${aiAdvice.source === 'AI' ? 'AI가 쓴 글이에요. 틀릴 수 있어요.' : '기본 조언이에요.'}</span>
+                    <button onclick="readAdvice()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs flex items-center gap-1.5"><i class="fa-solid fa-volume-high"></i>읽어주기</button>
+                </div>`;
+        }
+        function toggleAdvice(id) {
+            if (advicePicks.has(id)) advicePicks.delete(id); else advicePicks.add(id);
+            renderAdvice(); renderPromiseOptions(); updateDreamCard();
+        }
+        function readAdvice() { if (aiAdvice) speakText(aiAdvice.items.map(i => `${i.label}. ${i.text}`).join(' ')); }
+
+        function getPromiseOptions() {
+            const opts = [];
+            const pi = prepItem();
+            if (pi) opts.push({ id: 'prep', text: `${pi.short}, 이것을 매일 연습할 거예요.`, from: '내가 고른 연습' });
+            if (aiAdvice) aiAdvice.items.filter(i => advicePicks.has(i.id) && (i.kind === 'promise' || i.kind === 'action'))
+                .forEach(i => opts.push({ id: 'adv:' + i.id, text: i.text, from: aiAdvice.source === 'AI' ? 'AI 조언에서 골랐어요' : '조언에서 골랐어요' }));
+            return opts;
+        }
+
+        function renderPromiseOptions() {
+            const opts = getPromiseOptions();
+            if (promiseChoice !== 'custom' && !opts.some(o => o.id === promiseChoice)) promiseChoice = opts.length ? opts[0].id : 'custom';
+            const box = document.getElementById('promiseOptions');
+            const radio = (id, on, inner) => `<button type="button" role="radio" aria-checked="${on}" onclick="choosePromise('${id}')"
+                class="w-full text-left p-3 rounded-xl border-2 text-sm flex items-start gap-3 transition ${on ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-300/50' : 'border-slate-200 bg-white hover:border-amber-300'}">
+                <span class="mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${on ? 'border-amber-600' : 'border-slate-300'}">${on ? '<span class="w-2.5 h-2.5 rounded-full bg-amber-600"></span>' : ''}</span>
+                <span class="flex-1">${inner}</span></button>`;
+            const customOn = promiseChoice === 'custom';
+            box.innerHTML = opts.map(o => radio(o.id, promiseChoice === o.id,
+                `<span class="block font-bold text-slate-800 leading-snug">${esc(o.text)}</span><span class="block text-[11px] text-slate-500 mt-0.5">${esc(o.from)}</span>`)).join('') +
+                `<div class="rounded-xl border-2 p-3 space-y-2 transition ${customOn ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-300/50' : 'border-slate-200 bg-white'}">
+                    <button type="button" role="radio" aria-checked="${customOn}" onclick="choosePromise('custom')" class="w-full text-left flex items-center gap-3 text-sm font-bold text-slate-800">
+                        <span class="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${customOn ? 'border-amber-600' : 'border-slate-300'}">${customOn ? '<span class="w-2.5 h-2.5 rounded-full bg-amber-600"></span>' : ''}</span>
+                        <span>내가 직접 쓰기</span>
+                    </button>
+                    <input type="text" id="customPromiseInput" value="${esc(customPromise)}" maxlength="60" aria-label="내가 직접 쓰는 실천 다짐"
+                        onfocus="onCustomFocus()" oninput="onCustomPromise(this.value)"
+                        placeholder="나는 ______ 을(를) 할 거예요." class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    <p class="text-[11px] text-slate-500">이름이나 사진 같은 개인정보는 쓰지 않아요.</p>
+                </div>`;
+        }
+        function choosePromise(id) {
+            promiseChoice = id;
+            renderPromiseOptions();
+            updateDreamCard();
+            if (id === 'custom') focusCustomPromise();
+        }
+        function focusCustomPromise() {
+            const el = document.getElementById('customPromiseInput');
+            if (el) { el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} }
+        }
+        function onCustomFocus() {
+            if (promiseChoice === 'custom') return;
+            promiseChoice = 'custom';
+            renderPromiseOptions();
+            updateDreamCard();
+            focusCustomPromise();
+        }
+        function onCustomPromise(v) {
+            customPromise = v;
+            if (promiseChoice !== 'custom') {
+                promiseChoice = 'custom';
+                renderPromiseOptions();
+                focusCustomPromise();
             }
             updateDreamCard();
         }
 
-        function populateTargetJobDropdown() {
-            const select = document.getElementById('targetJobSelect');
-            if (!select) return;
-
-            select.innerHTML = LOCAL_JOBS_DB.map(job => `
-                <option value="${job.id}">${job.name} (${job.categoryName})</option>
-            `).join('');
-
-            selectedTargetJob = LOCAL_JOBS_DB[0];
-        }
-
-        function handleJobSelectChange() {
-            const select = document.getElementById('targetJobSelect');
-            const found = LOCAL_JOBS_DB.find(j => j.id === select.value);
-            if (found) {
-                selectedTargetJob = found;
-                updateDreamCard();
-            }
+        function currentPromiseText() {
+            if (promiseChoice === 'custom') return customPromise.trim();
+            const o = getPromiseOptions().find(x => x.id === promiseChoice);
+            return o ? o.text : '';
         }
 
         function updateDreamCard() {
-            const name = document.getElementById('studentNameInput').value.trim() || '김꿈돌';
-            const goal = document.getElementById('studentGoalInput').value.trim() || '매일 즐거운 마음으로 일하며 멋진 직장인이 될 거예요!';
-            const job = selectedTargetJob || LOCAL_JOBS_DB[0];
-
+            const job = selectedTargetJob;
+            document.getElementById('cardJobTitle').innerText = job ? job.name : '(희망 직업을 골라요)';
+            document.getElementById('cardJobIcon').innerHTML = `<i class="fa-solid ${job ? job.icon : 'fa-briefcase'}"></i>`;
+            const name = (document.getElementById('studentNameInput').value || '').trim();
+            const row = document.getElementById('cardNameRow');
+            row.classList.toggle('hidden', !name); row.classList.toggle('flex', !!name);
             document.getElementById('cardStudentName').innerText = name;
-            document.getElementById('cardJobTitle').innerText = job.name;
-            document.getElementById('cardJobIcon').innerHTML = `<i class="fa-solid ${job.icon}"></i>`;
-            document.getElementById('cardGoalText').innerText = `"${goal}"`;
-
-            const readinessPct = Math.round((checkedSkills.size / CHECKLIST_ITEMS.length) * 100);
-            document.getElementById('cardReadiness').innerText = `${readinessPct}% 준비 완료`;
-
-            const strengthTitles = selectedStrengths.map(id => {
-                const st = STRENGTHS_DATA.find(s => s.id === id);
-                return st ? st.title.split(' ')[0] : '';
-            }).filter(Boolean).join(', ');
-
-            document.getElementById('cardStrengths').innerText = strengthTitles || '인사 잘함, 성실함';
+            document.getElementById('cardStrengths').innerText = selectedStrengths.length ? selectedStrengths.map(strengthShort).join(' · ') : '(강점을 골라요)';
+            document.getElementById('cardGoalText').innerText = currentPromiseText() || '(실천 다짐을 골라요)';
         }
 
-        function printDreamCard() {
-            window.print();
+        function cardText() {
+            const name = (document.getElementById('studentNameInput').value || '').trim();
+            return [
+                '희망 직업: ' + (selectedTargetJob ? selectedTargetJob.name : ''),
+                name ? '이름: ' + name : '',
+                '나의 강점: ' + selectedStrengths.map(strengthShort).join(', '),
+                '미래를 위한 실천 다짐: ' + currentPromiseText()
+            ].filter(Boolean).join('\n');
         }
+        async function copyCardText() {
+            if (!selectedTargetJob) { alert('먼저 희망 직업을 골라요.'); return; }
+            if (await copyToClipboard(cardText())) { activity.cardCopied = true; saveState(); flashToast('copyToastCard'); } else alert('복사가 안 돼요. 선생님께 도움을 요청해요.');
+        }
+        function printDreamCard() { activity.printed = true; saveState(); window.print(); }
 
-        // html2canvas를 활용한 꿈 카드 PNG 이미지 다운로드 기능
         async function downloadDreamCardImage() {
-            const cardArea = document.getElementById('dreamCardPrintArea');
-            const downloadBtn = document.getElementById('downloadCardBtn');
-            if (!cardArea) return;
-
-            const originalBtnText = downloadBtn ? downloadBtn.innerHTML : '';
-            if (downloadBtn) {
-                downloadBtn.disabled = true;
-                downloadBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>이미지 만드는 중...</span>`;
-            }
-
+            const area = document.getElementById('dreamCardPrintArea');
+            const btn = document.getElementById('downloadCardBtn');
+            if (typeof html2canvas === 'undefined') { alert('이미지 저장 도구를 불러오지 못했어요. 인터넷 연결을 확인해요.'); return; }
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>만드는 중...</span>';
             try {
-                if (typeof html2canvas === 'undefined') {
-                    console.error('html2canvas 라이브러리가 로드되지 않았습니다.');
-                    return;
-                }
-
-                const canvas = await html2canvas(cardArea, {
-                    scale: 2, // 고해상도 출력
-                    useCORS: true,
-                    backgroundColor: null,
-                    logging: false
-                });
-
-                const studentName = document.getElementById('studentNameInput').value.trim() || '김꿈돌';
-                const targetJob = selectedTargetJob ? selectedTargetJob.name : '꿈직업';
-                const fileName = `${studentName}_${targetJob}_꿈카드.png`;
-
-                const image = canvas.toDataURL("image/png");
+                const canvas = await html2canvas(area, { scale: 2, useCORS: true, backgroundColor: null, logging: false });
+                const name = (document.getElementById('studentNameInput').value || '').trim() || '나의';
                 const link = document.createElement('a');
-                link.href = image;
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } catch (error) {
-                console.error('이미지 다운로드 처리 중 오류 발생:', error);
+                link.href = canvas.toDataURL('image/png');
+                link.download = `${name}_${selectedTargetJob ? selectedTargetJob.name : '미래직업'}_미래직업카드.png`.replace(/[\\/:*?"<>|]/g, '');
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                activity.cardSaved = true; saveState();
+            } catch (e) {
+                alert('이미지를 만들지 못했어요. 선생님께 도움을 요청해요.');
             } finally {
-                if (downloadBtn) {
-                    downloadBtn.disabled = false;
-                    downloadBtn.innerHTML = originalBtnText;
-                }
+                btn.disabled = false; btn.innerHTML = original;
             }
         }
 
-        // 음성 읽기 함수 (Google Cloud TTS API 연동 및 브라우저 Web Speech API 폴백)
+        // ---------- 음성 ----------
         async function speakText(text) {
             if (!text) return;
-
-            // 기존 재생 중인 음성 정지
             stopSpeech();
-
-            const cleanText = text.replace(/[*#_~]/g, '');
-            const keyToUse = googleTtsApiKey || localStorage.getItem('google_tts_api_key');
-
-            updateTtsStatus(true, '음성 생성 중...');
-
-            // Google Cloud TTS API 키가 설정되어 있는 경우 REST API 호출
-            if (keyToUse) {
+            const clean = String(text).replace(/[*#_~]/g, '');
+            let key = '';
+            try { key = localStorage.getItem('google_tts_api_key') || ''; } catch (e) {}
+            updateTtsStatus(true, '음성 준비 중...');
+            if (key) {
                 try {
-                    const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${keyToUse}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            input: { text: cleanText },
-                            voice: {
-                                languageCode: 'ko-KR',
-                                name: 'ko-KR-Neural2-C' // 자연스러운 한국어 여성 음성 (또는 ko-KR-Wavenet-A)
-                            },
-                            audioConfig: {
-                                audioEncoding: 'MP3',
-                                speakingRate: 0.88,
-                                pitch: 0.0
-                            }
-                        })
+                    const res = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(key)}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ input: { text: clean }, voice: { languageCode: 'ko-KR', name: 'ko-KR-Neural2-C' }, audioConfig: { audioEncoding: 'MP3', speakingRate: 0.88, pitch: 0.0 } })
                     });
-
-                    if (response.ok) {
-                        const data = await response.json();
+                    if (res.ok) {
+                        const data = await res.json();
                         if (data.audioContent) {
-                            const audioSrc = 'data:audio/mp3;base64,' + data.audioContent;
-                            currentAudio = new Audio(audioSrc);
-                            
-                            currentAudio.onplay = () => updateTtsStatus(true, '구글 AI 음성 읽는 중...');
+                            currentAudio = new Audio('data:audio/mp3;base64,' + data.audioContent);
+                            currentAudio.onplay = () => updateTtsStatus(true, '읽는 중...');
                             currentAudio.onended = () => updateTtsStatus(false);
-                            currentAudio.onerror = () => fallbackWebSpeech(cleanText);
-
+                            currentAudio.onerror = () => fallbackWebSpeech(clean);
                             await currentAudio.play();
                             return;
                         }
                     }
-                } catch (err) {
-                    console.warn('Google TTS API 호출 실패, 브라우저 기본 음성으로 전환합니다:', err);
-                }
+                } catch (e) { /* 기본 음성으로 이어서 */ }
             }
-
-            // API 키가 없거나 호출 실패 시 Web Speech API 폴백
-            fallbackWebSpeech(cleanText);
+            fallbackWebSpeech(clean);
         }
-
-        // 브라우저 기본 Web Speech API 음성 출력
-        function fallbackWebSpeech(cleanText) {
-            if (!('speechSynthesis' in window)) {
-                updateTtsStatus(false);
-                return;
-            }
-
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'ko-KR';
-            utterance.rate = 0.85;
-            utterance.pitch = 1.0;
-
-            utterance.onstart = () => updateTtsStatus(true, '기본 음성 읽는 중...');
-            utterance.onend = () => updateTtsStatus(false);
-            utterance.onerror = () => updateTtsStatus(false);
-
-            window.speechSynthesis.speak(utterance);
+        function fallbackWebSpeech(clean) {
+            if (!('speechSynthesis' in window)) { updateTtsStatus(false); return; }
+            const u = new SpeechSynthesisUtterance(clean);
+            u.lang = 'ko-KR'; u.rate = 0.85; u.pitch = 1.0;
+            u.onstart = () => updateTtsStatus(true, '읽는 중...');
+            u.onend = () => updateTtsStatus(false);
+            u.onerror = () => updateTtsStatus(false);
+            window.speechSynthesis.speak(u);
         }
-
-        // 음성 정지 함수
         function stopSpeech() {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio = null;
-            }
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             updateTtsStatus(false);
         }
-
-        // TTS 재생 상태 UI 업데이트
-        function updateTtsStatus(isPlaying, message = '') {
+        function updateTtsStatus(playing, message) {
             const banner = document.getElementById('ttsStatusBanner');
-            const defaultHint = document.getElementById('ttsDefaultHint');
-            const msgEl = document.getElementById('ttsStatusMsg');
-
-            if (isPlaying) {
-                if (banner) banner.classList.remove('hidden');
-                if (banner) banner.classList.add('flex');
-                if (defaultHint) defaultHint.classList.add('hidden');
-                if (msgEl) msgEl.innerText = message || '음성 읽는 중...';
-            } else {
-                if (banner) banner.classList.add('hidden');
-                if (banner) banner.classList.remove('flex');
-                if (defaultHint) defaultHint.classList.remove('hidden');
-            }
+            const hint = document.getElementById('ttsDefaultHint');
+            banner.classList.toggle('hidden', !playing); banner.classList.toggle('flex', !!playing);
+            hint.classList.toggle('hidden', !!playing);
+            if (playing) document.getElementById('ttsStatusMsg').innerText = message || '읽는 중...';
         }
-
         function readSelectedStrengths() {
-            if (selectedStrengths.length === 0) {
-                speakText('선택된 강점이 없습니다. 위의 카드를 클릭해 주세요.');
-                return;
-            }
-            const text = selectedStrengths.map(id => {
-                const s = STRENGTHS_DATA.find(item => item.id === id);
-                return s ? s.title : '';
-            }).join(', ');
-            speakText(`내가 선택한 강점은 ${text} 입니다.`);
+            if (selectedStrengths.length === 0) { speakText('고른 강점이 없어요. 위의 카드를 눌러 주세요.'); return; }
+            speakText('내가 고른 강점은 ' + selectedStrengths.map(id => STRENGTHS_DATA.find(s => s.id === id).title).join(', ') + ' 입니다.');
         }
-
         function readModalContent() {
-            const title = document.getElementById('modalTitle').innerText;
-            const desc = document.getElementById('modalDescription').innerText;
-            const pathway = document.getElementById('modalPathway').innerText;
-            const tip = document.getElementById('modalTip').innerText;
-            speakText(`직업 이름: ${title}. 직업 설명: ${desc}. 취업 준비 방법: ${pathway}. 선생님 꿀팁: ${tip}`);
+            speakText(`직업 이름: ${document.getElementById('modalTitle').innerText}. 하는 일: ${document.getElementById('modalDescription').innerText}. 취업 준비 방법: ${document.getElementById('modalPathway').innerText}. 꿀팁: ${document.getElementById('modalTip').innerText}`);
         }
+        function speakDreamCard() { speakText(cardText().replace(/\n/g, '. ')); }
 
-        function readChecklist() {
-            const text = CHECKLIST_ITEMS.map((item, idx) => `${idx + 1}번. ${item.text}`).join('. ');
-            speakText(`기초 직장 태도 체크리스트입니다. ${text}`);
+        // ---------- 교사용 도구 (설정 · 이 학생 기록 · 저장된 기록) ----------
+        const LS = {
+            get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+            set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+        };
+        function getCanva(kind) {
+            const v = LS.get(kind === 'poster' ? 'jx_canva_poster' : 'jx_canva_card') || (kind === 'poster' ? CANVA_POSTER_URL : CANVA_CARD_URL);
+            try { const u = new URL(v); return u.protocol === 'https:' ? u.href : ''; } catch (e) { return ''; }
         }
+        const RATING_ITEMS = ['직업 탐색', '정보 활용', 'AI 활용', '결과물 제작', '진로 설계'];
+        const RATING_HELP = [
+            '자신의 강점이나 관심을 바탕으로 직업을 선택하는가?',
+            '직업 정보를 살펴보고 필요한 내용을 선택하는가?',
+            'AI가 제시한 정보나 조언을 확인하고 필요한 내용을 선택하는가?',
+            '직업 소개 포스터와 미래 직업 카드를 완성하는가?',
+            '희망 직업과 자신의 강점을 연결하거나 실천 다짐을 표현하는가?'
+        ];
+        const RATING_LEVELS = ['', '스스로 함', '도움을 받아 함', '많은 도움이 필요함'];
+        let teacherTab = 'settings';
+        let teacherDraft = { id: '', ratings: ['', '', '', '', ''], memo: '' };
 
-        function readTeacherTips() {
-            const text = document.getElementById('teacherTipsList').innerText;
-            speakText(`특수교사 선생님의 취업 꿀팁입니다. ${text}`);
+        function initTeacherPanel() {
+            if (new URLSearchParams(location.search).get('teacher') !== '1') return;
+            document.getElementById('teacherPanelWrap').classList.remove('hidden');
         }
-
-        function speakDreamCard() {
-            const cardText = document.getElementById('dreamCardPrintArea').innerText;
-            speakText(cardText);
+        // 교실에서 쓰는 간단한 잠금이에요. 보안 장치가 아니라 학생이 실수로 누르지 않게 하는 용도예요.
+        function teacherAuth() {
+            const pin = LS.get('jx_pin');
+            if (!pin) return confirm('선생님이 확인했나요?');
+            const v = prompt('선생님 비밀번호를 입력해요.');
+            if (v === null) return false;
+            if (v === pin) return true;
+            alert('비밀번호가 달라요.');
+            return false;
         }
+        function openTeacher() {
+            const pin = LS.get('jx_pin');
+            if (pin) { const v = prompt('선생님 비밀번호를 입력해요.'); if (v !== pin) return; }
+            teacherTab = 'settings';
+            renderTeacher();
+            document.getElementById('teacherModal').classList.remove('hidden');
+        }
+        function closeTeacher() { document.getElementById('teacherModal').classList.add('hidden'); }
+        function setTeacherTab(t) { teacherTab = t; renderTeacher(); }
 
-        function speakAiResponse() {
-            if (currentAiMessageText) {
-                speakText(currentAiMessageText);
+        function getRecords() { try { const r = JSON.parse(LS.get('jx_records') || '[]'); return Array.isArray(r) ? r : []; } catch (e) { return []; } }
+
+        function autoSummary() {
+            const job = selectedTargetJob;
+            let base = 0, career = 0, ai = 0;
+            if (job) buildPosterList().forEach(it => { if (posterPicks.has(it.key)) { if (it.src === 'AI') ai++; else if (it.src === '커리어넷') career++; else base++; } });
+            let promiseType = '미정';
+            if (currentPromiseText()) {
+                if (promiseChoice === 'custom') promiseType = '직접 쓴 다짐';
+                else if (promiseChoice === 'prep') promiseType = '선택형(내가 고른 연습)';
+                else promiseType = aiAdvice && aiAdvice.source === 'AI' ? 'AI 조언에서 고름' : '기본 조언에서 고름';
             }
-        }
-
-        async function askGeminiTeacher() {
-            const studentName = document.getElementById('studentNameInput').value.trim() || '학생';
-            const targetJob = selectedTargetJob ? selectedTargetJob.name : '선택한 직업';
-            const goal = document.getElementById('studentGoalInput').value.trim() || '성실하게 직장생활을 하고 싶어요.';
-
-            const strengthTitles = selectedStrengths.map(id => {
-                const s = STRENGTHS_DATA.find(item => item.id === id);
-                return s ? s.title : '';
-            }).join(', ') || '인사를 잘함, 성실함';
-
-            const readinessPct = Math.round((checkedSkills.size / CHECKLIST_ITEMS.length) * 100);
-
-            const aiContainer = document.getElementById('aiResponseContainer');
-            const aiBtn = document.getElementById('aiConsultBtn');
-            const speakAiBtn = document.getElementById('speakAiTextBtn');
-
-            speakAiBtn.classList.add('hidden');
-            aiContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-8 space-y-3">
-                    <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-600"></i>
-                    <p class="font-bold text-indigo-900 text-sm">AI 특수교사 선생님이 따뜻한 조언을 작성하고 있어요...</p>
-                </div>
-            `;
-            aiBtn.disabled = true;
-
-            const systemPrompt = "당신은 15년 경력의 베테랑 중등 특수교사입니다. 발달장애 및 특수교육대상 학생의 눈높이에 맞춰 매우 쉽고 따뜻한 어조(Plain Language, 쉬운 표현, 격려 중심, 단문 위주)로 직업 진로 조언을 해주세요. 마크다운 기호를 최소화하고 친근하게 작성해 주세요.";
-            const userQuery = `학생 이름: ${studentName}\n희망 직업: ${targetJob}\n나의 강점: ${strengthTitles}\n취업 준비도: ${readinessPct}%\n학생의 목표 다짐: ${goal}\n\n위 정보를 바탕으로 학생에게 전달할 1) 따뜻한 칭찬 메시지, 2) 선택한 직업에서 힘낼 수 있는 쉬운 실행 팁 2가지를 다정하게 작성해 주세요.`;
-
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] }
+            return {
+                job: job ? job.name : '',
+                strengths: selectedStrengths.map(strengthShort).join(', '),
+                reasons: REASONS.filter(r => choiceReasons.has(r.id)).map(r => r.text).join(', '),
+                posterBase: base, posterCareer: career, posterAi: ai,
+                aiJobInfo: activity.aiJobInfo ? '사용' : '안 씀',
+                advicePicked: advicePicks.size,
+                aiCounsel: activity.aiCounsel ? '사용' : '안 씀',
+                prep: prepItem() ? prepItem().short : '',
+                promiseType,
+                express: EXPRESS_MODES.filter(m => expressModes.has(m.id)).map(m => m.text).join(', '),
+                posterDone: activity.posterCopied ? '재료 복사함' : '',
+                cardDone: [activity.cardSaved ? '이미지 저장' : '', activity.printed ? '인쇄' : '', activity.cardCopied ? '글 복사' : ''].filter(Boolean).join(', ')
             };
+        }
 
-            let attempts = 0;
-            let success = false;
-            let responseText = "";
+        function renderTeacher() {
+            const tabs = [['settings', '설정'], ['student', '이 학생 기록'], ['records', '저장된 기록']];
+            document.getElementById('teacherTabs').innerHTML = tabs.map(([id, label]) =>
+                `<button onclick="setTeacherTab('${id}')" class="px-4 py-2 rounded-xl ${teacherTab === id ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">${label}${id === 'records' ? ` (${getRecords().length})` : ''}</button>`).join('');
+            const body = document.getElementById('teacherBody');
 
-            while (attempts < 3 && !success) {
-                try {
-                    attempts++;
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        const candidate = result.candidates?.[0];
-                        if (candidate && candidate.content?.parts?.[0]?.text) {
-                            responseText = candidate.content.parts[0].text;
-                            success = true;
-                        }
-                    }
-                } catch (e) {
-                    await new Promise(res => setTimeout(res, 1000 * attempts));
-                }
-            }
-
-            aiBtn.disabled = false;
-
-            if (success) {
-                currentAiMessageText = responseText;
-                aiContainer.innerHTML = `
-                    <div class="space-y-3 text-slate-800">
-                        <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-center gap-2 text-indigo-900 font-bold">
-                            <i class="fa-solid fa-heart text-pink-500"></i>
-                            <span>${studentName} 학생을 위한 AI 선생님의 메시지</span>
-                        </div>
-                        <div class="text-sm leading-relaxed whitespace-pre-line bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                            ${responseText}
-                        </div>
+            if (teacherTab === 'settings') {
+                body.innerHTML = `
+                <div class="space-y-4 text-sm">
+                    <div><label for="tp-endpoint" class="font-bold block mb-1">서버 주소 (AI·커리어넷을 연결하는 Cloudflare Worker)</label>
+                        <input id="tp-endpoint" type="text" value="${esc(LS.get('jx_ai_endpoint') || AI_ENDPOINT)}" class="w-full p-2.5 border border-slate-300 rounded-xl"></div>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <div><label for="tp-cp" class="font-bold block mb-1">캔바 포스터 템플릿 링크</label><input id="tp-cp" type="text" value="${esc(LS.get('jx_canva_poster') || CANVA_POSTER_URL)}" placeholder="https://..." class="w-full p-2.5 border border-slate-300 rounded-xl"></div>
+                        <div><label for="tp-cc" class="font-bold block mb-1">캔바 미래 직업 카드 템플릿 링크</label><input id="tp-cc" type="text" value="${esc(LS.get('jx_canva_card') || CANVA_CARD_URL)}" placeholder="https://..." class="w-full p-2.5 border border-slate-300 rounded-xl"></div>
                     </div>
-                `;
-                speakAiBtn.classList.remove('hidden');
+                    <div><label for="tp-tts" class="font-bold block mb-1">Google 음성(TTS) API 키 (선택, 비우면 기본 음성)</label>
+                        <input id="tp-tts" type="password" value="${esc(LS.get('google_tts_api_key'))}" class="w-full p-2.5 border border-slate-300 rounded-xl"></div>
+                    <label class="flex items-start gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl cursor-pointer">
+                        <input id="tp-review" type="checkbox" ${isReviewOn() ? 'checked' : ''} class="mt-0.5 w-5 h-5 accent-emerald-600">
+                        <span><span class="font-bold block">AI가 쓴 글을 선생님이 확인한 뒤에 학생에게 보여 주기</span><span class="text-xs text-slate-600">켜면 AI 결과가 나올 때마다 확인 창이 떠요. 알맞은 것만 남기거나 모두 지울 수 있어요.</span></span>
+                    </label>
+                    <div><label for="tp-pin" class="font-bold block mb-1">교사용 비밀번호 (선택)</label>
+                        <input id="tp-pin" type="password" value="${esc(LS.get('jx_pin'))}" placeholder="숫자 4자리 정도" class="w-full sm:w-60 p-2.5 border border-slate-300 rounded-xl">
+                        <p class="text-xs text-slate-500 mt-1">AI 확인 창과 이 화면을 열 때 물어봐요. 교실용 잠금이라 보안 장치는 아니에요.</p></div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="teacherSave()" class="px-4 py-2.5 bg-slate-800 text-white font-bold rounded-xl">이 기기에 저장</button>
+                        <button onclick="teacherTestAi()" class="px-4 py-2.5 bg-indigo-600 text-white font-bold rounded-xl">AI 연결 테스트</button>
+                        <button onclick="teacherTestCareer()" class="px-4 py-2.5 bg-sky-600 text-white font-bold rounded-xl">커리어넷 연결 테스트</button>
+                    </div>
+                    <p id="tp-result" class="font-bold text-slate-700"></p>
+                    <p class="text-xs text-slate-500 leading-relaxed">여기서 저장한 값은 이 기기의 이 브라우저에만 남아요. 모든 학생 기기에 똑같이 적용하려면 앱 파일 위쪽 설정값(AI_ENDPOINT, CANVA_POSTER_URL, CANVA_CARD_URL)을 고쳐 주세요.</p>
+                </div>`;
+            } else if (teacherTab === 'student') {
+                const a = autoSummary();
+                const row = (k, v) => `<tr><th class="text-left align-top py-1.5 pr-3 text-slate-500 font-bold whitespace-nowrap">${k}</th><td class="py-1.5">${v ? esc(v) : '<span class="text-slate-300">-</span>'}</td></tr>`;
+                body.innerHTML = `
+                <div class="space-y-4 text-sm">
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                        <p class="font-extrabold text-slate-800 mb-2">학생이 한 활동 (자동 기록)</p>
+                        <table class="w-full text-sm"><tbody>
+                            ${row('희망 직업', a.job)}${row('나의 강점', a.strengths)}${row('직업을 고른 이유', a.reasons)}
+                            ${row('포스터 재료', `기본 ${a.posterBase}개 · 커리어넷 ${a.posterCareer}개 · AI ${a.posterAi}개`)}
+                            ${row('AI 직업 정보', a.aiJobInfo)}${row('AI 진로 상담', a.aiCounsel + (a.aiCounsel === '사용' ? ` (내 생각과 맞는 조언 ${a.advicePicked}개 고름)` : ''))}
+                            ${row('연습하고 싶은 것', a.prep)}${row('실천 다짐', a.promiseType)}${row('발표 방법', a.express)}
+                            ${row('포스터 재료', a.posterDone)}${row('미래 직업 카드', a.cardDone)}
+                        </tbody></table>
+                    </div>
+                    <div class="space-y-3">
+                        <div><label for="tr-id" class="font-bold block mb-1">학생 번호 또는 별명 <span class="text-xs font-normal text-slate-500">(실명 대신 쓰는 것을 권해요)</span></label>
+                            <input id="tr-id" type="text" value="${esc(teacherDraft.id)}" oninput="teacherDraft.id = this.value" class="w-full sm:w-60 p-2.5 border border-slate-300 rounded-xl"></div>
+                        <p class="font-extrabold text-slate-800">평가 관찰 <span class="text-xs font-normal text-slate-500">(글 입력 여부만으로 판단하지 않고, 그림 선택·가리키기·AAC·교사 지원을 통한 표현도 인정해요)</span></p>
+                        ${RATING_ITEMS.map((name, i) => `
+                        <div class="grid sm:grid-cols-[1fr_12rem] gap-2 items-center p-3 bg-white border border-slate-200 rounded-xl">
+                            <div><p class="font-bold">${name}</p><p class="text-xs text-slate-500">${RATING_HELP[i]}</p></div>
+                            <select aria-label="${name} 평가" onchange="teacherDraft.ratings[${i}] = this.value" class="p-2 border border-slate-300 rounded-lg">
+                                ${RATING_LEVELS.map(l => `<option value="${l}" ${teacherDraft.ratings[i] === l ? 'selected' : ''}>${l || '선택 안 함'}</option>`).join('')}
+                            </select>
+                        </div>`).join('')}
+                        <div><label for="tr-memo" class="font-bold block mb-1">메모</label>
+                            <textarea id="tr-memo" rows="2" oninput="teacherDraft.memo = this.value" class="w-full p-2.5 border border-slate-300 rounded-xl">${esc(teacherDraft.memo)}</textarea></div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="saveRecord(false)" class="px-4 py-2.5 bg-slate-800 text-white font-bold rounded-xl">기록 저장</button>
+                            <button onclick="saveRecord(true)" class="px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl"><i class="fa-solid fa-forward mr-1"></i>저장하고 다음 학생 시작</button>
+                        </div>
+                        <p id="tr-result" class="font-bold text-emerald-700"></p>
+                        <p class="text-xs text-slate-500">기록은 이 기기에만 저장돼요. 학생 이름은 AI와 커리어넷으로 보내지 않아요. 수업이 끝나면 [저장된 기록]에서 파일로 내려받아 보관해요.</p>
+                    </div>
+                </div>`;
             } else {
-                const fallbackText = `안녕, ${studentName} 학생! 선생님이에요. ${targetJob} 직업을 목표로 정한 모습이 정말 대견하고 멋집니다!\n\n${studentName} 학생은 [${strengthTitles}]라는 아주 훌륭한 강점을 가지고 있군요. 오늘부터 매일 정해진 시각에 출근하는 연습과 밝게 인사하는 연습을 차근차근 해보아요. 선생님이 언제나 응원할게요!`;
-                currentAiMessageText = fallbackText;
-                aiContainer.innerHTML = `
-                    <div class="space-y-2 text-slate-800">
-                        <div class="bg-indigo-50 p-3 rounded-xl font-bold text-indigo-900">${studentName} 학생을 위한 격려 카드</div>
-                        <p class="whitespace-pre-line text-sm leading-relaxed">${fallbackText}</p>
+                const recs = getRecords();
+                body.innerHTML = `
+                <div class="space-y-3 text-sm">
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportRecords()" class="px-4 py-2.5 bg-indigo-600 text-white font-bold rounded-xl"><i class="fa-solid fa-file-arrow-down mr-1"></i>엑셀(CSV)로 내려받기</button>
+                        <button onclick="clearRecords()" class="px-4 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 font-bold rounded-xl">기록 모두 지우기</button>
                     </div>
-                `;
-                speakAiBtn.classList.remove('hidden');
+                    ${recs.length === 0 ? '<p class="text-slate-400 py-6 text-center">아직 저장된 기록이 없어요.</p>' : `
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-xs">
+                        <thead class="bg-slate-100"><tr>${['시각', '번호/별명', '희망 직업', ...RATING_ITEMS].map(h => `<th class="text-left p-2 whitespace-nowrap">${h}</th>`).join('')}</tr></thead>
+                        <tbody>${recs.slice().reverse().map(r => `<tr class="border-t border-slate-100">
+                            <td class="p-2 whitespace-nowrap">${esc(r.time)}</td><td class="p-2">${esc(r.id)}</td><td class="p-2">${esc(r.summary.job)}</td>
+                            ${r.ratings.map(x => `<td class="p-2 whitespace-nowrap">${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody>
+                    </table></div>`}
+                </div>`;
             }
         }
 
+        function teacherSave() {
+            const get = id => document.getElementById(id).value.trim();
+            const okUrl = v => { if (!v) return true; try { return new URL(v).protocol === 'https:'; } catch (e) { return false; } };
+            const out = document.getElementById('tp-result');
+            const cp = get('tp-cp'), cc = get('tp-cc'), ep = get('tp-endpoint');
+            if (!okUrl(cp) || !okUrl(cc) || !okUrl(ep)) { out.innerText = '주소는 https:// 로 시작해야 해요.'; return; }
+            const ok = LS.set('jx_ai_endpoint', ep) & LS.set('jx_canva_poster', cp) & LS.set('jx_canva_card', cc)
+                & LS.set('google_tts_api_key', get('tp-tts')) & LS.set('jx_pin', get('tp-pin'))
+                & LS.set('jx_review', document.getElementById('tp-review').checked ? '1' : '0');
+            out.innerText = ok ? '이 기기에 저장했어요.' : '저장할 수 없는 환경이에요.';
+        }
+        async function teacherTestAi() {
+            const out = document.getElementById('tp-result');
+            LS.set('jx_ai_endpoint', document.getElementById('tp-endpoint').value.trim());
+            out.innerText = 'AI 연결 확인 중...';
+            try {
+                const r = await callAi('job-info', { job: '바리스타 보조' });
+                out.innerText = 'AI 연결 성공! 예시: ' + asStrArr(r.tasks).slice(0, 1).join('');
+            } catch (e) { out.innerText = 'AI 연결 실패: ' + (e && e.message ? e.message : '알 수 없는 오류'); }
+        }
+        async function teacherTestCareer() {
+            const out = document.getElementById('tp-result');
+            LS.set('jx_ai_endpoint', document.getElementById('tp-endpoint').value.trim());
+            out.innerText = '커리어넷 연결 확인 중...';
+            try {
+                const s = await callAi('career-search', { query: '바리스타' });
+                const jobs = Array.isArray(s.jobs) ? s.jobs : [];
+                if (!jobs.length) { out.innerText = '커리어넷에 연결됐지만 검색 결과가 없어요. 응답 모양을 확인해야 해요.'; return; }
+                const d = await callAi('career-detail', { seq: jobs[0].seq });
+                const n = (Array.isArray(d.works) ? d.works.length : 0) + (Array.isArray(d.abilities) ? d.abilities.length : 0);
+                out.innerText = `커리어넷 연결 성공! "${jobs[0].name}" 상세에서 하는 일·핵심 능력 ${n}개를 가져왔어요.` + (n === 0 ? ' (내용이 비어 있어요. 응답 모양을 확인해야 해요.)' : '');
+            } catch (e) {
+                out.innerText = '커리어넷 연결 실패: ' + (e && e.code === 'NO_CAREER_KEY' ? '서버에 CAREERNET_API_KEY가 없어요.' : (e && e.message ? e.message : '알 수 없는 오류'));
+            }
+        }
+
+        function saveRecord(next) {
+            if (!selectedTargetJob && selectedStrengths.length === 0 && !confirm('학생이 한 활동이 아직 없어요. 그래도 저장할까요?')) return;
+            const recs = getRecords();
+            recs.push({ time: new Date().toLocaleString('ko-KR'), id: teacherDraft.id.trim(), summary: autoSummary(), ratings: teacherDraft.ratings.slice(), memo: teacherDraft.memo.trim() });
+            if (!LS.set('jx_records', JSON.stringify(recs.slice(-300)))) { alert('이 기기에 저장할 수 없어요.'); return; }
+            if (next) {
+                closeTeacher();
+                resetAll(true);
+            } else {
+                const r = document.getElementById('tr-result'); if (r) r.innerText = '저장했어요. (' + recs.length + '명)';
+            }
+        }
+        function csvCell(v) {
+            let t = String(v == null ? '' : v);
+            if (/^[=+\-@\t\r]/.test(t)) t = "'" + t;   // 엑셀 수식으로 읽히지 않게 막아요
+            return '"' + t.replace(/"/g, '""') + '"';
+        }
+        function exportRecords() {
+            const recs = getRecords();
+            if (!recs.length) { alert('저장된 기록이 없어요.'); return; }
+            const head = ['기록 시각', '번호/별명', '희망 직업', '나의 강점', '고른 이유', '포스터 재료(기본)', '포스터 재료(커리어넷)', '포스터 재료(AI)', 'AI 직업 정보', 'AI 상담', '고른 AI 조언 수', '연습하고 싶은 것', '실천 다짐 유형', '발표 방법', '포스터 재료 복사', '카드 저장·인쇄', ...RATING_ITEMS, '메모'];
+            const rows = recs.map(r => { const a = r.summary; return [r.time, r.id, a.job, a.strengths, a.reasons, a.posterBase, a.posterCareer, a.posterAi, a.aiJobInfo, a.aiCounsel, a.advicePicked, a.prep, a.promiseType, a.express, a.posterDone, a.cardDone, ...r.ratings, r.memo]; });
+            const csv = '﻿' + [head, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+            a.download = '꿈차근_수업기록.csv';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }
+        function clearRecords() {
+            if (!getRecords().length) return;
+            if (!confirm('저장된 기록을 모두 지울까요? 지우면 되돌릴 수 없어요.')) return;
+            LS.set('jx_records', '[]');
+            renderTeacher();
+        }
+
+        // ---------- 시작 ----------
         function initApp() {
             renderStrengthCards();
             updateSelectedStrengthsSummary();
-            renderJobsGrid(LOCAL_JOBS_DB);
+            resetCategoryButtons('ALL');
+            refreshJobList();
             renderSkillChecklist();
-            populateTargetJobDropdown();
-            updateDreamCard();
+            renderPrepChoices();
+            updateReadinessProgress();
+            renderStep5();
             switchTab('step1');
         }
-
-        window.onload = function() {
-            initApp();
-        };
+        window.onload = function () { loadState(); initTeacherPanel(); initApp(); };
     </script>
 </body>
 </html>
