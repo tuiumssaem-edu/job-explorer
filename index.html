@@ -15,8 +15,48 @@
         body { font-family: 'Noto Sans KR', sans-serif; word-break: keep-all; font-size: 16px; }
         .tab-active { border-bottom: 4px solid #2563eb; color: #2563eb; font-weight: bold; background-color: #eff6ff; }
         button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+
+        /* ===== 바인더 노트 디자인 ===== */
+        :root { --ink:#1c1c1c; --paper:#faf9f7; --desk:#8a9fbd; --cream:#fdf0c4; --sage:#d3e2c4; --sky:#d3e4fa; }
+        body.bg-slate-50 { background: var(--desk); }
+        header.sticky { background: var(--paper); border-bottom: 2px solid var(--ink); box-shadow: none; }
+        header .bg-gradient-to-tr { background: var(--desk); background-image: none; color: var(--ink); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+        header nav { background: #f1eee9; border-top: 2px solid var(--ink); }
+        .tab-active { border-bottom: 4px solid var(--ink); color: var(--ink); font-weight: 800; background-color: #fff; }
+
+        #appContent { position: relative; width: calc(100% - 44px); max-width: 72rem; margin: 52px auto 48px; padding: 30px 26px 34px;
+            background: var(--paper); border: 2px solid var(--ink); border-radius: 18px;
+            box-shadow: 7px 8px 0 0 #ece9e4, 7px 8px 0 2px var(--ink); }
+        .pin { position: absolute; top: -20px; left: -16px; width: 26px; height: 26px; border-radius: 50%; background: var(--desk); border: 3px solid var(--ink); z-index: 2; }
+        .pin::before { content: ''; position: absolute; top: -13px; left: -8px; width: 8px; height: 24px; background: var(--ink); border-radius: 6px; transform: rotate(48deg); z-index: -1; }
+        .index-tabs { position: absolute; top: 70px; right: -17px; display: flex; flex-direction: column; gap: 10px; z-index: 0; }
+        .index-tabs i { display: block; width: 22px; height: 46px; border: 2px solid var(--ink); border-left: 0; border-radius: 0 10px 10px 0; }
+        .index-tabs i:nth-child(1) { background: var(--cream); } .index-tabs i:nth-child(2) { background: var(--sage); } .index-tabs i:nth-child(3) { background: var(--sky); }
+        @media (max-width: 640px) { #appContent { width: calc(100% - 28px); padding: 22px 14px 26px; } .index-tabs { display: none; } .pin { left: -10px; } }
+
+        .chapter { text-align: center; padding: 4px 0 6px; }
+        .chapter-label { font-size: 12px; font-weight: 800; letter-spacing: .28em; color: #b9b4ab; }
+        .chapter-title { font-size: clamp(1.7rem, 4.6vw, 2.5rem); font-weight: 900; line-height: 1.25; color: var(--ink); margin-top: 4px; letter-spacing: -.02em; }
+        .chapter-rule { border: 0; border-top: 1.5px solid var(--ink); margin: 16px 0 14px; }
+        .chapter-desc { font-size: 1.05rem; font-weight: 700; color: #333; line-height: 1.6; }
+        .chapter-desc i { color: var(--ink); margin-right: 4px; }
+
+        .guide { margin: 20px 0 22px; }
+        .guide-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .guide-title { font-weight: 900; font-size: 1.1rem; }
+        .guide-read { font-size: 12px; font-weight: 800; padding: 6px 12px; background: #fff; border: 1.5px solid var(--ink); border-radius: 10px; }
+        .guide-read:hover { background: var(--cream); }
+        .guide-row { display: flex; align-items: center; gap: 10px; background: #ececec; border: 1.5px solid var(--ink); padding: 11px 14px; font-size: .95rem; margin-top: 8px; }
+        .guide-row b { margin-right: 6px; }
+        .num { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+        .n1 { background: var(--cream); } .n2 { background: var(--sage); }
+
+        #appContent .bg-white.rounded-2xl { border: 1.5px solid var(--ink); box-shadow: none; }
+        #appContent .border-slate-200 { border-color: #bdb8af; }
+        #appContent .bg-white.rounded-2xl.border-slate-200 { border-color: var(--ink); }
         @media print {
             body * { visibility: hidden; }
+            .pin, .index-tabs { display: none !important; }
             #dreamCardPrintArea, #dreamCardPrintArea * { visibility: visible; }
             #dreamCardPrintArea { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: 2px solid #000 !important; color: #000 !important; background: #fff !important; }
         }
@@ -76,25 +116,21 @@
                     <span>AI 상담·직업 카드</span>
                 </button>
             </div>
-            <div class="max-w-6xl mx-auto grid grid-cols-5 text-center text-[10px] md:text-xs font-bold">
-                <div class="col-span-3 bg-blue-600 text-white py-0.5">1차시 · 내가 소개하는 직업 포스터</div>
-                <div class="col-span-2 bg-amber-500 text-white py-0.5">2차시 · 나의 미래 직업 카드</div>
-            </div>
         </nav>
     </header>
 
     <main id="appContent" class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+        <span class="pin" aria-hidden="true"></span>
+        <span class="index-tabs" aria-hidden="true"><i></i><i></i><i></i></span>
         <div id="lessonGuide"></div>
 
         <!-- ========== STEP 1: 나의 강점 ========== -->
         <section id="step1" class="tab-content space-y-6">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
-                <div class="relative z-10 space-y-2">
-                    <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">1차시 · 나의 강점 찾기</span>
-                    <h2 class="text-2xl md:text-3xl font-extrabold">내가 잘하고 좋아하는 것은 무엇인가요?</h2>
-                    <p class="text-blue-100 text-sm md:text-base max-w-2xl">나와 어울리는 강점 카드를 눌러 골라 보세요. 여러 개를 골라도 괜찮아요.</p>
-                </div>
-                <i class="fa-solid fa-star absolute -right-4 -bottom-6 text-9xl text-white/10"></i>
+            <div class="chapter">
+                <p class="chapter-label">STEP 01</p>
+                <h2 class="chapter-title">내가 잘하고 좋아하는 것은 무엇인가요?</h2>
+                <hr class="chapter-rule">
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 나와 어울리는 강점 카드를 눌러 골라 보세요. 여러 개를 골라도 괜찮아요.</p>
             </div>
 
             <div id="strengthGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
@@ -120,10 +156,11 @@
 
         <!-- ========== STEP 2: 직업 탐색 ========== -->
         <section id="step2" class="tab-content hidden space-y-6">
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-3xl p-6 md:p-8 text-white shadow-lg">
-                <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">1차시 · 직업 탐색</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">나에게 어울리는 직업을 찾아볼까요?</h2>
-                <p class="text-indigo-100 text-sm md:text-base mt-1">직업을 살펴보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
+            <div class="chapter">
+                <p class="chapter-label">STEP 02</p>
+                <h2 class="chapter-title">나에게 어울리는 직업을 찾아볼까요?</h2>
+                <hr class="chapter-rule">
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 직업을 살펴보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
             </div>
 
             <div id="recommendationBanner" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-4 md:p-5 shadow-sm">
@@ -166,20 +203,22 @@
 
         <!-- ========== STEP 3: 직업 정보 · 포스터 재료 ========== -->
         <section id="step3" class="tab-content hidden space-y-6">
-            <div class="bg-gradient-to-r from-sky-600 to-blue-700 rounded-3xl p-6 md:p-8 text-white shadow-lg">
-                <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">1차시 · 직업 정보 · 포스터 재료</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">포스터에 넣을 내용을 골라요!</h2>
-                <p class="text-sky-100 text-sm md:text-base mt-1">직업이 하는 일, 일하는 장소, 필요한 능력을 살펴보고 포스터에 넣을 내용만 골라요. 고른 내용은 캔바 포스터에 붙여 넣어요.</p>
+            <div class="chapter">
+                <p class="chapter-label">STEP 03</p>
+                <h2 class="chapter-title">포스터에 넣을 내용을 골라요!</h2>
+                <hr class="chapter-rule">
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 직업이 하는 일, 일하는 장소, 필요한 능력을 살펴보고 포스터에 넣을 내용만 골라요. 고른 내용은 캔바 포스터에 붙여 넣어요.</p>
             </div>
             <div id="posterArea" class="space-y-6"></div>
         </section>
 
         <!-- ========== STEP 4: 취업 역량 체크 ========== -->
         <section id="step4" class="tab-content hidden space-y-6">
-            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-6 md:p-8 text-white shadow-lg">
-                <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">2차시 · 취업 역량 체크</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">멋진 직장인이 되기 위한 준비!</h2>
-                <p class="text-emerald-100 text-sm md:text-base mt-1">내가 잘할 수 있는 것에 체크하고, 앞으로 연습하고 싶은 것을 <strong>한 가지</strong> 골라요.</p>
+            <div class="chapter">
+                <p class="chapter-label">STEP 04</p>
+                <h2 class="chapter-title">멋진 직장인이 되기 위한 준비!</h2>
+                <hr class="chapter-rule">
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 내가 잘할 수 있는 것에 체크하고, 앞으로 연습하고 싶은 것을 <strong>한 가지</strong> 골라요.</p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-6">
@@ -247,10 +286,11 @@
 
         <!-- ========== STEP 5: AI 상담 · 미래 직업 카드 ========== -->
         <section id="step5" class="tab-content hidden space-y-6">
-            <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl p-6 md:p-8 text-white shadow-lg">
-                <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">2차시 · AI 진로 상담 · 미래 직업 카드</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">나의 미래 직업 카드를 만들어요!</h2>
-                <p class="text-amber-100 text-sm md:text-base mt-1">AI 선생님의 조언을 읽고, <strong>내 생각과 맞는 것만</strong> 골라요. 결정은 내가 해요.</p>
+            <div class="chapter">
+                <p class="chapter-label">STEP 05</p>
+                <h2 class="chapter-title">나의 미래 직업 카드를 만들어요!</h2>
+                <hr class="chapter-rule">
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> AI 선생님의 조언을 읽고, <strong>내 생각과 맞는 것만</strong> 골라요. 결정은 내가 해요.</p>
             </div>
 
             <div class="grid lg:grid-cols-2 gap-8">
@@ -488,32 +528,31 @@
 
         // ---------- 수업 안내 (학습 목표와 오늘 할 일) ----------
         const LESSON_GUIDE = {
-            step1: { lesson: '1차시', goal: '내가 잘하거나 좋아하는 것을 떠올리며 나의 강점을 골라요.', todo: '강점 카드를 눌러 골라요.' },
-            step2: { lesson: '1차시', goal: '관심 있는 직업을 살펴보고 한 가지를 골라요.', todo: '직업 카드를 보고 [이 직업 고르기]를 눌러요.' },
-            step3: { lesson: '1차시', goal: '직업 정보를 살펴보고 포스터에 넣을 내용을 골라요.', todo: '하는 일, 일하는 장소, 필요한 능력 중에서 넣고 싶은 것을 골라요.' },
-            step4: { lesson: '2차시', goal: '직장생활에 필요한 태도와 능력을 살펴보고 준비할 것을 골라요.', todo: '잘하는 것에 체크하고, 연습하고 싶은 것을 한 가지 골라요.' },
-            step5: { lesson: '2차시', goal: '나의 강점과 희망 직업을 연결하고 실천 다짐을 정해요.', todo: 'AI 조언 중 내 생각과 맞는 것을 고르고, 다짐을 정해서 카드를 만들어요.' }
+            step1: { goal: '내가 잘하거나 좋아하는 것을 떠올리며 나의 강점을 골라요.', todo: '강점 카드를 눌러 골라요.' },
+            step2: { goal: '관심 있는 직업을 살펴보고 한 가지를 골라요.', todo: '직업 카드를 보고 [이 직업 고르기]를 눌러요.' },
+            step3: { goal: '직업 정보를 살펴보고 포스터에 넣을 내용을 골라요.', todo: '하는 일, 일하는 장소, 필요한 능력 중에서 넣고 싶은 것을 골라요.' },
+            step4: { goal: '직장생활에 필요한 태도와 능력을 살펴보고 준비할 것을 골라요.', todo: '잘하는 것에 체크하고, 연습하고 싶은 것을 한 가지 골라요.' },
+            step5: { goal: '나의 강점과 희망 직업을 연결하고 실천 다짐을 정해요.', todo: 'AI 조언 중 내 생각과 맞는 것을 고르고, 다짐을 정해서 카드를 만들어요.' }
         };
         function renderLessonGuide(tabId) {
             const g = LESSON_GUIDE[tabId];
             const el = document.getElementById('lessonGuide');
             if (!el || !g) return;
-            const first = g.lesson === '1차시';
+            const chapter = document.querySelector('#' + tabId + ' .chapter');
+            if (chapter) chapter.after(el);   // 제목 바로 아래에 보여요
             el.innerHTML = `
-                <div class="mb-5 bg-white border-2 ${first ? 'border-blue-200' : 'border-amber-200'} rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
-                    <div class="flex items-start gap-3">
-                        <span class="${first ? 'bg-blue-600' : 'bg-amber-500'} text-white text-xs font-black px-3 py-1 rounded-full whitespace-nowrap">${g.lesson}</span>
-                        <div class="text-sm space-y-0.5">
-                            <p class="font-extrabold text-slate-900"><i class="fa-solid fa-bullseye mr-1 text-slate-500"></i>오늘의 목표: ${esc(g.goal)}</p>
-                            <p class="text-slate-600"><i class="fa-solid fa-hand-pointer mr-1 text-slate-400"></i>${esc(g.todo)}</p>
-                        </div>
+                <div class="guide">
+                    <div class="guide-head">
+                        <span class="guide-title"><i class="fa-solid fa-circle-check"></i> 오늘의 수업</span>
+                        <button onclick="readLessonGuide('${tabId}')" class="guide-read"><i class="fa-solid fa-volume-high"></i> 읽어주기</button>
                     </div>
-                    <button onclick="readLessonGuide('${tabId}')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs flex items-center gap-1"><i class="fa-solid fa-volume-high text-blue-600"></i>읽어주기</button>
+                    <div class="guide-row"><span class="num n1">1</span><span><b>목표</b> ${esc(g.goal)}</span></div>
+                    <div class="guide-row"><span class="num n2">2</span><span><b>할 일</b> ${esc(g.todo)}</span></div>
                 </div>`;
         }
         function readLessonGuide(tabId) {
             const g = LESSON_GUIDE[tabId];
-            if (g) speakText(`${g.lesson}. 오늘의 목표. ${g.goal} ${g.todo}`);
+            if (g) speakText(`오늘의 목표. ${g.goal} 할 일. ${g.todo}`);
         }
 
         // ---------- 데이터 ----------
