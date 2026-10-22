@@ -151,6 +151,7 @@
                     <i class="fa-solid fa-volume-high text-blue-600"></i>
                     <span class="hidden sm:inline">'읽어주기' 버튼으로 듣기</span>
                 </span>
+                <button id="sfxBtn" onclick="toggleSfx()" class="px-2.5 py-1.5 bg-white text-slate-700 rounded-lg shadow-sm font-bold hover:bg-slate-50" title="효과음 켜기/끄기" aria-pressed="true"><i class="fa-solid fa-bell"></i></button>
                 <button onclick="adjustFontSize(1)" class="px-2.5 py-1.5 bg-white text-slate-700 rounded-lg shadow-sm font-bold hover:bg-slate-50" title="글자 확대">A+</button>
                 <button onclick="adjustFontSize(-1)" class="px-2.5 py-1.5 bg-white text-slate-700 rounded-lg shadow-sm font-bold hover:bg-slate-50" title="글자 축소">A-</button>
                 <button onclick="resetAll()" class="px-2.5 py-1.5 bg-white text-rose-600 rounded-lg shadow-sm font-bold hover:bg-rose-50" title="처음부터 다시 하기"><i class="fa-solid fa-rotate-left"></i> <span class="hidden sm:inline">처음부터</span></button>
@@ -181,7 +182,6 @@
 
     <main id="appContent" class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
         <svg class="pin" viewBox="0 0 40 96" aria-hidden="true"><use href="#clip-mark"/></svg>
-        <div id="lessonGuide"></div>
 
         <!-- ========== STEP 1: 나의 강점 ========== -->
         <section id="step1" class="tab-content space-y-6">
@@ -219,51 +219,12 @@
                 <p class="chapter-label">STEP 02</p>
                 <h2 class="chapter-title">나에게 어울리는 직업을 찾아볼까요?</h2>
                 <hr class="chapter-rule">
-                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 커리어넷에서 직업을 찾아보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
-            </div>
-
-            <div id="recommendationBanner" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-4 md:p-5 shadow-sm">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <div class="space-y-1">
-                        <span id="recommendCountBadge" class="text-xs font-bold text-emerald-800"></span>
-                        <h3 class="font-extrabold text-slate-900 text-base md:text-lg" id="recommendBannerTitle"></h3>
-                        <p class="text-xs text-slate-600" id="recommendBannerSubtitle"></p>
-                    </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <button id="showOnlyRecBtn" onclick="toggleMatchFilter(true)" class="flex-1 sm:flex-none px-3.5 py-2 text-xs font-bold rounded-xl">추천 직업만 보기</button>
-                        <button id="showAllJobsBtn" onclick="toggleMatchFilter(false)" class="flex-1 sm:flex-none px-3.5 py-2 text-xs font-bold rounded-xl">전체 직업 보기</button>
-                    </div>
-                </div>
+                <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 내 강점과 관심에서 검색어를 떠올려 커리어넷에서 직업을 찾아보고, 마음에 드는 직업을 <strong>한 가지</strong> 골라요.</p>
             </div>
 
             <div id="careerSearchBox" class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-4 md:p-6 space-y-3"></div>
 
-            <div class="bg-white rounded-2xl p-4 md:p-6 border border-slate-200 shadow-sm space-y-4">
-                <div>
-                    <h3 class="font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-list-check text-indigo-500"></i>수업용 예시 직업</h3>
-                    <p class="text-xs text-slate-500 mt-1">선생님이 수업에 맞게 정리한 예시 목록이에요. 공식 자료가 아니라서, 더 믿을 만한 정보는 위의 커리어넷에서 찾아요.</p>
-                </div>
-                <div class="flex flex-col md:flex-row gap-3">
-                    <div class="relative flex-grow">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="text" id="jobSearchInput" onkeyup="handleSearchKey(event)" placeholder="직업 이름을 검색해 보세요 (예: 카페, 마트, 사무, 식물)" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:border-indigo-500 text-base">
-                    </div>
-                    <button onclick="searchJobs()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-search"></i><span>검색</span>
-                    </button>
-                </div>
-                <div id="categoryFilters" class="flex flex-wrap gap-2 pt-1">
-                    <button data-cat="ALL" onclick="filterCategory('ALL', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 text-white">전체 보기</button>
-                    <button data-cat="SERVICE" onclick="filterCategory('SERVICE', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">식음료 &amp; 서비스</button>
-                    <button data-cat="BAKERY" onclick="filterCategory('BAKERY', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">제과제빵 &amp; 식품가공</button>
-                    <button data-cat="OFFICE" onclick="filterCategory('OFFICE', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">사무지원 &amp; 도서관</button>
-                    <button data-cat="MANUFACTURING" onclick="filterCategory('MANUFACTURING', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">물류포장 &amp; 부품조립</button>
-                    <button data-cat="NATURE" onclick="filterCategory('NATURE', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">원예스마트팜 &amp; 동물돌봄</button>
-                    <button data-cat="CLEAN" onclick="filterCategory('CLEAN', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">클리닝 &amp; 세탁위생</button>
-                </div>
-            </div>
-
-            <div id="jobListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+            <div id="viewedJobs"></div>
         </section>
 
         <!-- ========== STEP 3: 직업 정보 · 포스터 재료 ========== -->
@@ -474,6 +435,7 @@
                 <div class="grid sm:grid-cols-2 gap-3">
                     <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 space-y-1">
                         <h4 class="font-extrabold text-emerald-900 flex items-center gap-1.5"><i class="fa-solid fa-check-double text-emerald-600"></i><span>필요한 능력</span></h4>
+                        <p id="modalSkillsHint" class="text-[11px] text-emerald-700 hidden">나는 어떤지 눌러서 골라요.</p>
                         <ul id="modalSkills" class="text-xs text-emerald-800 space-y-1 list-disc list-inside"></ul>
                     </div>
                     <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-1">
@@ -521,7 +483,7 @@
             <p class="chapter-desc"><i class="fa-solid fa-circle-check"></i> 나의 강점으로 미래 직업을 찾아요</p>
             <ol class="landing-steps">
                 <li class="guide-row"><span class="num n1">1</span><span><b>나의 강점</b> 내가 잘하는 것 찾기</span></li>
-                <li class="guide-row"><span class="num n2">2</span><span><b>직업 탐색</b> 어울리는 직업 살펴보기</span></li>
+                <li class="guide-row"><span class="num n2">2</span><span><b>직업 탐색</b> 커리어넷에서 직업 찾기</span></li>
                 <li class="guide-row"><span class="num n3">3</span><span><b>포스터 만들기</b> 직업 소개 포스터 완성하기</span></li>
                 <li class="guide-row"><span class="num n4">4</span><span><b>취업 역량 체크</b> 준비할 것 정하기</span></li>
                 <li class="guide-row"><span class="num n5">5</span><span><b>미래 직업 카드</b> AI 조언 듣고 카드 만들기</span></li>
@@ -571,12 +533,11 @@
         let promiseChoice = 'custom';
         let customPromise = '';
         let currentFontSize = 16;
-        let isOnlyRecommendedMode = false;
-        let currentCategory = 'ALL';
         let currentAudio = null;
         let currentPosterList = [];
         let aiBusy = false;
         let careerCache = {};             // { jobId: 커리어넷에서 가져온 정보 }
+        let abilityChecks = {};             // { jobId: { 능력글: 'good'|'help'|'practice' } }
         let careerQuery = '', careerQueryFor = null, careerResults = [], careerMsg = '', careerBusy = false;
         let choiceReasons = new Set();    // 직업을 고른 이유
         let expressModes = new Set();     // 발표(표현) 방법
@@ -605,7 +566,6 @@
             if (tabId === 'step3') renderPosterStep();
             if (tabId === 'step4') { renderSkillChecklist(); renderPrepChoices(); updateReadinessProgress(); }
             if (tabId === 'step5') renderStep5();
-            renderLessonGuide(tabId);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -614,34 +574,49 @@
             document.body.style.fontSize = currentFontSize + 'px';
         }
 
-        // ---------- 수업 안내 (학습 목표와 오늘 할 일) ----------
-        const LESSON_GUIDE = {
-            step1: { goal: '내가 잘하거나 좋아하는 것을 떠올리며 나의 강점을 골라요.', todo: '강점 카드를 눌러 골라요.' },
-            step2: { goal: '관심 있는 직업을 살펴보고 한 가지를 골라요.', todo: '커리어넷에서 직업을 찾거나 예시 직업 카드를 보고, [이 직업 고르기]를 눌러요.' },
-            step3: { goal: '직업 정보를 살펴보고 직업 소개 포스터를 만들어요.', todo: '넣고 싶은 내용과 모양을 골라 포스터를 완성하고 저장해요. 더 꾸미고 싶으면 캔바에서 이어서 해요.' },
-            step4: { goal: '직장생활에 필요한 태도와 능력을 살펴보고 준비할 것을 골라요.', todo: '잘하는 것에 체크하고, 연습하고 싶은 것을 한 가지 골라요.' },
-            step5: { goal: '나의 강점과 희망 직업을 연결하고 실천 다짐을 정해요.', todo: 'AI 조언 중 내 생각과 맞는 것을 고르고, 다짐을 정해서 카드를 만들어요.' }
-        };
-        function renderLessonGuide(tabId) {
-            const g = LESSON_GUIDE[tabId];
-            const el = document.getElementById('lessonGuide');
-            if (!el || !g) return;
-            const chapter = document.querySelector('#' + tabId + ' .chapter');
-            if (chapter) chapter.after(el);   // 제목 바로 아래에 보여요
-            el.innerHTML = `
-                <div class="guide">
-                    <div class="guide-head">
-                        <span class="guide-title"><i class="fa-solid fa-circle-check"></i> 오늘의 수업</span>
-                        <button onclick="readLessonGuide('${tabId}')" class="guide-read"><i class="fa-solid fa-volume-high"></i> 읽어주기</button>
-                    </div>
-                    <div class="guide-row"><span class="num n1">1</span><span><b>목표</b> ${esc(g.goal)}</span></div>
-                    <div class="guide-row"><span class="num n2">2</span><span><b>할 일</b> ${esc(g.todo)}</span></div>
-                </div>`;
+        // ---------- 효과음 (파일 없이 브라우저에서 만들어요) ----------
+        let sfxOn = true, sfxCtx = null;
+        try { sfxOn = localStorage.getItem('jx_sfx') !== 'off'; } catch (e) {}
+        function sfxTone(freq, start, dur, vol) {
+            const t0 = sfxCtx.currentTime + start;
+            const o = sfxCtx.createOscillator(), g = sfxCtx.createGain();
+            o.type = 'sine'; o.frequency.setValueAtTime(freq, t0);
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.exponentialRampToValueAtTime(vol, t0 + 0.012);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+            o.connect(g); g.connect(sfxCtx.destination);
+            o.start(t0); o.stop(t0 + dur + 0.02);
         }
-        function readLessonGuide(tabId) {
-            const g = LESSON_GUIDE[tabId];
-            if (g) speakText(`오늘의 목표. ${g.goal} 할 일. ${g.todo}`);
+        function playSfx(kind) {
+            if (!sfxOn) return;
+            try {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                if (!sfxCtx) sfxCtx = new AC();
+                if (sfxCtx.state === 'suspended') sfxCtx.resume();
+                if (kind === 'tab') { sfxTone(660, 0, 0.11, 0.07); sfxTone(880, 0.07, 0.14, 0.06); }   // 탭: 도약하는 두 음
+                else if (kind === 'ok') { sfxTone(523, 0, 0.1, 0.07); sfxTone(659, 0.08, 0.1, 0.06); sfxTone(784, 0.16, 0.16, 0.06); } // 저장·완성
+                else sfxTone(740, 0, 0.07, 0.06);                                                       // 일반 버튼: 짧은 '톡'
+            } catch (e) { /* 소리가 안 나도 수업은 계속돼요 */ }
         }
+        function updateSfxBtn() {
+            const b = document.getElementById('sfxBtn'); if (!b) return;
+            b.innerHTML = sfxOn ? '<i class="fa-solid fa-bell"></i>' : '<i class="fa-solid fa-bell-slash text-slate-400"></i>';
+            b.setAttribute('aria-pressed', sfxOn ? 'true' : 'false');
+            b.title = sfxOn ? '효과음 끄기' : '효과음 켜기';
+        }
+        function toggleSfx() {
+            sfxOn = !sfxOn;
+            try { localStorage.setItem('jx_sfx', sfxOn ? 'on' : 'off'); } catch (e) {}
+            updateSfxBtn(); playSfx('click');
+        }
+        document.addEventListener('click', function (e) {
+            const el = e.target && e.target.closest ? e.target.closest('button, a[href], [role="button"]') : null;
+            if (!el || el.disabled || el.id === 'sfxBtn' || el.closest('#landing .no-sfx')) return;
+            if (el.classList.contains('tab-btn')) playSfx('tab');
+            else if (/(download|save|print)/i.test(el.getAttribute('onclick') || '')) playSfx('ok');
+            else playSfx('click');
+        }, true);
 
         // ---------- 데이터 ----------
         const STRENGTHS_DATA = [
@@ -666,249 +641,18 @@
             { id: 'C6', text: '위험한 도구나 기계를 사용할 때는 지침을 꼭 지켜요.', short: '위험한 도구는 안전 지침 지키기', icon: 'fa-helmet-safety' }
         ];
 
-        // 직업별 '일하는 장소' (직업 소개 문장을 바탕으로 작성. 교사가 확인·수정해 주세요)
-        const JOB_PLACES = {
-            JOB_BARISTA: ['카페'],
-            JOB_CAFE_CLEAN: ['카페 주방'],
-            JOB_MART_DISPLAY: ['마트 매장'],
-            JOB_BAKERY_PACK: ['빵집', '제과 작업장'],
-            JOB_FOOD_PREP: ['급식실', '식품 공장'],
-            JOB_COOK_HELPER: ['급식소', '조리실'],
-            JOB_OFFICE_SHRED: ['관공서', '사무실'],
-            JOB_LIBRARY_HELPER: ['도서관'],
-            JOB_MAIL_HELPER: ['회사 사무실'],
-            JOB_PACKING: ['물류센터', '작업장'],
-            JOB_ASSEMBLY: ['공장 작업장'],
-            JOB_LABELING: ['포장 작업장'],
-            JOB_SMART_FARM: ['실내 스마트팜'],
-            JOB_GARDENING: ['식물원', '농장'],
-            JOB_ANIMAL_CARE: ['반려동물 유치원', '반려동물 센터'],
-            JOB_HOTEL_TOWEL: ['호텔 세탁실'],
-            JOB_CLEANER: ['건물 안 복도·승강기·회의실'],
-            JOB_DISH_WASH: ['급식소', '대형 식당']
+// 기본(수업용 예시) 직업 목록은 없애고, 직업은 모두 커리어넷에서 찾아요.
+        const LOCAL_JOBS_DB = [];
+
+        // 강점에서 떠올릴 수 있는 커리어넷 검색어 (앱이 정한 예시예요. 커리어넷의 추천 결과가 아니에요)
+        const STRENGTH_KEYWORDS = {
+            S1: ['서비스', '안내', '판매'], S2: ['조립', '공예', '제작'], S3: ['정리', '물류', '사서'],
+            S4: ['동물', '식물', '원예'], S5: ['청소', '세탁', '환경'], S6: ['컴퓨터', '사무', '데이터'],
+            S7: ['사무', '우편', '안전'], S8: ['디저트', '제과', '바리스타', '조리'], S9: ['배송', '농업', '운반'],
+            S10: ['검수', '포장', '검사']
         };
-
-        const LOCAL_JOBS_DB = [
-            {
-                id: 'JOB_BARISTA',
-                name: '바리스타 보조',
-                category: 'SERVICE',
-                categoryName: '식음료 & 서비스',
-                icon: 'fa-mug-hot',
-                strengths: ['S1', 'S8', 'S7'],
-                summary: '카페에서 음료 재료를 준비하고 완성된 음료를 손님에게 전달하며 매장을 정돈해요.',
-                skills: ['밝게 인사하기', '음료 쟁반 전달하기', '시럽 및 컵 채우기', '손님 테이블 닦기'],
-                pathway: '학교 바리스타 실습실 및 특수학교 전공과 과정에서 음료 추출 및 전달을 배워요.',
-                tip: '밝고 환한 미소로 "맛있게 드세요!" 인사하는 연습을 해보세요.'
-            },
-            {
-                id: 'JOB_CAFE_CLEAN',
-                name: '카페 기물 및 컵 세척원',
-                category: 'SERVICE',
-                categoryName: '식음료 & 서비스',
-                icon: 'fa-soap',
-                strengths: ['S5', 'S3', 'S7'],
-                summary: '카페에서 사용한 다회용 컵과 기구를 수거하고 식기세척기로 위생적으로 세척하여 정리해요.',
-                skills: ['사용된 컵 분류하기', '식기세척기 랙 장착', '건조된 컵 정돈', '위생장갑 착용'],
-                pathway: '학교 가사실습 및 직업재활센터에서 기물 세척기 작동법을 훈련받아 취업해요.',
-                tip: '깨끗이 씻은 컵을 소독기에 차곡차곡 정렬하는 기술이 중요합니다.'
-            },
-            {
-                id: 'JOB_MART_DISPLAY',
-                name: '마트 매대 진열 & 카트 관리원',
-                category: 'SERVICE',
-                categoryName: '식음료 & 서비스',
-                icon: 'fa-cart-shopping',
-                strengths: ['S3', 'S7', 'S1', 'S10'],
-                summary: '마트 매대에서 상품 유통기한을 확인하고 줄을 맞추어 진열하며 쇼핑카트를 회수해요.',
-                skills: ['선입선출(옛날 상품 앞으로 이동)', '상품 얼굴 정면 보이기', '쇼핑카트 이동 회수', '매대 먼지 닦기'],
-                pathway: '특수교육지원센터 마트 실습실에서 매대 진열 훈련을 이수해요.',
-                tip: '유통기한이 가까운 물품을 앞쪽에 배치하는 규칙(선입선출)을 꼭 익혀두세요.'
-            },
-            {
-                id: 'JOB_BAKERY_PACK',
-                name: '제과제빵 포장 보조원',
-                category: 'BAKERY',
-                categoryName: '제과제빵 & 식품가공',
-                icon: 'fa-bread-slice',
-                strengths: ['S8', 'S2', 'S10'],
-                summary: '갓 구운 빵과 과자를 집게로 집어 봉지에 넣고 스티커 및 포장재를 부착해요.',
-                skills: ['빵 집게 다루기', '포장지 봉인 및 스티커 부착', '유통기한 도장 확인', '상자 포장'],
-                pathway: '보호작업장 제과제빵반이나 특수학교 전공과 제빵실습 과정을 이수합니다.',
-                tip: '빵이 찌그러지지 않게 빵집게를 가볍게 사용하는 연습이 필요해요.'
-            },
-            {
-                id: 'JOB_FOOD_PREP',
-                name: '식품 가공 & 채소 전처리 보조',
-                category: 'BAKERY',
-                categoryName: '제과제빵 & 식품가공',
-                icon: 'fa-carrot',
-                strengths: ['S8', 'S5', 'S9'],
-                summary: '급식실이나 식품 공장에서 야채 세척, 껍질 벗기기, 재료 구분 및 이동을 도와요.',
-                skills: ['야채 흐르는 물 세척', '재료 바구니 옮기기', '위생모 및 앞치마 착용', '도구 청결 유지'],
-                pathway: '장애인 직업재활시설 또는 식품가공 사업장에서 연습 후 취업합니다.',
-                tip: '식품 위생 수칙을 엄격하게 지키고 위생복 착용 순서를 기억해 두세요.'
-            },
-            {
-                id: 'JOB_COOK_HELPER',
-                name: '단체급식 식재료 계량 보조원',
-                category: 'BAKERY',
-                categoryName: '제과제빵 & 식품가공',
-                icon: 'fa-kitchen-set',
-                strengths: ['S8', 'S10', 'S7'],
-                summary: '급식소나 조리실에서 저울을 사용해 식재료 무게를 측정하고 소분해 담는 일입니다.',
-                skills: ['전자저울 눈금 읽기', '지정된 무게만큼 담기', '식재료 용기 라벨 부착', '주방 위생'],
-                pathway: '학교 외식조리 실습실 및 특수교육 맞춤형 조리 보조 과정에서 이수해요.',
-                tip: '저울 숫자가 지정된 무게(예: 500g)가 되도록 차분하게 담는 것이 중요합니다.'
-            },
-            {
-                id: 'JOB_OFFICE_SHRED',
-                name: '사무보조 (문서 파쇄 & 스캔)',
-                category: 'OFFICE',
-                categoryName: '사무지원 & 도서관',
-                icon: 'fa-file-lines',
-                strengths: ['S3', 'S6', 'S7'],
-                summary: '관공서나 일반 사무실에서 서류의 클립을 제거하고 문서 파쇄 및 스캔 작업을 맡습니다.',
-                skills: ['클립/스테이플러 제거', '문서 파쇄기 투입', '스캐너 받침 정돈', '보안 유지'],
-                pathway: '시청, 구청 장애인 일자리 사업 사무보조 분야에 지원해요.',
-                tip: '문서에 붙은 스테이플러 심을 먼저 철저히 제거해야 기계가 고장 나지 않아요.'
-            },
-            {
-                id: 'JOB_LIBRARY_HELPER',
-                name: '도서관 서가 정돈원',
-                category: 'OFFICE',
-                categoryName: '사무지원 & 도서관',
-                icon: 'fa-book-open',
-                strengths: ['S3', 'S10', 'S7', 'S6'],
-                summary: '도서관에서 반납된 책의 십진분류표 청구기호를 확인하고 서가 제자리에 꽂아 정리해요.',
-                skills: ['책 청구기호 숫자 읽기', '책장 가나다순 배치', '북카트 이동', '파손 도서 보고'],
-                pathway: '학교 도서관 봉사 및 지자체 도서관 장애인 일자리 사업을 통해 취업해요.',
-                tip: '책 등표지에 붙은 숫자와 한글 순서를 차근차근 확인하고 정렬해요.'
-            },
-            {
-                id: 'JOB_MAIL_HELPER',
-                name: '사무실 우편물 & 딜리버리 보조원',
-                category: 'OFFICE',
-                categoryName: '사무지원 & 도서관',
-                icon: 'fa-envelope-open-text',
-                strengths: ['S1', 'S7', 'S9'],
-                summary: '기업 내 각 부서로 전달되는 우편물과 서류 봉투를 분류하고 지정된 자리로 전달해요.',
-                skills: ['부서 이름 확인하기', '우편함 서류 넣기', '밝은 목소리로 전달', '방문 서명 받기'],
-                pathway: '장애인고용공단 맞춤훈련센터 사무지원 직무 과정을 수료하여 진출합니다.',
-                tip: '부서 위치를 잘 기억하고 서류를 전달할 때 "좋은 하루 되세요"라고 인사해보세요.'
-            },
-            {
-                id: 'JOB_PACKING',
-                name: '스마트 물류 분류 및 포장원',
-                category: 'MANUFACTURING',
-                categoryName: '물류포장 & 부품조립',
-                icon: 'fa-box-open',
-                strengths: ['S2', 'S3', 'S10', 'S6'],
-                summary: '물류센터나 작업장에서 제품을 상자에 넣고 테이프를 붙인 뒤 스티커를 부착해요.',
-                skills: ['박스 접기 및 테이핑', '제품 수량 세기', '바코드 라벨 부착', '파렛트 적재'],
-                pathway: '장애인고용공단 맞춤훈련센터 물류 직무 과정을 이수하거나 보호작업장에서 훈련받아요.',
-                tip: '손으로 빠르게 하기보다 정해진 개수를 정확히 세는 것이 핵심입니다.'
-            },
-            {
-                id: 'JOB_ASSEMBLY',
-                name: '전자 부품 단순 조립원',
-                category: 'MANUFACTURING',
-                categoryName: '물류포장 & 부품조립',
-                icon: 'fa-gears',
-                strengths: ['S2', 'S10', 'S7'],
-                summary: '작은 고무 부품이나 전선 나사를 지정된 틀에 끼워 간단한 부품을 조립해요.',
-                skills: ['손전동 드라이버 사용', '부품 구멍 맞춰 끼우기', '불량품 골라내기', '작업대 정돈'],
-                pathway: '직업재활시설(임가공반)에서 조립 도구 활용법 및 훈련을 이수해요.',
-                tip: '손재주와 집중력을 발휘해 모양이 다른 불량 부품을 잘 구분해 내면 훌륭합니다.'
-            },
-            {
-                id: 'JOB_LABELING',
-                name: '제품 라벨 부착 & 검수원',
-                category: 'MANUFACTURING',
-                categoryName: '물류포장 & 부품조립',
-                icon: 'fa-tags',
-                strengths: ['S2', 'S3', 'S10'],
-                summary: '포장된 상자나 용기의 지정된 위치에 용량, 유통기한 라벨 스티커를 구김 없이 붙여요.',
-                skills: ['스티커 위치 맞추기', '삐뚤어짐 없이 부착', '스크래치 상품 분류', '포장 박스 수량 확인'],
-                pathway: '장애인 보호작업장 포장검수반 및 표준사업장 라벨 작업실에서 습득해요.',
-                tip: '스티커가 구겨지지 않게 손가락 끝으로 가볍게 눌러 붙이는 연습을 해보세요.'
-            },
-            {
-                id: 'JOB_SMART_FARM',
-                name: '스마트팜 채소 수확 & 재배원',
-                category: 'NATURE',
-                categoryName: '원예스마트팜 & 동물돌봄',
-                icon: 'fa-seedling',
-                strengths: ['S4', 'S7', 'S9', 'S6'],
-                summary: '실내 스마트팜 시설에서 LED 조명 아래 자라는 쌈채소를 가위로 수확하고 용기에 담아요.',
-                skills: ['채소 뿌리 다듬기', '수확 잎 포장 용기 넣기', '배양액 수위 확인', '작업실 소독'],
-                pathway: '특수학교 스마트팜 실습실 또는 사회적기업 첨단 농장에서 수확 훈련을 받아요.',
-                tip: '채소 잎이 찢어지지 않도록 가위질을 살살 해주는 기술이 필요해요.'
-            },
-            {
-                id: 'JOB_GARDENING',
-                name: '화분 및 원예 관리 보조원',
-                category: 'NATURE',
-                categoryName: '원예스마트팜 & 동물돌봄',
-                icon: 'fa-plant-wilt',
-                strengths: ['S4', 'S5', 'S9'],
-                summary: '식물원이나 농장에서 화분에 흙을 채우고 잡초를 뽑으며 분무기로 물을 주며 관리해요.',
-                skills: ['화분 흙 모종삽 채우기', '시든 잎 가지치기', '물조리개/스프레이 사용', '모종 옮겨심기'],
-                pathway: '특수교육 원예 치료 프로그램 및 치유농장 일자리 사업을 통해 준비해요.',
-                tip: '식물을 아끼는 마음으로 흙 상태를 만져보며 물이 필요한지 체크해보세요.'
-            },
-            {
-                id: 'JOB_ANIMAL_CARE',
-                name: '반려동물 센터 & 펫숍 보조원',
-                category: 'NATURE',
-                categoryName: '원예스마트팜 & 동물돌봄',
-                icon: 'fa-paw',
-                strengths: ['S4', 'S1', 'S5'],
-                summary: '반려동물 유치원이나 센터에서 동물 사료를 챙겨주고 울타리 청소 및 용품 정리를 도와요.',
-                skills: ['사료 정량 덜어주기', '물통 청소 및 새 물 채우기', '동물 패드 교체', '장난감 소독'],
-                pathway: '애완동물 관리 보조 과정 및 장애인 맞춤 펫케어 훈련을 이수합니다.',
-                tip: '동물에게 큰 소리를 내지 않고 다정하고 차분하게 다가가는 자세가 제일 중요해요.'
-            },
-            {
-                id: 'JOB_HOTEL_TOWEL',
-                name: '호텔/리조트 린넨 & 수건 정돈원',
-                category: 'CLEAN',
-                categoryName: '클리닝 & 세탁위생',
-                icon: 'fa-toilet-paper',
-                strengths: ['S5', 'S3', 'S9'],
-                summary: '호텔 세탁실에서 세탁 완료된 수건과 가운을 각 잡아서 깔끔하게 접어 정리 카트에 쌓아둬요.',
-                skills: ['수건 4단 모양 접기', '린넨 카트 적재', '오염 수건 분류', '선반 정리'],
-                pathway: '특수학교 세탁실습실 및 호텔 맞춤형 린넨 직무 훈련반에서 습득해요.',
-                tip: '수건 모서리를 맞추어 똑바르게 접으면 보기에도 좋고 쌓기도 쉬워집니다.'
-            },
-            {
-                id: 'JOB_CLEANER',
-                name: '건물 내부 환경미화원',
-                category: 'CLEAN',
-                categoryName: '클리닝 & 세탁위생',
-                icon: 'fa-broom',
-                strengths: ['S5', 'S9', 'S7'],
-                summary: '복도, 승강기, 회의실 바닥을 밀대 걸레로 닦고 휴지통 분리수거를 실시해요.',
-                skills: ['바닥 마른걸레/젖은걸레질', '분리수거 봉투 교체', '손잡이 소독 닦기', '청소도구 정돈'],
-                pathway: '한국장애인고용공단 클리닝 직무 맞춤 훈련을 수료하여 자회사형 표준사업장에 취업해요.',
-                tip: '구석진 곳의 먼지까지 깨끗이 닦아내는 꼼꼼함이 청소 전문가의 기본입니다.'
-            },
-            {
-                id: 'JOB_DISH_WASH',
-                name: '식기 세척 & 자동 세척기 보조원',
-                category: 'CLEAN',
-                categoryName: '클리닝 & 세탁위생',
-                icon: 'fa-utensils',
-                strengths: ['S5', 'S9', 'S7'],
-                summary: '급식소나 대형 식당에서 사용한 식판의 잔반을 비우고 세척기 랙에 넣어 소독 세척해요.',
-                skills: ['잔반 털어내기', '식판 세척 랙 열 맞추기', '물기 털기', '식판 카트 이송'],
-                pathway: '학교 급식실 현장실습 및 장애인 직업훈련기관의 식기세척 직무를 통해 취업합니다.',
-                tip: '미끄러지지 않는 장화를 착용하고 안전에 유의하며 잔반을 깨끗이 비워냅니다.'
-            }
-        ];
-
-
-        LOCAL_JOBS_DB.forEach(j => { j.places = JOB_PLACES[j.id] || []; });
+        const INTEREST_KEYWORDS = ['디저트', '청소', '동물', '식물', '컴퓨터', '요리', '정리', '포장', '자동차', '음악'];
+        const ABILITY_CHOICES = [{ id: 'good', text: '잘해요' }, { id: 'help', text: '도움 받으면 할 수 있어요' }, { id: 'practice', text: '연습하고 싶어요' }];
 
         // 커리어넷에서 가져온 직업은 careerCache('CN_번호')에 저장돼 있고, 필요할 때 직업 정보로 바꿔서 써요.
         const CN_PREFIX = 'CN_';
@@ -943,6 +687,7 @@
                     posterPicks: [...posterPicks],
                     aiJobCache: aiJobCache,
                     careerCache: careerCache,
+                    abilityChecks: abilityChecks,
                     reasons: [...choiceReasons],
                     express: [...expressModes],
                     posterTemplate: posterTemplate,
@@ -964,6 +709,11 @@
                 aiJobCache = st.aiJobCache && typeof st.aiJobCache === 'object' ? st.aiJobCache : {};
                 careerCache = st.careerCache && typeof st.careerCache === 'object' ? st.careerCache : {};
                 selectedTargetJob = findJob(st.jobId);
+                abilityChecks = {};
+                if (st.abilityChecks && typeof st.abilityChecks === 'object') Object.keys(st.abilityChecks).forEach(k => {
+                    const o = st.abilityChecks[k]; if (!o || typeof o !== 'object') return;
+                    abilityChecks[k] = {}; Object.keys(o).forEach(t => { if (ABILITY_CHOICES.some(c => c.id === o[t])) abilityChecks[k][t] = o[t]; });
+                });
                 choiceReasons = new Set((st.reasons || []).filter(id => REASONS.some(r => r.id === id)));
                 expressModes = new Set((st.express || []).filter(id => EXPRESS_MODES.some(m => m.id === id)));
                 posterTemplate = POSTER_TEMPLATES.some(t => t.id === st.posterTemplate) ? st.posterTemplate : 'T1';
@@ -975,7 +725,7 @@
             if (skipConfirm !== true && !confirm('지금까지 고른 것을 모두 지우고 처음부터 다시 할까요?')) return;
             try { localStorage.removeItem(STATE_KEY); } catch (e) {}
             selectedStrengths = []; selectedTargetJob = null; checkedSkills = new Set(); chosenPrep = null;
-            aiJobCache = {}; careerCache = {}; posterPicks = new Set(); aiAdvice = null; advicePicks = new Set();
+            aiJobCache = {}; careerCache = {}; abilityChecks = {}; posterPicks = new Set(); aiAdvice = null; advicePicks = new Set();
             choiceReasons = new Set(); expressModes = new Set();
             posterTemplate = 'T1'; posterTheme = 'C1'; posterMaker = '';
             activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, aiJobInfo: false, aiCounsel: false, posterSaved: false, posterPrinted: false };
@@ -983,7 +733,6 @@
             promiseChoice = 'custom'; customPromise = '';
             teacherDraft = { id: '', ratings: ['', '', '', '', ''], memo: '' };
             const nm = document.getElementById('studentNameInput'); if (nm) nm.value = '';
-            isOnlyRecommendedMode = false; currentCategory = 'ALL';
             initApp();
         }
 
@@ -1027,107 +776,8 @@
         }
 
         // ---------- 2. 직업 탐색 ----------
-        function goToStep2WithFilter() {
-            isOnlyRecommendedMode = selectedStrengths.length > 0;
-            currentCategory = 'ALL';
-            resetCategoryButtons('ALL');
-            switchTab('step2');
-            refreshJobList();
-        }
-
-        function matchInfo(job) {
-            const matches = job.strengths.filter(s => selectedStrengths.includes(s));
-            return matches.length;
-        }
-
-        function refreshJobList() {
-            renderCareerSearch();
-            const banner = document.getElementById('recommendationBanner');
-            let list = LOCAL_JOBS_DB.map(j => ({ ...j, matchScore: matchInfo(j) }));
-            if (selectedStrengths.length > 0) {
-                list.sort((a, b) => b.matchScore - a.matchScore);
-                const matched = list.filter(j => j.matchScore > 0);
-                const names = selectedStrengths.map(strengthShort).join(', ');
-                banner.classList.remove('hidden');
-                document.getElementById('recommendBannerTitle').innerText = `내 강점 [${names}]에 어울리는 직업`;
-                document.getElementById('recommendBannerSubtitle').innerText = `강점이 많이 맞는 직업이 앞에 보여요.`;
-                document.getElementById('recommendCountBadge').innerText = `추천 ${matched.length}개 / 전체 ${LOCAL_JOBS_DB.length}개`;
-                const on = "flex-1 sm:flex-none px-3.5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow";
-                const off = "flex-1 sm:flex-none px-3.5 py-2 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 text-xs font-bold rounded-xl";
-                document.getElementById('showOnlyRecBtn').className = isOnlyRecommendedMode ? on : off;
-                document.getElementById('showAllJobsBtn').className = isOnlyRecommendedMode ? off : on;
-                if (isOnlyRecommendedMode) list = matched;
-            } else {
-                banner.classList.add('hidden');
-            }
-            if (currentCategory !== 'ALL') list = list.filter(j => j.category === currentCategory);
-            renderJobsGrid(list);
-        }
-
-        function toggleMatchFilter(onlyRec) { isOnlyRecommendedMode = onlyRec; refreshJobList(); }
-
-        function renderJobsGrid(jobsList) {
-            const container = document.getElementById('jobListGrid');
-            if (jobsList.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 space-y-2 bg-white rounded-2xl border border-slate-200">
-                    <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300"></i>
-                    <p class="font-bold">맞는 직업이 없어요.</p>
-                    <p class="text-xs">[전체 직업 보기]를 누르거나 다른 강점을 골라 보세요!</p></div>`;
-                return;
-            }
-            const maxMatch = Math.max(0, ...jobsList.map(j => matchInfo(j)));
-            container.innerHTML = jobsList.map(job => {
-                const m = matchInfo(job);
-                const picked = selectedTargetJob && selectedTargetJob.id === job.id;
-                let badge = '';
-                if (selectedStrengths.length > 0) {
-                    badge = m > 0
-                        ? `<div class="flex items-center gap-1.5 flex-wrap">
-                            ${m === maxMatch ? '<span class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-crown"></i> 가장 잘 맞아요</span>' : ''}
-                            <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">강점 ${m}개 일치</span></div>`
-                        : '<span class="bg-slate-100 text-slate-400 text-[10px] font-medium px-2 py-0.5 rounded-full">일치하는 강점 없음</span>';
-                }
-                return `
-                <div class="bg-white rounded-2xl p-5 border ${picked ? 'border-indigo-500 ring-2 ring-indigo-400/40' : (m > 0 ? 'border-emerald-200 ring-2 ring-emerald-500/20' : 'border-slate-200')} shadow-sm hover:shadow-md transition flex flex-col justify-between gap-4">
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-xl ${m > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-600'} flex items-center justify-center text-2xl flex-shrink-0"><i class="fa-solid ${job.icon}"></i></div>
-                            <div>
-                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">${esc(job.categoryName)}</span> <span class="bg-slate-50 text-slate-500 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md">수업용 예시</span>
-                                <h3 class="font-extrabold text-slate-900 text-lg tracking-tight mt-0.5">${esc(job.name)}</h3>
-                            </div>
-                        </div>
-                        ${badge}
-                        <p class="text-xs text-slate-600 leading-relaxed">${esc(job.summary)}</p>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
-                        <button onclick="openJobDetail('${job.id}')" class="flex-1 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1"><i class="fa-solid fa-circle-info"></i><span>자세히 보기</span></button>
-                        <button onclick="selectJobAsTarget('${job.id}')" class="px-4 py-2.5 ${picked ? 'bg-emerald-600' : 'bg-indigo-600 hover:bg-indigo-700'} text-white font-bold rounded-xl text-xs shadow">${picked ? '선택함 ✓' : '이 직업 고르기'}</button>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        function resetCategoryButtons(cat) {
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                const on = btn.dataset.cat === cat;
-                btn.classList.toggle('bg-indigo-600', on); btn.classList.toggle('text-white', on);
-                btn.classList.toggle('bg-slate-100', !on); btn.classList.toggle('text-slate-700', !on);
-            });
-        }
-        function filterCategory(cat) {
-            currentCategory = cat;
-            resetCategoryButtons(cat);
-            document.getElementById('jobSearchInput').value = '';
-            refreshJobList();
-        }
-        function handleSearchKey(e) { if (e.key === 'Enter') searchJobs(); }
-        function searchJobs() {
-            const q = document.getElementById('jobSearchInput').value.trim().toLowerCase();
-            if (!q) { refreshJobList(); return; }
-            renderJobsGrid(LOCAL_JOBS_DB.filter(j =>
-                j.name.toLowerCase().includes(q) || j.summary.toLowerCase().includes(q) || j.categoryName.toLowerCase().includes(q)));
-        }
+        function goToStep2WithFilter() { switchTab('step2'); refreshJobList(); }
+        function refreshJobList() { renderCareerSearch(); renderViewedJobs(); }
 
         function openJobDetail(jobId) {
             const job = findJob(jobId);
@@ -1142,17 +792,32 @@
             document.getElementById('modalDescription').innerText = isCn ? ((cc.works || []).join('\n') || '내용이 비어 있어요.') : job.summary;
             document.getElementById('modalPathway').innerText = job.pathway || (isCn ? '커리어넷에 정리된 준비 방법이 없어요.' : '');
             document.getElementById('modalTipHead').innerHTML = isCn ? '<i class="fa-solid fa-scale-balanced text-amber-500"></i>내 강점과 견주어 봐요' : '<i class="fa-solid fa-heart text-amber-500"></i>꿀팁';
+            const checks = abilityChecks[job.id] || {};
             if (isCn) {
                 const mine = selectedStrengths.map(strengthShort).join(', ');
+                const cnt = id => job.skills.filter(t => checks[t] === id).length;
                 document.getElementById('modalTip').innerText = (mine ? `내 강점: ${mine}` : '내 강점: 아직 고르지 않았어요 (1번 탭)') +
-                    `\n이 직업에서 필요한 능력과 견주어 보고, 선생님과 이야기해 봐요. 앱이 맞는지 점수를 매기지는 않아요.`;
+                    `\n견주어 본 결과: 잘해요 ${cnt('good')}개 · 도움 받으면 할 수 있어요 ${cnt('help')}개 · 연습하고 싶어요 ${cnt('practice')}개` +
+                    `\n이 직업이 나에게 맞는지 선생님과 이야기해 봐요. 앱이 맞는지 점수를 매기지는 않아요.`;
             } else {
                 document.getElementById('modalTip').innerText = job.tip;
             }
             document.getElementById('modalIcon').innerHTML = `<i class="fa-solid ${job.icon}"></i>`;
-            document.getElementById('modalSkills').innerHTML = (job.skills.length ? job.skills : ['내용이 비어 있어요.']).map(s => `<li>${esc(s)}</li>`).join('');
+            document.getElementById('modalSkillsHint').classList.toggle('hidden', !(isCn && job.skills.length));
+            document.getElementById('modalSkills').innerHTML = isCn && job.skills.length
+                ? job.skills.map((t, i) => `<li class="list-none border-b border-emerald-100 pb-2"><span class="font-bold">${esc(t)}</span>
+                    <div class="flex flex-wrap gap-1 mt-1">${ABILITY_CHOICES.map(c => `<button type="button" onclick="setAbilityCheck('${job.id}', ${i}, '${c.id}')" aria-pressed="${checks[t] === c.id}" class="px-2 py-1 rounded-lg text-[11px] font-bold border ${checks[t] === c.id ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-100'}">${c.text}</button>`).join('')}</div></li>`).join('')
+                : (job.skills.length ? job.skills : ['내용이 비어 있어요.']).map(s => `<li>${esc(s)}</li>`).join('');
             document.getElementById('modalSelectBtn').onclick = function () { selectJobAsTarget(job.id); closeModal(); };
             document.getElementById('jobDetailModal').classList.remove('hidden');
+        }
+        function setAbilityCheck(jobId, idx, val) {
+            const job = findJob(jobId); if (!job || !job.skills[idx]) return;
+            const t = job.skills[idx];
+            abilityChecks[jobId] = abilityChecks[jobId] || {};
+            if (abilityChecks[jobId][t] === val) delete abilityChecks[jobId][t]; else abilityChecks[jobId][t] = val;
+            saveState();
+            openJobDetail(jobId);
         }
         function closeModal() { document.getElementById('jobDetailModal').classList.add('hidden'); }
 
@@ -1187,14 +852,6 @@
             { id: 'E4', text: '글로 써요', icon: 'fa-pen' },
             { id: 'E5', text: '선생님이 도와줘요', icon: 'fa-hands-holding-child' }
         ];
-        // 커리어넷 검색 기본 낱말 (직업 이름과 달라서 검색이 잘 안 되면 학생·교사가 고쳐서 찾을 수 있어요)
-        const CAREER_KEYWORD = {
-            JOB_BARISTA: '바리스타', JOB_CAFE_CLEAN: '식기', JOB_MART_DISPLAY: '마트', JOB_BAKERY_PACK: '제과',
-            JOB_FOOD_PREP: '조리', JOB_COOK_HELPER: '급식', JOB_OFFICE_SHRED: '사무', JOB_LIBRARY_HELPER: '사서',
-            JOB_MAIL_HELPER: '우편', JOB_PACKING: '물류', JOB_ASSEMBLY: '조립', JOB_LABELING: '포장',
-            JOB_SMART_FARM: '스마트팜', JOB_GARDENING: '원예', JOB_ANIMAL_CARE: '반려동물', JOB_HOTEL_TOWEL: '호텔',
-            JOB_CLEANER: '환경미화', JOB_DISH_WASH: '조리'
-        };
         const PREPARE_LABEL = { recruit: '취업 방법', training: '직업훈련', certificate: '관련 자격증', curriculum: '관련 교육' };
 
         function buildPosterList() {
@@ -1285,15 +942,29 @@
                     <span class="block font-extrabold text-sky-900 text-sm">${esc(r.name)} ${r.group ? `<span class="text-[11px] font-bold text-slate-500">· ${esc(r.group)}</span>` : ''}</span>
                     <span class="block text-xs text-slate-600 mt-0.5">${esc(r.work)}</span>
                 </button>`).join('');
+            const seen = {}, fromStrength = [];
+            selectedStrengths.forEach(id => (STRENGTH_KEYWORDS[id] || []).forEach(k => { if (!seen[k]) { seen[k] = 1; fromStrength.push({ k, from: strengthShort(id) }); } }));
+            const chip = (k, tip) => `<button type="button" onclick="useKeyword('${k}')" ${careerBusy ? 'disabled' : ''} class="px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-sky-300 text-sky-900 hover:bg-sky-100 disabled:opacity-60" ${tip ? `title="${esc(tip)}"` : ''}>${esc(k)}</button>`;
+            const kwHtml = `
+                <div class="bg-white/70 rounded-xl p-3 space-y-2">
+                    <p class="text-xs font-extrabold text-sky-900">① 검색어를 골라요 <span class="font-medium text-slate-500">(눌러서 바로 찾아요)</span></p>
+                    ${fromStrength.length
+                        ? `<div><p class="text-[11px] font-bold text-slate-600 mb-1">내 강점에서 떠오르는 말</p><div class="flex flex-wrap gap-1.5">${fromStrength.map(x => chip(x.k, x.from)).join('')}</div></div>`
+                        : '<p class="text-[11px] text-slate-500">1번 탭에서 강점을 고르면, 강점에서 떠오르는 검색어가 나와요.</p>'}
+                    <div><p class="text-[11px] font-bold text-slate-600 mb-1">관심 있는 것</p><div class="flex flex-wrap gap-1.5">${INTEREST_KEYWORDS.map(k => chip(k)).join('')}</div></div>
+                    <p class="text-[11px] text-slate-500">검색어는 앱이 정한 예시예요. 커리어넷이 추천한 것이 아니에요. 선생님과 함께 골라요. 아래 칸에 직접 써도 돼요.</p>
+                </div>`;
             const focus = document.activeElement && document.activeElement.id === 'careerQueryInput';
             box.innerHTML = `
                 <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i>커리어넷 직업백과에서 직업 찾기</h3>
-                <p class="text-xs text-sky-800 leading-relaxed">나라에서 운영하는 직업 정보(커리어넷)에서 직업을 찾아요. 하는 일, 필요한 능력, 준비 방법에 <strong>출처</strong>가 붙어요.${mine ? ` <span class="font-bold">내 강점: ${esc(mine)}</span> — 직업에서 필요한 능력과 견주어 봐요.` : ''}</p>
+                <p class="text-xs text-sky-800 leading-relaxed">나라에서 운영하는 직업 정보(커리어넷)에서 직업을 찾아요. 하는 일, 필요한 능력, 준비 방법에 <strong>출처</strong>가 붙어요. 직업을 열면, 필요한 능력마다 <strong>나는 어떤지</strong> 골라 볼 수 있어요.${mine ? ` <span class="font-bold">내 강점: ${esc(mine)}</span>` : ''}</p>
+                ${kwHtml}
                 <div class="flex flex-col sm:flex-row gap-2">
                     <input type="text" id="careerQueryInput" value="${esc(careerQuery)}" oninput="careerQuery = this.value" onkeyup="if(event.key==='Enter') searchCareer()" maxlength="20" aria-label="커리어넷에서 찾을 직업 이름"
                         class="flex-1 p-2.5 border border-sky-300 rounded-xl text-sm bg-white" placeholder="찾을 직업 이름 (예: 바리스타, 사서, 조경)">
                     <button onclick="searchCareer()" ${careerBusy ? 'disabled' : ''} class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid fa-magnifying-glass mr-1"></i>커리어넷에서 찾기</button>
                 </div>
+                <p class="text-xs font-extrabold text-sky-900">② 직업을 골라요</p>
                 <p class="text-xs font-bold text-sky-900" role="status">${esc(careerMsg)}</p>
                 ${results ? `<div class="grid sm:grid-cols-2 gap-2">${results}</div>` : ''}`;
             if (focus) { const el = document.getElementById('careerQueryInput'); if (el) { el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} } }
@@ -1303,6 +974,19 @@
             if (e && e.message === 'NO_ENDPOINT') return '지금은 서버가 연결되어 있지 않아요. 기본 정보로 이어서 해요.';
             if (e && e.code === 'NO_CAREER_KEY') return '커리어넷 인증키가 아직 설정되지 않았어요. 선생님께 알려요. 기본 정보로 이어서 해요.';
             return '커리어넷에서 정보를 가져오지 못했어요. 기본 정보로 이어서 해요.';
+        }
+
+        function useKeyword(k) { careerQuery = k; searchCareer(); }
+
+        function renderViewedJobs() {
+            const box = document.getElementById('viewedJobs'); if (!box) return;
+            const list = allJobs();
+            if (!list.length && !selectedTargetJob) { box.innerHTML = ''; return; }
+            box.innerHTML = `<div class="bg-white rounded-2xl p-4 border border-slate-200 space-y-2">
+                ${selectedTargetJob ? `<p class="text-sm font-bold text-slate-800">지금 고른 직업: <span class="text-indigo-700">${esc(selectedTargetJob.name)}</span> <button onclick="switchTab('step3')" class="ml-2 px-3 py-1 bg-indigo-600 text-white rounded-lg text-xs">포스터 만들러 가기</button></p>` : ''}
+                ${list.length ? `<p class="text-xs font-extrabold text-slate-600">지금까지 살펴본 직업 (눌러서 다시 보기)</p>
+                <div class="flex flex-wrap gap-2">${list.map(j => `<button onclick="openJobDetail('${j.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-50 border border-sky-200 text-sky-900 hover:bg-sky-100">${esc(j.name)}</button>`).join('')}</div>` : ''}
+            </div>`;
         }
 
         async function searchCareer() {
@@ -1315,7 +999,7 @@
                 careerResults = (Array.isArray(r.jobs) ? r.jobs : []).filter(j => j && j.seq && j.name);
                 careerMsg = careerResults.length ? `${careerResults.length}개를 찾았어요. 알고 싶은 직업을 눌러요.` : '찾은 직업이 없어요. 다른 낱말로 찾아봐요.';
             } catch (e) { careerMsg = careerErrorMsg(e); }
-            careerBusy = false; renderCareerSearch();
+            careerBusy = false; renderCareerSearch(); renderViewedJobs();
         }
 
         async function pickCareer(i) {
@@ -1339,7 +1023,7 @@
                     careerMsg = '이 직업은 보여 줄 내용이 비어 있어요. 다른 직업을 눌러 봐요.';
                 }
             } catch (e) { careerMsg = careerErrorMsg(e); }
-            careerBusy = false; renderCareerSearch();
+            careerBusy = false; renderCareerSearch(); renderViewedJobs();
         }
 
         const POSTER_TEMPLATES = [{ id: 'T1', name: '노트형' }, { id: 'T2', name: '컬러형' }, { id: 'T3', name: '간판형' }];
@@ -2372,6 +2056,7 @@
                 promiseType,
                 express: EXPRESS_MODES.filter(m => expressModes.has(m.id)).map(m => m.text).join(', '),
                 posterDone: [activity.posterSaved ? '이미지 저장' : '', activity.posterPrinted ? '인쇄' : '', activity.posterCopied ? '캔바용 내용 복사' : ''].filter(Boolean).join(', '),
+                abilityCheck: (() => { if (!job) return ''; const c = abilityChecks[job.id] || {}; const n = id => (job.skills || []).filter(t => c[t] === id).length; const tot = n('good') + n('help') + n('practice'); return tot ? `잘해요 ${n('good')} · 도움 ${n('help')} · 연습 ${n('practice')}` : '안 함'; })(),
                 posterStyle: (POSTER_TEMPLATES.find(t => t.id === posterTemplate) || {}).name + ' · ' + (POSTER_THEMES.find(t => t.id === posterTheme) || {}).name,
                 cardDone: [activity.cardSaved ? '이미지 저장' : '', activity.printed ? '인쇄' : '', activity.cardCopied ? '글 복사' : ''].filter(Boolean).join(', ')
             };
@@ -2421,7 +2106,7 @@
                             ${row('포스터 내용', `기본 ${a.posterBase}개 · 커리어넷 ${a.posterCareer}개 · AI ${a.posterAi}개`)}
                             ${row('AI 직업 정보', a.aiJobInfo)}${row('AI 진로 상담', a.aiCounsel + (a.aiCounsel === '사용' ? ` (내 생각과 맞는 조언 ${a.advicePicked}개 고름)` : ''))}
                             ${row('연습하고 싶은 것', a.prep)}${row('실천 다짐', a.promiseType)}${row('발표 방법', a.express)}
-                            ${row('포스터 만들기', a.posterDone)}${row('포스터 모양', a.posterStyle)}${row('미래 직업 카드', a.cardDone)}
+                            ${row('능력 견주기', a.abilityCheck)}${row('포스터 만들기', a.posterDone)}${row('포스터 모양', a.posterStyle)}${row('미래 직업 카드', a.cardDone)}
                         </tbody></table>
                     </div>
                     <div class="space-y-3">
@@ -2520,8 +2205,8 @@
         function exportRecords() {
             const recs = getRecords();
             if (!recs.length) { alert('저장된 기록이 없어요.'); return; }
-            const head = ['기록 시각', '번호/별명', '희망 직업', '나의 강점', '고른 이유', '포스터 내용(기본)', '포스터 내용(커리어넷)', '포스터 내용(AI)', 'AI 직업 정보', 'AI 상담', '고른 AI 조언 수', '연습하고 싶은 것', '실천 다짐 유형', '발표 방법', '포스터 만들기', '포스터 모양', '카드 저장·인쇄', ...RATING_ITEMS, '메모'];
-            const rows = recs.map(r => { const a = r.summary; return [r.time, r.id, a.job, a.strengths, a.reasons, a.posterBase, a.posterCareer, a.posterAi, a.aiJobInfo, a.aiCounsel, a.advicePicked, a.prep, a.promiseType, a.express, a.posterDone, a.posterStyle, a.cardDone, ...r.ratings, r.memo]; });
+            const head = ['기록 시각', '번호/별명', '희망 직업', '나의 강점', '고른 이유', '포스터 내용(기본)', '포스터 내용(커리어넷)', '포스터 내용(AI)', 'AI 직업 정보', 'AI 상담', '고른 AI 조언 수', '연습하고 싶은 것', '실천 다짐 유형', '발표 방법', '능력 견주기', '포스터 만들기', '포스터 모양', '카드 저장·인쇄', ...RATING_ITEMS, '메모'];
+            const rows = recs.map(r => { const a = r.summary; return [r.time, r.id, a.job, a.strengths, a.reasons, a.posterBase, a.posterCareer, a.posterAi, a.aiJobInfo, a.aiCounsel, a.advicePicked, a.prep, a.promiseType, a.express, a.abilityCheck, a.posterDone, a.posterStyle, a.cardDone, ...r.ratings, r.memo]; });
             const csv = '﻿' + [head, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
@@ -2538,9 +2223,9 @@
 
         // ---------- 시작 ----------
         function initApp() {
+            updateSfxBtn();
             renderStrengthCards();
             updateSelectedStrengthsSummary();
-            resetCategoryButtons('ALL');
             refreshJobList();
             renderSkillChecklist();
             renderPrepChoices();
