@@ -1592,6 +1592,7 @@
             return c;
         }
         // ---------- 캔바용 파일(.pptx): 글자·모양을 하나씩 고칠 수 있는 포스터/카드 ----------
+        const APP_BUILD = '2026-10-23-c';
         const hexNo = c => String(c).replace('#', '').toUpperCase();
         const ptOf = px => Math.round(px * 0.75 * 10) / 10;
         const inch = px => Math.round(px / 96 * 1000) / 1000;
@@ -1613,7 +1614,7 @@
             if (d) slide.addImage({ data: d, x: R(cx - size / 2), y: R(cy - size / 2), w: R(size), h: R(size) });
         }
         function ensurePptx() {
-            if (typeof PptxGenJS === 'undefined') { alert('파일을 만드는 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 눌러요.'); return null; }
+            if (typeof PptxGenJS === 'undefined') { alert('파일을 만드는 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 눌러요.\n(버전 ' + APP_BUILD + ')'); return null; }
             return new PptxGenJS();
         }
         async function buildPosterPptx() {
@@ -1723,7 +1724,7 @@
             try {
                 const pptx = await buildPosterPptx();
                 if (pptx) { const name = (posterMaker || '').trim() || '나의'; await pptx.writeFile({ fileName: `${name}_${selectedTargetJob.name}_포스터(캔바용).pptx`.replace(/[\\/:*?"<>|]/g, '') }); activity.posterSaved = true; saveState(); }
-            } catch (e) { alert('파일을 만들지 못했어요. 선생님께 도움을 요청해요.'); }
+            } catch (e) { alert('파일을 만들지 못했어요. 선생님께 도움을 요청해요.\n(원인: ' + ((e && e.message) || e) + ')'); }
             if (btn) { btn.disabled = false; btn.innerHTML = original; }
         }
         async function buildCardPptx() {
@@ -1769,7 +1770,7 @@
             try {
                 const pptx = await buildCardPptx();
                 if (pptx) { const nm = (document.getElementById('studentNameInput').value || '').trim() || '나의'; await pptx.writeFile({ fileName: `${nm}_${selectedTargetJob.name}_미래직업카드(캔바용).pptx`.replace(/[\\/:*?"<>|]/g, '') }); activity.cardSaved = true; saveState(); }
-            } catch (e) { alert('파일을 만들지 못했어요. 선생님께 도움을 요청해요.'); }
+            } catch (e) { alert('파일을 만들지 못했어요. 선생님께 도움을 요청해요.\n(원인: ' + ((e && e.message) || e) + ')'); }
             if (btn) { btn.disabled = false; btn.innerHTML = original; }
         }
 
@@ -1787,7 +1788,7 @@
                 document.body.appendChild(link); link.click(); document.body.removeChild(link);
                 activity.posterSaved = true; saveState();
             } catch (e) {
-                alert('이미지를 만들지 못했어요. 선생님께 도움을 요청해요.');
+                alert('이미지를 만들지 못했어요. 선생님께 도움을 요청해요.\n(원인: ' + ((e && e.message) || e) + ')');
             } finally {
                 btn.disabled = false; btn.innerHTML = original;
             }
@@ -2172,7 +2173,7 @@
                 document.body.appendChild(link); link.click(); document.body.removeChild(link);
                 activity.cardSaved = true; saveState();
             } catch (e) {
-                alert('이미지를 만들지 못했어요. 선생님께 도움을 요청해요.');
+                alert('이미지를 만들지 못했어요. 선생님께 도움을 요청해요.\n(원인: ' + ((e && e.message) || e) + ')');
             } finally {
                 btn.disabled = false; btn.innerHTML = original;
             }
@@ -2500,7 +2501,7 @@
             speakText('꿈차근, 직업탐색기. 나의 강점으로 미래 직업을 찾아요. 먼저 나의 강점을 찾고, 어울리는 직업을 살펴보고, 직업 소개 포스터를 만들고, 준비할 것을 정하고, 미래 직업 카드를 만들어요.');
         }
 
-        window.onload = function () { loadState(); initTeacherPanel(); initApp(); renderLanding(); const b = document.querySelector('#landing .btn-ink'); if (b) b.focus(); };
+        window.onload = function () { try { if (new URLSearchParams(location.search).get('teacher') === '1') { const t = document.createElement('p'); t.className = 'text-center text-xs text-slate-400 py-2'; t.textContent = '버전 ' + APP_BUILD + ' · 파일 도구 ' + (typeof PptxGenJS === 'undefined' ? '없음' : '있음'); document.body.appendChild(t); } } catch (x) {} loadState(); initTeacherPanel(); initApp(); renderLanding(); const b = document.querySelector('#landing .btn-ink'); if (b) b.focus(); };
     </script>
 </body>
 </html>
