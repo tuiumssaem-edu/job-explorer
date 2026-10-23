@@ -1037,9 +1037,11 @@
         }
 
         function careerErrorMsg(e) {
-            if (e && e.message === 'NO_ENDPOINT') return '지금은 서버가 연결되어 있지 않아요. 기본 정보로 이어서 해요.';
-            if (e && e.code === 'NO_CAREER_KEY') return '커리어넷 인증키가 아직 설정되지 않았어요. 선생님께 알려요. 기본 정보로 이어서 해요.';
-            return '커리어넷에서 정보를 가져오지 못했어요. 기본 정보로 이어서 해요.';
+            if (e && e.message === 'NO_ENDPOINT') return '지금은 서버가 연결되어 있지 않아요. 선생님께 알려요.';
+            if (e && e.code === 'NO_CAREER_KEY') return '커리어넷 인증키가 아직 설정되지 않았어요. 선생님께 알려요.';
+            let why = '';
+            try { if (new URLSearchParams(location.search).get('teacher') === '1') why = ' [교사용 원인: ' + ((e && e.message) || '알 수 없음') + (e && e.code ? ' / ' + e.code : '') + ']'; } catch (x) {}
+            return '커리어넷에서 정보를 가져오지 못했어요. 선생님께 알려요.' + why;
         }
 
         function useFilter(kind, code, label) { careerQuery = ''; careerActive = kind + code; searchCareer({ kind, code, label }); }
