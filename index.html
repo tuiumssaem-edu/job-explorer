@@ -143,7 +143,265 @@
             #posterPrintArea img { display: block; width: 180mm; height: 240mm; margin: 0 auto; }
             #dreamCardPrintArea { position: absolute; left: 0; top: 0; width: 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
-    </style>
+    
+        /* ----- Bright, color-coded step palette ----- */
+        :root {
+            --step1: #F5C842; --step2: #50C878; --step3: #4D91F7;
+            --step4: #A780F5; --step5: #F26F91; --page-cream: #FFFDF5;
+        }
+        body.bg-slate-50, .landing { background-color: var(--page-cream); background-image: radial-gradient(#f2e8c5 1px, transparent 1px); background-size: 22px 22px; }
+        .idx-nav { background: #fffdf8; background-image: none; border-color: #e9e3d5; }
+        header.sticky { background: #fff; border-bottom: 1px solid #eee8dc; }
+        header nav { background: #fffdf8; border-color: #eee8dc; }
+        #appContent { background: #fff; border: 1px solid #eee8dc; box-shadow: 0 14px 38px rgba(67, 54, 26, .09); }
+        nav .idx { color: #263247; border-color: #fff; border-radius: 14px 14px 0 0; filter: none; }
+        nav .idx1 { --tc: #F5C842; } nav .idx2 { --tc: #50C878; } nav .idx3 { --tc: #4D91F7; }
+        nav .idx4 { --tc: #A780F5; } nav .idx5 { --tc: #F26F91; }
+        nav .idx.tab-active { color: #172033; box-shadow: inset 0 -4px 0 rgba(23,32,51,.18); }
+        .chapter-label { color: #667085; }
+        .guide-row { background: #fff; border-color: #eee8dc; border-radius: 14px; }
+        .guide .n1, .guide-row .n1 { background: #FFF4C7; }
+        .guide-row .n2 { background: #DDF7E6; } .guide-row .n3 { background: #E1EEFF; }
+        .guide-row .n4 { background: #EFE7FF; } .guide-row .n5 { background: #FFE5EC; }
+        #appContent .bg-white.rounded-2xl { border-color: #ebe7df; box-shadow: 0 5px 18px rgba(25,35,50,.045); }
+        #strengthGrid button[aria-pressed="true"] { border-color: var(--step1) !important; background: #FFF8DA !important; box-shadow: 0 0 0 3px rgba(245,200,66,.22) !important; }
+        #strengthGrid button[aria-pressed="true"] .bg-blue-600 { background: var(--step1) !important; color: #263247 !important; }
+        #step2 .jr-pill { background: #DDF7E6; border-color: #50C878; }
+        #step2 .jr-chip { background: #fff; border-color: #d8eadf; }
+        #step2 .jr-chip:hover, #step2 .jr-chip.on { background: #DDF7E6; border-color: #50C878; }
+        #step2 .jr-chip.on { box-shadow: 0 0 0 2px rgba(80,200,120,.2); }
+        #step3 .jr-chip.on, #step3 .jr-job:hover { background: #E1EEFF; border-color: #4D91F7; }
+        #step4 .jr-chip.on, #step4 .jr-job:hover { background: #EFE7FF; border-color: #A780F5; }
+        #step5 .jr-chip.on, #step5 .jr-job:hover { background: #FFE5EC; border-color: #F26F91; }
+        .jr-job { border-color: #e4e9f0; }
+        .btn-ink { background: #263247; box-shadow: 4px 4px 0 #F5C842; }
+        .btn-ink:hover { box-shadow: 5px 5px 0 #F5C842; }
+        .btn-line:hover { background: #FFF4C7; }
+        @media (max-width: 640px) {
+            .idx-nav { padding-left: 7px; padding-right: 7px; }
+            nav .idx { border-radius: 10px 10px 0 0; }
+        }
+
+        /* ----- Softer sky-blue base and matching pastel step colors ----- */
+        :root {
+            --page-cream: #F3F9FF;
+            --step1: #FFF1BD;
+            --step2: #DDF4E5;
+            --step3: #DCEBFF;
+            --step4: #EEE5FF;
+            --step5: #FFE4EC;
+        }
+        body.bg-slate-50, .landing {
+            background-color: #F3F9FF;
+            background-image: radial-gradient(#DCEBFA 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        .idx-nav, header nav { background: #F8FBFF; background-image: none; border-color: #E4EDF7; }
+        header.sticky { background: #FFFFFF; border-bottom-color: #E4EDF7; }
+        #appContent { background: #FFFFFF; border-color: #E4EDF7; }
+        nav .idx1 { --tc: #FFF1BD; }
+        nav .idx2 { --tc: #DDF4E5; }
+        nav .idx3 { --tc: #DCEBFF; }
+        nav .idx4 { --tc: #EEE5FF; }
+        nav .idx5 { --tc: #FFE4EC; }
+        nav .idx.tab-active { box-shadow: inset 0 -3px 0 rgba(35,52,75,.12); }
+        .guide-row { background: #FFFFFF; border-color: #E4EDF7; }
+        .guide .n1, .guide-row .n1 { background: #FFF1BD; }
+        .guide-row .n2 { background: #DDF4E5; }
+        .guide-row .n3 { background: #DCEBFF; }
+        .guide-row .n4 { background: #EEE5FF; }
+        .guide-row .n5 { background: #FFE4EC; }
+        .btn-ink { box-shadow: 4px 4px 0 #DCEBFF; }
+        .btn-ink:hover { box-shadow: 5px 5px 0 #DCEBFF; }
+        .btn-line:hover { background: #EAF4FF; }
+
+        /* Each content panel follows the pastel tint of its matching tab. */
+        #step1 .step-h .num, #step1 .jr-pill { background: #FFF1BD; border-color: #EAD88F; }
+        #step2 .step-h .num, #step2 .jr-pill { background: #DDF4E5; border-color: #A9DDB8; }
+        #step3 .step-h .num, #step3 .jr-pill { background: #DCEBFF; border-color: #AFCDF7; }
+        #step4 .step-h .num, #step4 .jr-pill { background: #EEE5FF; border-color: #CCB8F3; }
+        #step5 .step-h .num, #step5 .jr-pill { background: #FFE4EC; border-color: #F2B8CA; }
+        #step1 button[aria-pressed="true"] { background: #FFF8DA !important; border-color: #EAD88F !important; }
+        #step2 .jr-chip:hover, #step2 .jr-chip.on { background: #DDF4E5; border-color: #A9DDB8; }
+        #step3 .jr-chip:hover, #step3 .jr-chip.on, #step3 .jr-job:hover { background: #DCEBFF; border-color: #AFCDF7; }
+        #step4 .jr-chip:hover, #step4 .jr-chip.on, #step4 .jr-job:hover { background: #EEE5FF; border-color: #CCB8F3; }
+        #step5 .jr-chip:hover, #step5 .jr-chip.on, #step5 .jr-job:hover { background: #FFE4EC; border-color: #F2B8CA; }
+        #step3 button[class*="bg-blue-"],
+        #step5 button[class*="bg-blue-"],
+        #step5 button[class*="bg-indigo-"],
+        #step5 button[class*="bg-rose-"] {
+            background-color: #DCEBFF !important;
+            color: #27466F !important;
+            border-color: #AFCDF7 !important;
+        }
+        #step4 button[class*="bg-emerald-"] {
+            background-color: #EEE5FF !important;
+            color: #493A69 !important;
+            border-color: #CCB8F3 !important;
+        }
+        #step3 button[class*="bg-blue-"]:hover,
+        #step4 button[class*="bg-emerald-"]:hover,
+        #step5 button[class*="bg-blue-"]:hover,
+        #step5 button[class*="bg-indigo-"]:hover,
+        #step5 button[class*="bg-rose-"]:hover { filter: brightness(.98); }
+\n
+        /* Force every colored utility inside each step to use that tab's pastel palette. */
+        #step3 [class*="bg-blue-"], #step3 [class*="bg-sky-"], #step3 [class*="bg-indigo-"],
+        #step3 [class*="bg-purple-"], #step3 [class*="bg-violet-"], #step3 [class*="bg-rose-"],
+        #step3 [class*="bg-pink-"], #step3 [class*="bg-amber-"], #step3 [class*="bg-yellow-"],
+        #step3 [class*="bg-emerald-"], #step3 [class*="bg-green-"], #step3 [class*="bg-orange-"] {
+            background-color: #DCEBFF !important;
+        }
+        #step4 [class*="bg-blue-"], #step4 [class*="bg-sky-"], #step4 [class*="bg-indigo-"],
+        #step4 [class*="bg-purple-"], #step4 [class*="bg-violet-"], #step4 [class*="bg-rose-"],
+        #step4 [class*="bg-pink-"], #step4 [class*="bg-amber-"], #step4 [class*="bg-yellow-"],
+        #step4 [class*="bg-emerald-"], #step4 [class*="bg-green-"], #step4 [class*="bg-orange-"] {
+            background-color: #EEE5FF !important;
+        }
+        #step5 [class*="bg-blue-"], #step5 [class*="bg-sky-"], #step5 [class*="bg-indigo-"],
+        #step5 [class*="bg-purple-"], #step5 [class*="bg-violet-"], #step5 [class*="bg-rose-"],
+        #step5 [class*="bg-pink-"], #step5 [class*="bg-amber-"], #step5 [class*="bg-yellow-"],
+        #step5 [class*="bg-emerald-"], #step5 [class*="bg-green-"], #step5 [class*="bg-orange-"] {
+            background-color: #FFE4EC !important;
+        }
+        #step3 [class*="text-blue-"], #step3 [class*="text-sky-"], #step3 [class*="text-indigo-"],
+        #step3 [class*="text-purple-"], #step3 [class*="text-violet-"], #step3 [class*="text-rose-"],
+        #step3 [class*="text-pink-"], #step3 [class*="text-amber-"], #step3 [class*="text-yellow-"],
+        #step3 [class*="text-emerald-"], #step3 [class*="text-green-"], #step3 [class*="text-orange-"] { color: #315579 !important; }
+        #step4 [class*="text-blue-"], #step4 [class*="text-sky-"], #step4 [class*="text-indigo-"],
+        #step4 [class*="text-purple-"], #step4 [class*="text-violet-"], #step4 [class*="text-rose-"],
+        #step4 [class*="text-pink-"], #step4 [class*="text-amber-"], #step4 [class*="text-yellow-"],
+        #step4 [class*="text-emerald-"], #step4 [class*="text-green-"], #step4 [class*="text-orange-"] { color: #51456F !important; }
+        #step5 [class*="text-blue-"], #step5 [class*="text-sky-"], #step5 [class*="text-indigo-"],
+        #step5 [class*="text-purple-"], #step5 [class*="text-violet-"], #step5 [class*="text-rose-"],
+        #step5 [class*="text-pink-"], #step5 [class*="text-amber-"], #step5 [class*="text-yellow-"],
+        #step5 [class*="text-emerald-"], #step5 [class*="text-green-"], #step5 [class*="text-orange-"] { color: #75495A !important; }
+        #step3 [class*="border-blue-"], #step3 [class*="border-sky-"], #step3 [class*="border-indigo-"],
+        #step3 [class*="border-purple-"], #step3 [class*="border-violet-"], #step3 [class*="border-rose-"],
+        #step3 [class*="border-pink-"], #step3 [class*="border-amber-"], #step3 [class*="border-yellow-"],
+        #step3 [class*="border-emerald-"], #step3 [class*="border-green-"], #step3 [class*="border-orange-"] { border-color: #AFCDF7 !important; }
+        #step4 [class*="border-blue-"], #step4 [class*="border-sky-"], #step4 [class*="border-indigo-"],
+        #step4 [class*="border-purple-"], #step4 [class*="border-violet-"], #step4 [class*="border-rose-"],
+        #step4 [class*="border-pink-"], #step4 [class*="border-amber-"], #step4 [class*="border-yellow-"],
+        #step4 [class*="border-emerald-"], #step4 [class*="border-green-"], #step4 [class*="border-orange-"] { border-color: #CCB8F3 !important; }
+        #step5 [class*="border-blue-"], #step5 [class*="border-sky-"], #step5 [class*="border-indigo-"],
+        #step5 [class*="border-purple-"], #step5 [class*="border-violet-"], #step5 [class*="border-rose-"],
+        #step5 [class*="border-pink-"], #step5 [class*="border-amber-"], #step5 [class*="border-yellow-"],
+        #step5 [class*="border-emerald-"], #step5 [class*="border-green-"], #step5 [class*="border-orange-"] { border-color: #F2B8CA !important; }
+        #step3 [class*="hover:bg-blue-"]:hover, #step3 [class*="hover:bg-sky-"]:hover,
+        #step3 [class*="hover:bg-indigo-"]:hover, #step3 [class*="hover:bg-purple-"]:hover,
+        #step3 [class*="hover:bg-violet-"]:hover, #step3 [class*="hover:bg-rose-"]:hover,
+        #step3 [class*="hover:bg-pink-"]:hover, #step3 [class*="hover:bg-amber-"]:hover,
+        #step3 [class*="hover:bg-yellow-"]:hover, #step3 [class*="hover:bg-emerald-"]:hover,
+        #step3 [class*="hover:bg-green-"]:hover { background-color: #DCEBFF !important; }
+        #step4 [class*="hover:bg-blue-"]:hover, #step4 [class*="hover:bg-sky-"]:hover,
+        #step4 [class*="hover:bg-indigo-"]:hover, #step4 [class*="hover:bg-purple-"]:hover,
+        #step4 [class*="hover:bg-violet-"]:hover, #step4 [class*="hover:bg-rose-"]:hover,
+        #step4 [class*="hover:bg-pink-"]:hover, #step4 [class*="hover:bg-amber-"]:hover,
+        #step4 [class*="hover:bg-yellow-"]:hover, #step4 [class*="hover:bg-emerald-"]:hover,
+        #step4 [class*="hover:bg-green-"]:hover { background-color: #EEE5FF !important; }
+        #step5 [class*="hover:bg-blue-"]:hover, #step5 [class*="hover:bg-sky-"]:hover,
+        #step5 [class*="hover:bg-indigo-"]:hover, #step5 [class*="hover:bg-purple-"]:hover,
+        #step5 [class*="hover:bg-violet-"]:hover, #step5 [class*="hover:bg-rose-"]:hover,
+        #step5 [class*="hover:bg-pink-"]:hover, #step5 [class*="hover:bg-amber-"]:hover,
+        #step5 [class*="hover:bg-yellow-"]:hover, #step5 [class*="hover:bg-emerald-"]:hover,
+        #step5 [class*="hover:bg-green-"]:hover { background-color: #FFE4EC !important; }
+\n
+        /* ----- Step 5: calm white cards with one soft rose accent ----- */
+        #step5 {
+            --s5-pink: #F7D8E1;
+            --s5-pink-soft: #FFF1F5;
+            --s5-pink-border: #EFC5D2;
+            --s5-ink: #493842;
+            --s5-muted: #746871;
+            --s5-line: #EAE5E8;
+        }
+        #step5 .chapter-desc i { color: #C87590; }
+        #step5 > .grid > div { min-width: 0; }
+        #step5 .bg-white.rounded-2xl,
+        #step5 .bg-white.rounded-3xl {
+            background: #FFFFFF !important;
+            border-color: var(--s5-line) !important;
+            box-shadow: 0 4px 16px rgba(73,56,66,.045) !important;
+        }
+        #step5 [class*="bg-gradient"] {
+            background-image: none !important;
+            background-color: var(--s5-pink-soft) !important;
+            color: var(--s5-ink) !important;
+            box-shadow: none !important;
+        }
+        #step5 [class*="bg-purple-"], #step5 [class*="bg-indigo-"],
+        #step5 [class*="bg-blue-"], #step5 [class*="bg-sky-"],
+        #step5 [class*="bg-amber-"], #step5 [class*="bg-yellow-"],
+        #step5 [class*="bg-emerald-"], #step5 [class*="bg-green-"],
+        #step5 [class*="bg-rose-"], #step5 [class*="bg-pink-"] {
+            background-color: #FFFFFF !important;
+        }
+        #step5 [class*="text-purple-"], #step5 [class*="text-indigo-"],
+        #step5 [class*="text-blue-"], #step5 [class*="text-sky-"],
+        #step5 [class*="text-amber-"], #step5 [class*="text-yellow-"],
+        #step5 [class*="text-emerald-"], #step5 [class*="text-green-"],
+        #step5 [class*="text-rose-"], #step5 [class*="text-pink-"] {
+            color: var(--s5-muted) !important;
+        }
+        #step5 [class*="border-purple-"], #step5 [class*="border-indigo-"],
+        #step5 [class*="border-blue-"], #step5 [class*="border-sky-"],
+        #step5 [class*="border-amber-"], #step5 [class*="border-yellow-"],
+        #step5 [class*="border-emerald-"], #step5 [class*="border-green-"],
+        #step5 [class*="border-rose-"], #step5 [class*="border-pink-"] {
+            border-color: var(--s5-line) !important;
+        }
+        #step5 h3 i, #step5 .dcard-pill, #step5 .dcard-icon {
+            color: #9E5870 !important;
+        }
+        #step5 h3 i { background: none !important; }
+        #step5 .dcard {
+            background: #FFFFFF !important;
+            border: 2px solid var(--s5-pink-border) !important;
+            box-shadow: 0 8px 24px rgba(73,56,66,.07) !important;
+            color: var(--s5-ink) !important;
+        }
+        #step5 .dcard::before { background: var(--s5-pink-soft) !important; }
+        #step5 .dcard-pill {
+            background: var(--s5-pink-soft) !important;
+            border-color: var(--s5-pink-border) !important;
+            color: #75495A !important;
+        }
+        #step5 .dcard-icon {
+            background: var(--s5-pink-soft) !important;
+            border-color: var(--s5-pink-border) !important;
+            color: #9E5870 !important;
+        }
+        #step5 .dcard-promise {
+            background: var(--s5-pink-soft) !important;
+            border-color: var(--s5-pink-border) !important;
+        }
+        #step5 .dcard-foot { border-color: var(--s5-line) !important; }
+        #step5 #aiConsultBtn, #step5 #downloadCardBtn,
+        #step5 #canvaCardLink {
+            background: var(--s5-pink) !important;
+            border: 1px solid var(--s5-pink-border) !important;
+            color: #633B4A !important;
+            box-shadow: none !important;
+        }
+        #step5 #aiConsultBtn:hover, #step5 #downloadCardBtn:hover,
+        #step5 #canvaCardLink:hover { background: #F4CDD9 !important; }
+        #step5 button[aria-pressed="true"], #step5 button[aria-checked="true"],
+        #step5 #aiResponseContainer button[class*="border-indigo-600"],
+        #step5 #promiseOptions [class*="border-amber-500"],
+        #step5 #promiseOptions [class*="border-amber-600"] {
+            background: var(--s5-pink-soft) !important;
+            border-color: var(--s5-pink-border) !important;
+            color: var(--s5-ink) !important;
+            box-shadow: 0 0 0 2px rgba(239,197,210,.25) !important;
+        }
+        #step5 #studentNameInput, #step5 #targetJobSelect {
+            border-color: #D9D2D7 !important;
+            color: var(--s5-ink) !important;
+        }
+        #step5 .bg-slate-800 { background-color: #514650 !important; }
+        #step5 .bg-slate-800:hover { background-color: #403740 !important; }
+\n</style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
@@ -989,16 +1247,14 @@
             const chip = (f, cls, tip) => `<button type="button" onclick="useFilter('${f.kind}', '${f.code}', '${esc(f.label)}')" ${dis} class="jr-chip ${cls || ''} ${careerActive === f.kind + f.code ? 'on' : ''}" ${tip ? `title="${esc(tip)}"` : ''}>${f.icon ? `<i class="fa-solid ${f.icon}"></i>` : ''}${esc(f.label)}</button>`;
             const f2 = (kind, label) => ({ ...jrFind(kind, label), icon: jrIcon(kind, label) });
             const themeChips = JR_THEMES.map(([code, label]) => chip(f2('theme', label), '')).join('');
-            const strengthRows = selectedStrengths.map(id => {
-                const d = STRENGTHS_DATA.find(x => x.id === id);
-                const items = (STRENGTH_FILTERS[id] || []).map(([kind, label]) => chip(f2(kind, label), 'jr-theme')).join('');
-                return `<div class="rounded-2xl bg-blue-50/60 border-2 border-blue-100 p-4 space-y-3">
-                        <p class="text-lg font-black text-slate-900"><span class="jr-pill mr-2"><i class="fa-solid ${d.icon}"></i>${esc(d.short)}</span>와(과) 이어지는 분류</p>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">${items}</div>
-                    </div>`;
-            }).join('');
+            const strengthFilters = selectedStrengths.flatMap(id => STRENGTH_FILTERS[id] || []);
+            const uniqueStrengthFilters = [...new Map(strengthFilters.map(([kind, label]) => {
+                const filter = f2(kind, label);
+                return [`${kind}:${filter.code}`, filter];
+            })).values()];
+            const strengthItems = uniqueStrengthFilters.map(filter => chip(filter, 'jr-theme')).join('');
             const strengthBlock = selectedStrengths.length
-                ? `<div class="space-y-4">${strengthRows}</div>`
+                ? `<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">${strengthItems}</div>`
                 : `<div class="rounded-2xl bg-slate-50 border-2 border-dashed border-slate-300 p-5 text-center space-y-3"><p class="text-lg font-bold text-slate-700">강점을 고르면, 강점에 이어지는 분류가 나와요.</p><button onclick="switchTab('step1')" class="px-5 py-2.5 bg-blue-600 text-white font-extrabold rounded-xl">강점 고르러 가기</button></div>`;
             const find1 = `
                 <div class="space-y-4">
