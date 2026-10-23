@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
     <script>
         tailwind.config = { theme: { extend: { fontFamily: { sans: ['Noto Sans KR', 'sans-serif'] }, colors: {"blue": {"50": "#f2f8ff", "100": "#e1effd", "200": "#cbe3fb", "300": "#a8d0f6", "400": "#7db6ee", "500": "#5a9fe3", "600": "#3f87d2", "700": "#3270b5", "800": "#285a93", "900": "#1d4270"}, "sky": {"50": "#f2f8ff", "100": "#e1effd", "200": "#cbe3fb", "300": "#a8d0f6", "400": "#7db6ee", "500": "#5a9fe3", "600": "#3f87d2", "700": "#3270b5", "800": "#285a93", "900": "#1d4270"}, "indigo": {"50": "#f7f3ff", "100": "#ece4fb", "200": "#ddd0f6", "300": "#c6b3ee", "400": "#ab92e3", "500": "#9378d6", "600": "#7d62c8", "700": "#6a4fb3", "800": "#553e94", "900": "#402e72"}, "purple": {"50": "#f7f3ff", "100": "#ece4fb", "200": "#ddd0f6", "300": "#c6b3ee", "400": "#ab92e3", "500": "#9378d6", "600": "#7d62c8", "700": "#6a4fb3", "800": "#553e94", "900": "#402e72"}, "violet": {"50": "#f7f3ff", "100": "#ece4fb", "200": "#ddd0f6", "300": "#c6b3ee", "400": "#ab92e3", "500": "#9378d6", "600": "#7d62c8", "700": "#6a4fb3", "800": "#553e94", "900": "#402e72"}, "emerald": {"50": "#f3faef", "100": "#e3f3d9", "200": "#cfe9c0", "300": "#b0daa0", "400": "#86c27a", "500": "#6db36a", "600": "#4a9a5f", "700": "#3d8350", "800": "#2f6a40", "900": "#235030"}, "green": {"50": "#f3faef", "100": "#e3f3d9", "200": "#cfe9c0", "300": "#b0daa0", "400": "#86c27a", "500": "#6db36a", "600": "#4a9a5f", "700": "#3d8350", "800": "#2f6a40", "900": "#235030"}, "teal": {"50": "#f3faef", "100": "#e3f3d9", "200": "#cfe9c0", "300": "#b0daa0", "400": "#86c27a", "500": "#6db36a", "600": "#4a9a5f", "700": "#3d8350", "800": "#2f6a40", "900": "#235030"}, "amber": {"50": "#fffbea", "100": "#fff3c8", "200": "#ffe9a0", "300": "#fbdc72", "400": "#f3c846", "500": "#e5b01e", "600": "#c8920f", "700": "#a1740b", "800": "#7a5708", "900": "#563d05"}, "yellow": {"50": "#fffbea", "100": "#fff3c8", "200": "#ffe9a0", "300": "#fbdc72", "400": "#f3c846", "500": "#e5b01e", "600": "#c8920f", "700": "#a1740b", "800": "#7a5708", "900": "#563d05"}, "orange": {"50": "#fffbea", "100": "#fff3c8", "200": "#ffe9a0", "300": "#fbdc72", "400": "#f3c846", "500": "#e5b01e", "600": "#c8920f", "700": "#a1740b", "800": "#7a5708", "900": "#563d05"}, "rose": {"50": "#fff6f2", "100": "#ffe6dc", "200": "#fdd2c1", "300": "#f9b8a0", "400": "#f29a7c", "500": "#e8795a", "600": "#d9634a", "700": "#bb4e38", "800": "#963d2b", "900": "#6f2d20"}, "red": {"50": "#fff6f2", "100": "#ffe6dc", "200": "#fdd2c1", "300": "#f9b8a0", "400": "#f29a7c", "500": "#e8795a", "600": "#d9634a", "700": "#bb4e38", "800": "#963d2b", "900": "#6f2d20"}, "pink": {"50": "#fff6f2", "100": "#ffe6dc", "200": "#fdd2c1", "300": "#f9b8a0", "400": "#f29a7c", "500": "#e8795a", "600": "#d9634a", "700": "#bb4e38", "800": "#963d2b", "900": "#6f2d20"}, "slate": {"50": "#faf9f7", "100": "#f1eee9", "200": "#e4dfd7", "300": "#cfc9bf", "400": "#a39d92", "500": "#7a746a", "600": "#5b564d", "700": "#423e37", "800": "#2b2824", "900": "#1c1c1c"}, "gray": {"50": "#faf9f7", "100": "#f1eee9", "200": "#e4dfd7", "300": "#cfc9bf", "400": "#a39d92", "500": "#7a746a", "600": "#5b564d", "700": "#423e37", "800": "#2b2824", "900": "#1c1c1c"}} } } }
     </script>
@@ -672,13 +673,17 @@
                         </button>
                     </div>
                     <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 text-sm text-sky-900 space-y-2">
-                        <p class="font-bold"><i class="fa-solid fa-palette mr-1"></i>캔바로 카드 완성하기</p>
-                        <p class="text-xs leading-relaxed">희망 직업, 나의 강점, 실천 다짐을 캔바 미래 직업 카드 템플릿에 넣어 완성해요.</p>
+                        <p class="font-bold"><i class="fa-solid fa-palette mr-1"></i>캔바에서 이어서 꾸며요 <small class="text-xs font-bold">(선택)</small></p>
+                        <ol class="text-xs leading-relaxed list-decimal pl-5 space-y-0.5">
+                            <li><b>[캔바용 파일 받기]</b>를 눌러요.</li>
+                            <li><b>[캔바 열기]</b>를 눌러 캔바를 열어요.</li>
+                            <li>캔바에서 <b>파일 가져오기(업로드)</b>로 받은 파일을 올려요.</li>
+                            <li>글자와 모양을 눌러서 마음대로 고쳐요.</li>
+                        </ol>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="copyCardText()" class="px-4 py-2 bg-white border border-sky-300 hover:bg-sky-100 text-sky-800 font-bold rounded-xl text-xs"><i class="fa-regular fa-copy mr-1"></i>카드 글 복사하기</button>
-                            <a id="canvaCardLink" href="https://www.canva.com/" target="_blank" rel="noopener" class="px-4 py-2 btn-go font-bold rounded-xl text-xs"><i class="fa-solid fa-up-right-from-square mr-1"></i>캔바 바로가기</a>
+                            <button id="canvaCardFileBtn" onclick="downloadCanvaCard()" class="px-4 py-2 btn-go font-bold rounded-xl text-xs"><i class="fa-solid fa-file-arrow-down mr-1"></i>캔바용 파일 받기</button>
+                            <a id="canvaCardLink" href="https://www.canva.com/" target="_blank" rel="noopener" class="px-4 py-2 btn-go font-bold rounded-xl text-xs"><i class="fa-solid fa-up-right-from-square mr-1"></i>캔바 열기</a>
                         </div>
-                        <p id="copyToastCard" class="hidden text-xs font-bold text-emerald-700"><i class="fa-solid fa-check"></i> 복사했어요!</p>
                     </div>
                 </div>
             </div>
@@ -1581,6 +1586,188 @@
             drawPoster(c, posterTemplate, posterTheme, true);
             return c;
         }
+        // ---------- 캔바용 파일(.pptx): 글자·모양을 하나씩 고칠 수 있는 포스터/카드 ----------
+        const hexNo = c => String(c).replace('#', '').toUpperCase();
+        const ptOf = px => Math.round(px * 0.75 * 10) / 10;
+        const inch = px => Math.round(px / 96 * 1000) / 1000;
+        function iconPng(cls, color) {
+            try {
+                const ch = pzIcon(cls); if (!ch) return null;
+                const c = document.createElement('canvas'); c.width = c.height = 128;
+                const x = c.getContext('2d'); if (!x) return null;
+                x.fillStyle = color; x.font = `900 92px ${pzIconFamily}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(ch, 64, 66);
+                return c.toDataURL('image/png').replace(/^data:/, '');
+            } catch (e) { return null; }
+        }
+        function pxText(slide, t, o) {
+            slide.addText(t, Object.assign({ fontFace: 'Noto Sans KR', margin: 0, valign: 'top', fit: 'none', wrap: true }, o));
+        }
+        const R = (v) => inch(v);
+        function addIcon(slide, cls, color, cx, cy, size) {
+            const d = iconPng(cls, color);
+            if (d) slide.addImage({ data: d, x: R(cx - size / 2), y: R(cy - size / 2), w: R(size), h: R(size) });
+        }
+        function ensurePptx() {
+            if (typeof PptxGenJS === 'undefined') { alert('파일을 만드는 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 눌러요.'); return null; }
+            return new PptxGenJS();
+        }
+        async function buildPosterPptx() {
+            await loadPosterFonts();
+            const job = selectedTargetJob, T = posterTemplate;
+            const th = POSTER_THEMES.find(x => x.id === posterTheme) || POSTER_THEMES[0];
+            const pptx = ensurePptx(); if (!pptx) return null;
+            pptx.defineLayout({ name: 'POSTER', width: R(PZ_W), height: R(PZ_H) }); pptx.layout = 'POSTER';
+            pptx.title = job.name + ' 직업 포스터';
+            const s = pptx.addSlide();
+            const W = PZ_W, H = PZ_H, ink = hexNo(PZ_INK);
+            const p = pickedByGroup();
+            const reasonList = REASONS.filter(r => choiceReasons.has(r.id)).map(r => r.text);
+            const defs = [['하는 일', 'fa-hands', p.tasks], ['필요한 능력', 'fa-star', p.skills], ['내가 고른 이유', 'fa-heart', reasonList]].filter(d => d[2].length);
+            const maker = (posterMaker || '').trim().slice(0, 20);
+            const mc = document.createElement('canvas').getContext('2d');
+            const measure = (font) => { if (mc) mc.font = font; };
+            const wrap = (t, w) => mc ? pzWrap(mc, t, w) : [String(t)];
+            const rect = (kind, x, y, w, h, o) => s.addShape(kind, Object.assign({ x: R(x), y: R(y), w: R(w), h: R(h) }, o));
+
+            let card = { x: 0, y: 0, w: W, h: H };
+            if (T === 'T1') {
+                rect('rect', 0, 0, W, H, { fill: { color: hexNo(th.main) }, line: { type: 'none' } });
+                card = { x: 34, y: 38, w: W - 68, h: H - 72 };
+                rect('roundRect', card.x + 9, card.y + 11, card.w, card.h, { fill: { color: hexNo(th.main), transparency: 0 }, line: { type: 'none' }, rectRadius: R(22) });
+                rect('roundRect', card.x + 9, card.y + 11, card.w, card.h, { fill: { color: '000000', transparency: 82 }, line: { type: 'none' }, rectRadius: R(22) });
+                rect('roundRect', card.x, card.y, card.w, card.h, { fill: { color: 'FAF9F7' }, line: { color: ink, width: 2.25 }, rectRadius: R(22) });
+            } else if (T === 'T2') {
+                rect('rect', 0, 0, W, H, { fill: { color: hexNo(th.main) }, line: { type: 'none' } });
+                rect('ellipse', 650 - 175, 40 - 175, 350, 350, { fill: { color: 'FFFFFF', transparency: 72 }, line: { type: 'none' } });
+                rect('ellipse', 40 - 150, 940 - 150, 300, 300, { fill: { color: 'FFFFFF', transparency: 80 }, line: { type: 'none' } });
+            } else {
+                rect('rect', 0, 0, W, H, { fill: { color: '1C2333' }, line: { type: 'none' } });
+                card = { x: 28, y: 28, w: W - 56, h: H - 56 };
+                rect('roundRect', card.x, card.y, card.w, card.h, { fill: { type: 'none' }, line: { color: hexNo(th.main), width: 3 }, rectRadius: R(14) });
+            }
+            const col = {
+                kicker: T === 'T1' ? 'AAA59C' : T === 'T3' ? hexNo(th.main) : hexNo(th.dark),
+                title: T === 'T1' ? ink : T === 'T3' ? hexNo(th.main) : hexNo(th.dark),
+                foot: T === 'T1' ? '666666' : T === 'T3' ? 'B7C0D6' : hexNo(th.dark)
+            };
+            const cx = card.x + card.w / 2, x0 = card.x + 46, innerW = card.w - 92;
+
+            // 위쪽
+            const ky = card.y + 66;
+            if (T === 'T2') rect('roundRect', cx - 110, ky - 27, 220, 40, { fill: { color: 'FFFFFF', transparency: 30 }, line: { type: 'none' }, rectRadius: R(20) });
+            pxText(s, '내가 소개하는 직업', { x: R(card.x), y: R(ky - 16), w: R(card.w), h: R(24), fontSize: ptOf(17), bold: true, color: col.kicker, align: 'center', charSpacing: 2 });
+            const icy = card.y + 150;
+            if (T === 'T3') rect('roundRect', cx - 44, icy - 44, 88, 88, { fill: { color: hexNo(th.main) }, line: { type: 'none' }, rectRadius: R(18) });
+            else rect('ellipse', cx - 44, icy - 44, 88, 88, { fill: { color: T === 'T2' ? 'FFFFFF' : hexNo(th.light) }, line: T === 'T1' ? { color: ink, width: 2.25 } : { type: 'none' } });
+            addIcon(s, job.icon || 'fa-briefcase', '#' + (T === 'T3' ? '1C2333' : T === 'T2' ? hexNo(th.dark) : ink), cx, icy + 1, 46);
+            let tfs = 58; measure(pzFont(900, tfs));
+            while (mc && mc.measureText(job.name).width > innerW && tfs > 30) { tfs -= 2; measure(pzFont(900, tfs)); }
+            pxText(s, job.name, { x: R(x0), y: R(card.y + 252 - tfs * 0.92), w: R(innerW), h: R(tfs * 1.3), fontSize: ptOf(tfs), bold: true, color: col.title, align: 'center', name: '직업 이름' });
+            let y = card.y + 278;
+            if (T !== 'T2') s.addShape('line', { x: R(x0), y: R(y), w: R(innerW), h: 0, line: { color: T === 'T3' ? hexNo(th.main) : ink, width: 1.5, dashType: T === 'T3' ? 'dash' : 'solid' } });
+            y += 24;
+
+            // 가운데 칸들
+            const footH = 56, bodyTop = y, bodyBottom = card.y + card.h - footH;
+            const gap = 16, padX = 22;
+            let fs = 24, layout = null;
+            for (const f of [24, 22, 20, 19, 18, 17, 16, 15, 14, 13]) {
+                fs = f; measure(pzFont(600, f));
+                const items = defs.map(d => d[2].map(t => wrap(t, innerW - padX * 2 - 24)));
+                const hs = items.map(ls => 62 + ls.reduce((a, l) => a + l.length, 0) * f * 1.4 + 12);
+                const total = hs.reduce((a, b) => a + b, 0) + gap * Math.max(0, defs.length - 1);
+                layout = { items, hs, total };
+                if (total <= bodyBottom - bodyTop) break;
+            }
+            const avail = bodyBottom - bodyTop;
+            const extra = defs.length ? Math.min(70, Math.max(0, (avail - layout.total) / defs.length)) : 0;
+            let sy = bodyTop + Math.max(0, (avail - (layout.total + extra * defs.length)) / 2);
+            defs.forEach((d, i) => {
+                const h = layout.hs[i] + extra;
+                if (T === 'T1') rect('rect', x0, sy, innerW, h, { fill: { color: 'ECECEC' }, line: { color: ink, width: 1.5 } });
+                else if (T === 'T2') {
+                    rect('roundRect', x0, sy + 4, innerW, h, { fill: { color: '000000', transparency: 86 }, line: { type: 'none' }, rectRadius: R(24) });
+                    rect('roundRect', x0, sy, innerW, h, { fill: { color: 'FFFFFF' }, line: { type: 'none' }, rectRadius: R(24) });
+                } else {
+                    rect('roundRect', x0, sy, innerW, h, { fill: { color: '2A3246' }, line: { type: 'none' }, rectRadius: R(8) });
+                    rect('rect', x0, sy + 2, 10, h - 4, { fill: { color: hexNo(th.main) }, line: { type: 'none' } });
+                }
+                const hc = T === 'T3' ? hexNo(th.main) : T === 'T2' ? hexNo(th.dark) : ink;
+                const ncx = x0 + padX + 16, ncy = sy + 34;
+                rect('ellipse', ncx - 16, ncy - 16, 32, 32, { fill: { color: T === 'T1' ? hexNo(th.light) : hexNo(th.main) }, line: T === 'T1' ? { color: ink, width: 1.5 } : { type: 'none' } });
+                pxText(s, String(i + 1), { x: R(ncx - 16), y: R(ncy - 16), w: R(32), h: R(32), fontSize: ptOf(18), bold: true, color: T === 'T3' ? '1C2333' : T === 'T2' ? hexNo(th.dark) : ink, align: 'center', valign: 'middle' });
+                addIcon(s, d[1], '#' + hc, ncx + 40, ncy, 26);
+                pxText(s, d[0], { x: R(ncx + 64), y: R(ncy - 14), w: R(innerW - 110), h: R(30), fontSize: ptOf(22), bold: true, color: hc, valign: 'middle' });
+                const lines = layout.items[i].length ? d[2] : [];
+                pxText(s, lines.map(t => ({ text: t, options: { bullet: { indent: Math.round(fs * 0.8) }, breakLine: true } })), {
+                    x: R(x0 + padX), y: R(sy + 62), w: R(innerW - padX * 2), h: R(Math.max(30, h - 66)), fontSize: ptOf(fs), bold: false,
+                    color: T === 'T3' ? 'F1F4FA' : ink, lineSpacingMultiple: 1.15, paraSpaceAfter: 0
+                });
+                sy += h + gap;
+            });
+
+            // 아랫부분
+            pxText(s, '꿈차근! 직업탐색기', { x: R(x0), y: R(card.y + card.h - 36), w: R(300), h: R(20), fontSize: ptOf(14), bold: true, color: col.foot });
+            if (maker) pxText(s, '만든 사람 · ' + maker, { x: R(x0 + innerW - 300), y: R(card.y + card.h - 36), w: R(300), h: R(20), fontSize: ptOf(14), bold: true, color: col.foot, align: 'right' });
+            return pptx;
+        }
+        async function downloadCanvaPoster() {
+            if (!selectedTargetJob || posterPickCount() === 0) { flashPosterMsg('먼저 포스터에 넣을 내용을 골라요.'); return; }
+            const btn = document.getElementById('canvaPosterFileBtn'); const original = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 만드는 중...'; }
+            try {
+                const pptx = await buildPosterPptx();
+                if (pptx) { const name = (posterMaker || '').trim() || '나의'; await pptx.writeFile({ fileName: `${name}_${selectedTargetJob.name}_포스터(캔바용).pptx`.replace(/[\\/:*?"<>|]/g, '') }); activity.posterSaved = true; saveState(); }
+            } catch (e) { alert('파일을 만들지 못했어요. 선생님께 도움을 요청해요.'); }
+            if (btn) { btn.disabled = false; btn.innerHTML = original; }
+        }
+        async function buildCardPptx() {
+            await loadPosterFonts();
+            const job = selectedTargetJob;
+            const pptx = ensurePptx(); if (!pptx) return null;
+            const CW = 720, CH = 560, ink = '2B2429', line = 'F2B8CA';
+            pptx.defineLayout({ name: 'CARD', width: R(CW), height: R(CH) }); pptx.layout = 'CARD';
+            pptx.title = job.name + ' 미래 직업 카드';
+            const s = pptx.addSlide();
+            const rect = (kind, x, y, w, h, o) => s.addShape(kind, Object.assign({ x: R(x), y: R(y), w: R(w), h: R(h) }, o));
+            const name = (document.getElementById('studentNameInput').value || '').trim();
+            const strengths = selectedStrengths.length ? selectedStrengths.map(strengthShort).join(' · ') : '(강점을 골라요)';
+            const goal = currentPromiseText() || '(실천 다짐을 골라요)';
+            rect('rect', 0, 0, CW, CH, { fill: { color: 'FFFFFF' }, line: { type: 'none' } });
+            rect('roundRect', 24, 24, CW - 48, CH - 48, { fill: { color: 'FFFEFD' }, line: { color: line, width: 2.25 }, rectRadius: R(22) });
+            rect('ellipse', CW - 24 - 90, 24 - 40, 130, 130, { fill: { color: 'FFE4EC' }, line: { type: 'none' } });
+            rect('roundRect', 24, 24, CW - 48, CH - 48, { fill: { type: 'none' }, line: { color: line, width: 2.25 }, rectRadius: R(22) });
+            rect('roundRect', 56, 56, 190, 30, { fill: { color: 'FFE4EC' }, line: { color: line, width: 1.5 }, rectRadius: R(15) });
+            pxText(s, '나의 미래 직업 카드', { x: R(56), y: R(56), w: R(190), h: R(30), fontSize: ptOf(13), bold: true, color: ink, align: 'center', valign: 'middle' });
+            pxText(s, '나의 희망 직업', { x: R(56), y: R(100), w: R(300), h: R(20), fontSize: ptOf(13), bold: true, color: '7A6C75' });
+            let tfs = 44; const mc = document.createElement('canvas').getContext('2d');
+            if (mc) { mc.font = pzFont(900, tfs); while (mc.measureText(job.name).width > 400 && tfs > 26) { tfs -= 2; mc.font = pzFont(900, tfs); } }
+            pxText(s, job.name, { x: R(56), y: R(124), w: R(420), h: R(tfs * 1.3), fontSize: ptOf(tfs), bold: true, color: ink, name: '직업 이름' });
+            rect('ellipse', CW - 56 - 70, 56, 70, 70, { fill: { color: 'FFFFFF' }, line: { color: line, width: 2.25 } });
+            addIcon(s, job.icon || 'fa-briefcase', '#8E5A6E', CW - 56 - 35, 91, 36);
+            s.addShape('line', { x: R(56), y: R(200), w: R(CW - 112), h: 0, line: { color: ink, width: 1.5 } });
+            let ry = 216;
+            if (name) { pxText(s, '이름', { x: R(56), y: R(ry + 4), w: R(100), h: R(22), fontSize: ptOf(13), bold: true, color: '7A6C75' }); pxText(s, name, { x: R(160), y: R(ry), w: R(CW - 216), h: R(28), fontSize: ptOf(20), bold: true, color: ink, align: 'right' }); ry += 40; }
+            pxText(s, '나의 강점', { x: R(56), y: R(ry + 4), w: R(100), h: R(22), fontSize: ptOf(13), bold: true, color: '7A6C75' });
+            pxText(s, strengths, { x: R(160), y: R(ry), w: R(CW - 216), h: R(56), fontSize: ptOf(20), bold: true, color: ink, align: 'right' });
+            const py = Math.max(ry + 70, 330);
+            rect('roundRect', 56, py, CW - 112, CH - 56 - py - 44, { fill: { color: 'FFF3F7' }, line: { color: line, width: 1.5 }, rectRadius: R(14) });
+            pxText(s, '미래를 위한 실천 다짐', { x: R(76), y: R(py + 14), w: R(300), h: R(20), fontSize: ptOf(13), bold: true, color: ink });
+            pxText(s, goal, { x: R(76), y: R(py + 40), w: R(CW - 152), h: R(CH - 56 - py - 44 - 50), fontSize: ptOf(22), bold: true, color: ink, valign: 'top' });
+            pxText(s, '꿈을 향해 차근차근! 꿈차근 직업탐색기', { x: R(56), y: R(CH - 24 - 34), w: R(CW - 112), h: R(18), fontSize: ptOf(12), bold: true, color: '9A8D95', align: 'right' });
+            return pptx;
+        }
+        async function downloadCanvaCard() {
+            if (!selectedTargetJob) { alert('먼저 희망 직업을 골라요.'); return; }
+            const btn = document.getElementById('canvaCardFileBtn'); const original = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 만드는 중...'; }
+            try {
+                const pptx = await buildCardPptx();
+                if (pptx) { const nm = (document.getElementById('studentNameInput').value || '').trim() || '나의'; await pptx.writeFile({ fileName: `${nm}_${selectedTargetJob.name}_미래직업카드(캔바용).pptx`.replace(/[\\/:*?"<>|]/g, '') }); activity.cardSaved = true; saveState(); }
+            } catch (e) { alert('파일을 만들지 못했어요. 선생님께 도움을 요청해요.'); }
+            if (btn) { btn.disabled = false; btn.innerHTML = original; }
+        }
+
         async function downloadPoster() {
             if (!selectedTargetJob || posterPickCount() === 0) return;
             const btn = document.getElementById('posterSaveBtn');
@@ -1685,15 +1872,15 @@
             <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-5 space-y-3">
                 <h3 class="font-extrabold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-palette"></i>더 꾸미고 싶으면 캔바에서 이어서 해요 <small class="text-xs font-bold text-sky-700">(선택)</small></h3>
                 <ol class="text-sm text-sky-900 space-y-1 list-decimal pl-5">
-                    <li>아래 <b>[포스터 내용 복사하기]</b>를 눌러요.</li>
+                    <li><b>[캔바용 파일 받기]</b>를 눌러요.</li>
                     <li><b>[캔바 열기]</b>를 눌러 캔바를 열어요.</li>
-                    <li>캔바에 붙여 넣고 마음대로 꾸며요.</li>
+                    <li>캔바에서 <b>파일 가져오기(업로드)</b>로 받은 파일을 올려요.</li>
+                    <li>글자와 모양을 눌러서 마음대로 고쳐요.</li>
                 </ol>
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="copyPosterText()" class="px-4 py-2.5 btn-go font-bold rounded-xl text-sm"><i class="fa-regular fa-copy mr-1"></i>포스터 내용 복사하기</button>
-                    <a href="${esc(canvaUrl || 'https://www.canva.com/')}" target="_blank" rel="noopener" class="px-4 py-2.5 btn-go font-bold rounded-xl text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i>${canvaUrl ? '캔바 포스터 템플릿 열기' : '캔바 열기'}</a>
+                    <button id="canvaPosterFileBtn" onclick="downloadCanvaPoster()" class="px-4 py-2.5 btn-go font-bold rounded-xl text-sm"><i class="fa-solid fa-file-arrow-down mr-1"></i>캔바용 파일 받기</button>
+                    <a href="${esc(canvaUrl || 'https://www.canva.com/')}" target="_blank" rel="noopener" class="px-4 py-2.5 btn-go font-bold rounded-xl text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i>캔바 열기</a>
                 </div>
-                <p id="copyToastPoster" class="hidden text-xs font-bold text-emerald-700"><i class="fa-solid fa-check"></i> 복사했어요! 캔바에 붙여 넣어요.</p>
             </div>`;
             renderReasons();
             refreshPoster();
@@ -1767,11 +1954,6 @@
         function flashToast(id) {
             const el = document.getElementById(id); if (!el) return;
             el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 3000);
-        }
-        async function copyPosterText() {
-            const p = pickedByGroup();
-            if (p.tasks.length + p.skills.length + p.summary.length === 0) { alert('먼저 포스터에 넣을 내용을 골라요.'); return; }
-            if (await copyToClipboard(posterText())) { activity.posterCopied = true; saveState(); flashToast('copyToastPoster'); } else alert('복사가 안 돼요. 선생님께 도움을 요청해요.');
         }
         function readJobInfo() {
             const job = selectedTargetJob;
@@ -1966,10 +2148,6 @@
                 '나의 강점: ' + selectedStrengths.map(strengthShort).join(', '),
                 '미래를 위한 실천 다짐: ' + currentPromiseText()
             ].filter(Boolean).join('\n');
-        }
-        async function copyCardText() {
-            if (!selectedTargetJob) { alert('먼저 희망 직업을 골라요.'); return; }
-            if (await copyToClipboard(cardText())) { activity.cardCopied = true; saveState(); flashToast('copyToastCard'); } else alert('복사가 안 돼요. 선생님께 도움을 요청해요.');
         }
         function printDreamCard() { const pa = document.getElementById('posterPrintArea'); if (pa) pa.innerHTML = ''; activity.printed = true; saveState(); window.print(); }
 
