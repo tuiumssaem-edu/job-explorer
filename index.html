@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>꿈을 향해 차근차근! 진로직업 탐색기</title>
+    <title>꿈을 향해 차근차근! 장애학생 맞춤형 진로직업 탐색기</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -922,7 +922,7 @@
             return {
                 id: CN_PREFIX + cc.seq, name: cc.name, category: 'CAREERNET', categoryName: cc.group || '주니어커리어넷',
                 icon: 'fa-briefcase', strengths: [], source: '커리어넷',
-                summary: cc.summary || (cc.works || [])[0] || '', skills: (cc.abilities || []).slice(0, 6), places: [],
+                summary: cc.summary || (cc.works || [])[0] || '', skills: (cc.abilities || []).slice(0, 6),
                 pathway: pathway, tip: '', cc: cc
             };
         }
@@ -1090,7 +1090,7 @@
         }
 
         // ---------- 3. 포스터 재료 ----------
-        const GROUP_LABEL = { tasks: '하는 일', places: '일하는 장소', skills: '필요한 능력', summary: '소개 문장' };
+        const GROUP_LABEL = { tasks: '하는 일', skills: '필요한 능력', summary: '소개 문장' };
 
         const REASONS = [
             { id: 'R1', text: '내 강점과 잘 맞아요', icon: 'fa-thumbs-up' },
@@ -1114,7 +1114,6 @@
             };
             const baseSrc = job.source === '커리어넷' ? '커리어넷' : '기본';
             add('tasks', job.summary, baseSrc);
-            (job.places || []).forEach(t => add('places', t, baseSrc));
             job.skills.forEach(t => add('skills', t, baseSrc));
             if (cc) {
                 (cc.works || []).forEach(t => add('tasks', t, '커리어넷'));
@@ -1125,12 +1124,12 @@
 
         const POSTER_GROUPS = [
             { id: 'tasks', label: '하는 일', icon: 'fa-hands', box: 'bg-indigo-50 border-indigo-100', head: 'text-indigo-900' },
-            { id: 'places', label: '일하는 장소', icon: 'fa-location-dot', box: 'bg-emerald-50 border-emerald-100', head: 'text-emerald-900' },
             { id: 'skills', label: '필요한 능력', icon: 'fa-star', box: 'bg-amber-50 border-amber-100', head: 'text-amber-900' }
         ];
 
         function srcTag(src) {
             if (src === '커리어넷') return '<span class="text-[10px] font-extrabold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">커리어넷</span>';
+            if (src === '직접') return '<span class="text-[10px] font-extrabold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">내가 쓴 글</span>';
             return '';
         }
 
@@ -1356,7 +1355,7 @@
 
         function posterAllText() {
             const job = selectedTargetJob;
-            return (job ? job.name : '') + posterText() + ' 내가 소개하는 직업 하는 일 일하는 장소 필요한 능력 꿈차근! 직업탐색기 만든 사람 내가 고른 이유 내용을 골라요 ' + (posterMaker || '');
+            return (job ? job.name : '') + posterText() + ' 내가 소개하는 직업 하는 일 필요한 능력 꿈차근! 직업탐색기 만든 사람 내가 고른 이유 이유를 골라요 내용을 골라요 '+REASONS.map(r => r.text).join(' ')+' ' + (posterMaker || '');
         }
         function drawPoster(canvas, tplId, themeId, forExport) {
             let ctx = null;
@@ -1369,9 +1368,9 @@
             ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
 
             const p = pickedByGroup();
-            const defs = [['하는 일', 'fa-hands', p.tasks], ['일하는 장소', 'fa-location-dot', p.places], ['필요한 능력', 'fa-star', p.skills]]
+            const reasonList = REASONS.filter(r => choiceReasons.has(r.id)).map(r => r.text);
+            const defs = [['하는 일', 'fa-hands', p.tasks], ['필요한 능력', 'fa-star', p.skills], ['내가 고른 이유', 'fa-heart', reasonList]]
                 .filter(d => !forExport || d[2].length);
-            const reasons = REASONS.filter(r => choiceReasons.has(r.id)).map(r => r.text).join(' · ');
             const maker = (posterMaker || '').trim().slice(0, 20);
 
             // 배경과 카드
@@ -1441,9 +1440,7 @@
             } else { y += 10; }
 
             // 아래쪽: 고른 이유, 꾸밈 글
-            ctx.font = pzFont(700, 16);
-            const rLines = reasons ? pzWrap(ctx, '내가 고른 이유: ' + reasons, innerW) : [];
-            const footH = (rLines.length ? rLines.length * 22 + 8 : 0) + 56;
+            const footH = 56;
             const bodyTop = y, bodyBottom = card.y + card.h - footH;
 
             // 가운데: 세 칸. 글자가 많으면 글자 크기를 줄여 한 장에 담아요.
@@ -1482,7 +1479,7 @@
                 ctx.fillText(pzIcon(d[1]) || '', ncx + 40, ncy + 1);
                 ctx.textBaseline = 'alphabetic'; ctx.font = pzFont(800, 22); ctx.textAlign = 'left'; ctx.fillText(d[0], ncx + 64, ncy + 8);
                 let ty = sy + 62 + fs; ctx.font = pzFont(600, fs);
-                if (!d[2].length) { ctx.globalAlpha = .5; ctx.fillStyle = T === 'T3' ? '#9aa4bd' : '#777'; ctx.fillText('내용을 골라요', x0 + padX + 24, ty); ctx.globalAlpha = 1; }
+                if (!d[2].length) { ctx.globalAlpha = .5; ctx.fillStyle = T === 'T3' ? '#9aa4bd' : '#777'; ctx.fillText(d[0] === '내가 고른 이유' ? '이유를 골라요' : '내용을 골라요', x0 + padX + 24, ty); ctx.globalAlpha = 1; }
                 layout.items[i].forEach(lines => {
                     ctx.fillStyle = T === 'T3' ? '#f1f4fa' : PZ_INK;
                     lines.forEach((ln, k) => { if (k === 0) ctx.fillText('•', x0 + padX + 2, ty); ctx.fillText(ln, x0 + padX + 24, ty); ty += fs * 1.4; });
@@ -1492,8 +1489,6 @@
 
             // 아랫부분
             ctx.fillStyle = col.small; ctx.textAlign = 'left'; ctx.font = pzFont(700, 16);
-            let ry = card.y + card.h - 56 - (rLines.length ? rLines.length * 22 : 0) + 18;
-            rLines.forEach((ln, i) => ctx.fillText(ln, x0, ry + i * 22));
             ctx.globalAlpha = .8; ctx.font = pzFont(700, 14);
             ctx.fillText('꿈차근! 직업탐색기', x0, card.y + card.h - 26);
             if (maker) { ctx.textAlign = 'right'; ctx.fillText('만든 사람 · ' + maker, x0 + innerW, card.y + card.h - 26); }
@@ -1529,7 +1524,7 @@
             loadPosterFonts().then(() => { if (token === posterDrawToken) drawAllPosters(); });
         }
 
-        function posterPickCount() { const p = pickedByGroup(); return p.tasks.length + p.places.length + p.skills.length + p.summary.length; }
+        function posterPickCount() { const p = pickedByGroup(); return p.tasks.length + p.skills.length + p.summary.length; }
 
         function renderPosterPicks() {
             const box = document.getElementById('posterPicksBox'); if (!box) return;
@@ -1743,7 +1738,7 @@
         }
 
         function pickedByGroup() {
-            const out = { tasks: [], places: [], skills: [], summary: [] };
+            const out = { tasks: [], skills: [], summary: [] };
             currentPosterList.forEach(it => { if (posterPicks.has(it.key)) out[it.group].push(it.text); });
             return out;
         }
@@ -1752,7 +1747,6 @@
             const p = pickedByGroup();
             const lines = [`직업 이름: ${selectedTargetJob.name}`];
             if (p.tasks.length) lines.push('하는 일: ' + p.tasks.join(' / '));
-            if (p.places.length) lines.push('일하는 장소: ' + p.places.join(' / '));
             if (p.skills.length) lines.push('필요한 능력: ' + p.skills.join(' / '));
             if (p.summary.length) lines.push('소개 문장: ' + p.summary.join(' '));
             if (choiceReasons.size) lines.push('고른 이유: ' + REASONS.filter(r => choiceReasons.has(r.id)).map(r => r.text).join(', '));
@@ -1775,13 +1769,13 @@
         }
         async function copyPosterText() {
             const p = pickedByGroup();
-            if (p.tasks.length + p.places.length + p.skills.length + p.summary.length === 0) { alert('먼저 포스터에 넣을 내용을 골라요.'); return; }
+            if (p.tasks.length + p.skills.length + p.summary.length === 0) { alert('먼저 포스터에 넣을 내용을 골라요.'); return; }
             if (await copyToClipboard(posterText())) { activity.posterCopied = true; saveState(); flashToast('copyToastPoster'); } else alert('복사가 안 돼요. 선생님께 도움을 요청해요.');
         }
         function readJobInfo() {
             const job = selectedTargetJob;
             if (!job) return;
-            speakText(`내가 고른 직업은 ${job.name} 입니다. 하는 일. ${job.summary} 일하는 장소. ${(job.places || []).join(', ')}. 필요한 능력. ${job.skills.join(', ')}.`);
+            speakText(`내가 고른 직업은 ${job.name} 입니다. 하는 일. ${job.summary} 필요한 능력. ${job.skills.join(', ')}.`);
         }
         function readPosterPicks() {
             if (!selectedTargetJob) return;
