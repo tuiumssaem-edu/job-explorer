@@ -668,7 +668,7 @@
                             <i class="fa-solid fa-print"></i><span>인쇄</span>
                         </button>
                         <button onclick="speakDreamCard()" class="py-3 px-4 bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold rounded-xl flex items-center justify-center gap-1.5 text-sm">
-                            <i class="fa-solid fa-volume-high"></i><span>읽기</span>
+                            <i class="fa-solid fa-volume-high"></i><span>읽어주기</span>
                         </button>
                     </div>
                     <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 text-sm text-sky-900 space-y-2">
@@ -676,7 +676,7 @@
                         <p class="text-xs leading-relaxed">희망 직업, 나의 강점, 실천 다짐을 캔바 미래 직업 카드 템플릿에 넣어 완성해요.</p>
                         <div class="flex flex-wrap gap-2">
                             <button onclick="copyCardText()" class="px-4 py-2 bg-white border border-sky-300 hover:bg-sky-100 text-sky-800 font-bold rounded-xl text-xs"><i class="fa-regular fa-copy mr-1"></i>카드 글 복사하기</button>
-                            <a id="canvaCardLink" href="#" target="_blank" rel="noopener" class="hidden px-4 py-2 btn-go font-bold rounded-xl text-xs"><i class="fa-solid fa-up-right-from-square mr-1"></i>캔바 카드 템플릿 열기</a>
+                            <a id="canvaCardLink" href="https://www.canva.com/" target="_blank" rel="noopener" class="px-4 py-2 btn-go font-bold rounded-xl text-xs"><i class="fa-solid fa-up-right-from-square mr-1"></i>캔바 바로가기</a>
                         </div>
                         <p id="copyToastCard" class="hidden text-xs font-bold text-emerald-700"><i class="fa-solid fa-check"></i> 복사했어요!</p>
                     </div>
@@ -1709,7 +1709,7 @@
         }
         function toggleReason(id) {
             if (choiceReasons.has(id)) choiceReasons.delete(id); else choiceReasons.add(id);
-            saveState(); renderReasons();
+            saveState(); renderReasons(); updatePosterPreview(); schedulePosterDraw();
         }
         const POSTER_MAX = 4;   // 포스터 한 칸에 넣을 수 있는 내용 수
         let posterMsgTimer = null;
@@ -1871,7 +1871,7 @@
             updateDreamCard();
             const link = document.getElementById('canvaCardLink');
             const cu = getCanva('card');
-            if (link && cu) { link.href = cu; link.classList.remove('hidden'); }
+            if (link) link.href = cu || 'https://www.canva.com/';
         }
 
         function handleJobSelectChange() {
