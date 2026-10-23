@@ -787,6 +787,7 @@
         let abilityChecks = {};             // { jobId: { 능력글: 'good'|'help'|'practice' } }
         let careerOpen = { other: null, name: false };   // 접었다 펼치는 칸의 상태
         let careerActive = '';             // 지금 누른 분류 (kind+code)
+        let careerShowN = 12;
         let careerQuery = '', careerQueryFor = null, careerResults = [], careerMsg = '', careerBusy = false;
         let choiceReasons = new Set();    // 직업을 고른 이유
         let activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, posterSaved: false, posterPrinted: false };
@@ -1213,7 +1214,7 @@
                     </div>
                 </div>`;
             // 결과
-            const results = careerResults.map((r, i) => `
+            const results = careerResults.slice(0, careerShowN).map((r, i) => `
                 <button type="button" onclick="pickCareer(${i})" class="jr-job">
                     <span class="ic"><i class="fa-solid fa-briefcase"></i></span>
                     <span class="min-w-0"><span class="block font-black text-slate-900 text-lg">${esc(r.name)}</span><span class="block text-sm text-slate-600 mt-0.5 leading-snug">${esc(r.summary)}</span></span>
@@ -1222,7 +1223,7 @@
                 <div class="space-y-3">
                     <h3 class="step-h"><span class="num n2">2</span>직업을 골라요</h3>
                     <p class="text-base font-bold ${careerBusy ? 'text-blue-700' : 'text-slate-700'}" role="status">${careerBusy ? '<i class="fa-solid fa-spinner fa-spin mr-1"></i>' : ''}${esc(careerMsg) || '위에서 분류를 누르면 직업이 나와요.'}</p>
-                    ${results ? `<div class="grid sm:grid-cols-2 gap-3">${results}</div><p class="text-xs text-slate-400">출처: 주니어커리어넷</p>` : ''}
+                    ${results ? `<div class="grid sm:grid-cols-2 gap-3">${results}</div>${careerResults.length > careerShowN ? `<button type="button" onclick="careerShowN += 12; renderCareerSearch()" class="btn-go px-5 py-3 rounded-xl text-base"><i class="fa-solid fa-plus mr-1"></i>더 보기 (${careerResults.length - careerShowN}개 더 있어요)</button>` : ''}<p class="text-xs text-slate-400">출처: 주니어커리어넷</p>` : ''}
                 </div>`;
             const focus = document.activeElement && document.activeElement.id === 'careerQueryInput';
             box.innerHTML = mineHtml + find1 + find2;
@@ -1259,7 +1260,7 @@
             if (!filter && !q) { careerMsg = '분류를 누르거나, 직업 이름을 써요.'; renderCareerSearch(); return; }
             const payload = filter ? { [filter.kind]: filter.code } : { query: q };
             const what = filter ? `"${filter.label}"` : `"${q}"`;
-            careerBusy = true; careerMsg = `${what} 직업을 찾고 있어요...`; careerResults = []; renderCareerSearch();
+            careerBusy = true; careerMsg = `${what} 직업을 찾고 있어요...`; careerResults = []; careerShowN = 12; renderCareerSearch();
             try {
                 const r = await callAi('junior-search', payload);
                 careerResults = (Array.isArray(r.jobs) ? r.jobs : []).filter(j => j && j.seq && j.name);
