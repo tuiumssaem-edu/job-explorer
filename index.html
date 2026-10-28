@@ -710,6 +710,7 @@
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-1">
                     <h4 class="font-extrabold text-slate-800 flex items-center gap-1.5 text-base"><i class="fa-solid fa-circle-info text-indigo-500"></i><span>어떤 일을 하나요?</span></h4>
                     <p id="modalDescription" class="text-slate-600 leading-relaxed" style="white-space:pre-line"></p>
+                    <div id="modalEasyBar" class="flex flex-wrap items-center gap-2 pt-2"></div>
                     <div id="modalVideos" class="flex flex-wrap gap-2 pt-1"></div>
                 </div>
                 <div class="grid sm:grid-cols-2 gap-3">
@@ -1050,12 +1051,15 @@
             if (!job) return;
             const isCn = job.source === '커리어넷';
             const cc = job.cc || {};
+            modalJobId = job.id;
             document.getElementById('modalTitle').innerText = job.name;
             document.getElementById('modalCategory').innerText = job.categoryName;
             const src = document.getElementById('modalSource');
             src.innerText = isCn ? '출처: 주니어커리어넷' : '수업용 예시 (공식 출처 아님)';
             src.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full ' + (isCn ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-500');
-            document.getElementById('modalDescription').innerText = isCn ? ([cc.summary].concat(cc.works || []).filter(Boolean).join('\n') || '내용이 비어 있어요.') : job.summary;
+            document.getElementById('modalDescription').innerText = isCn && easyView[job.id] && cc.easy ? easyText(cc.easy)
+                : isCn ? ([cc.summary].concat(cc.works || []).filter(Boolean).join('\n') || '내용이 비어 있어요.') : job.summary;
+            renderEasyBar(job);
             document.getElementById('modalPathway').innerText = job.pathway || (isCn ? '주니어커리어넷에 정리된 준비 방법이 없어요.' : '');
             document.getElementById('modalTipHead').innerHTML = isCn ? '<i class="fa-solid fa-scale-balanced text-amber-500"></i>내 강점과 견주어 봐요' : '<i class="fa-solid fa-heart text-amber-500"></i>꿀팁';
             const checks = abilityChecks[job.id] || {};
@@ -1129,6 +1133,7 @@
             if (cc) {
                 (cc.works || []).forEach(t => add('tasks', t, '커리어넷'));
                 (cc.abilities || []).forEach(t => add('skills', t, '커리어넷'));
+                if (cc.easy) (cc.easy.works || []).forEach(t => add('tasks', t, '쉬운 말'));
             }
             return list;
         }
@@ -1140,6 +1145,7 @@
 
         function srcTag(src) {
             if (src === '커리어넷') return '<span class="text-[10px] font-extrabold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">커리어넷</span>';
+            if (src === '쉬운 말') return '<span class="text-[10px] font-extrabold bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded">쉬운 말(AI)</span>';
             if (src === '직접') return '<span class="text-[10px] font-extrabold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">내가 쓴 글</span>';
             return '';
         }
@@ -1302,6 +1308,56 @@
                 }
             } catch (e) { careerMsg = careerErrorMsg(e); }
             careerBusy = false; renderCareerSearch(); renderViewedJobs();
+        }
+
+        // 직업 설명 쉬운 말로 바꿔 보기 (Worker가 커리어넷 글을 Gemini로 바꿔요. 결과는 careerCache에 같이 저장해요)
+        let easyView = {};                 // { jobId: true } 쉬운 말로 보고 있는 직업
+        let easyBusy = '', easyMsg = '';
+        let modalJobId = '';               // 지금 팝업에 열려 있는 직업
+        function easyText(e) {
+            const lines = [e.summary].concat(e.works || []).filter(Boolean);
+            if ((e.words || []).length) lines.push('', '[낱말 풀이]', ...e.words.map(w => `${w.word}: ${w.meaning}`));
+            return lines.join('\n');
+        }
+        function renderEasyBar(job) {
+            const bar = document.getElementById('modalEasyBar');
+            if (job.source !== '커리어넷') { bar.innerHTML = ''; return; }
+            const on = !!(easyView[job.id] && job.cc && job.cc.easy);
+            const btn = easyBusy === job.id
+                ? '<button type="button" disabled class="px-4 py-2 bg-violet-100 text-violet-800 font-bold rounded-xl text-sm"><i class="fa-solid fa-spinner fa-spin mr-1"></i>쉬운 말로 바꾸고 있어요...</button>'
+                : `<button type="button" onclick="toggleEasy('${job.id}')" ${easyBusy ? 'disabled' : ''} aria-pressed="${on}" class="px-4 py-2 ${on ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-violet-600 text-white hover:bg-violet-700'} font-bold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid ${on ? 'fa-rotate-left' : 'fa-wand-magic-sparkles'} mr-1"></i>${on ? '원래 글 보기' : '쉬운 말로 바꿔 보기'}</button>`;
+            const note = on ? '<span class="text-[11px] text-slate-500">AI가 커리어넷 글을 쉬운 말로 바꿨어요. 이상한 곳이 있으면 선생님께 알려요.</span>'
+                : easyMsg ? `<span class="text-xs font-bold text-rose-600" role="status">${esc(easyMsg)}</span>` : '';
+            bar.innerHTML = btn + note;
+        }
+        async function toggleEasy(jobId) {
+            const cc = careerCache[jobId];
+            if (!cc || easyBusy) return;
+            easyMsg = '';
+            if (easyView[jobId]) { delete easyView[jobId]; openJobDetail(jobId); return; }
+            if (!cc.easy) {
+                easyBusy = jobId; openJobDetail(jobId);
+                try {
+                    const d = await callAi('easy-job', { seq: cc.seq });
+                    const e = {
+                        summary: asStr(d.summary), works: asStrArr(d.works).slice(0, 4),
+                        words: (Array.isArray(d.words) ? d.words : []).map(w => ({ word: asStr(w && w.word), meaning: asStr(w && w.meaning) })).filter(w => w.word && w.meaning).slice(0, 3)
+                    };
+                    if (e.summary || e.works.length) { cc.easy = e; saveState(); }
+                    else easyMsg = '쉬운 말로 바꾸지 못했어요. 다시 눌러 봐요.';
+                } catch (err) { easyMsg = easyErrorMsg(err); }
+                easyBusy = '';
+            }
+            if (cc.easy) easyView[jobId] = true;
+            // 기다리는 동안 팝업을 닫았거나 다른 직업을 열었으면 그 화면은 그대로 둬요.
+            if (modalJobId === jobId && !document.getElementById('jobDetailModal').classList.contains('hidden')) openJobDetail(jobId);
+        }
+        function easyErrorMsg(e) {
+            if (e && e.message === 'NO_ENDPOINT') return '지금은 서버가 연결되어 있지 않아요. 선생님께 알려요.';
+            if (e && e.code === 'NO_GEMINI_KEY') return 'AI 인증키가 아직 설정되지 않았어요. 선생님께 알려요.';
+            let why = '';
+            try { if (new URLSearchParams(location.search).get('teacher') === '1') why = ' [교사용 원인: ' + ((e && e.message) || '알 수 없음') + (e && e.code ? ' / ' + e.code : '') + ']'; } catch (x) {}
+            return '쉬운 말로 바꾸지 못했어요. 잠시 뒤에 다시 눌러 봐요.' + why;
         }
 
         const POSTER_TEMPLATES = [{ id: 'T1', name: '노트형' }, { id: 'T2', name: '컬러형' }, { id: 'T3', name: '간판형' }];
