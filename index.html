@@ -806,6 +806,8 @@
         let choiceReasons = new Set();    // 직업을 고른 이유
         let activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, posterSaved: false, posterPrinted: false };
         let posterTemplate = 'T1', posterTheme = 'C1', posterMaker = '';   // 포스터 모양(저장), 만든 사람(저장 안 함)
+        let posterCatch = '';             // 포스터 한 줄 제목 (직접 쓸 수 있어서 저장 안 함)
+        let promiseFromAi = false;        // '내가 직접 쓰기' 다짐을 AI 추천에서 가져왔는지 (교사 기록용)
 
         const STATE_KEY = 'jx_state_v1';
 
@@ -1007,7 +1009,7 @@
             selectedStrengths = []; selectedTargetJob = null; checkedSkills = new Set(); chosenPrep = null; chosenMission = '';
             careerCache = {}; abilityChecks = {}; posterPicks = new Set();
             choiceReasons = new Set();
-            posterTemplate = 'T1'; posterTheme = 'C1'; posterMaker = '';
+            posterTemplate = 'T1'; posterTheme = 'C1'; posterMaker = ''; posterCatch = ''; promiseFromAi = false; phraseSets = {};
             activity = { posterCopied: false, cardSaved: false, cardCopied: false, printed: false, posterSaved: false, posterPrinted: false };
             careerQuery = ''; careerQueryFor = null; careerActive = ''; careerResults = []; careerMsg = '';
             promiseChoice = 'custom'; customPromise = '';
@@ -1435,7 +1437,7 @@
 
         function posterAllText() {
             const job = selectedTargetJob;
-            return (job ? job.name : '') + posterText() + ' 내가 소개하는 직업 하는 일 필요한 능력 꿈차근! 직업탐색기 만든 사람 내가 고른 이유 이유를 골라요 내용을 골라요 '+REASONS.map(r => r.text).join(' ')+' ' + (posterMaker || '');
+            return (job ? job.name : '') + posterText() + (posterCatch || '') + ' 내가 소개하는 직업 하는 일 필요한 능력 꿈차근! 직업탐색기 만든 사람 내가 고른 이유 이유를 골라요 내용을 골라요 '+REASONS.map(r => r.text).join(' ')+' ' + (posterMaker || '');
         }
         function drawPoster(canvas, tplId, themeId, forExport) {
             let ctx = null;
@@ -1506,16 +1508,20 @@
                 ctx.strokeStyle = T === 'T3' ? th.main : PZ_INK; ctx.setLineDash(T === 'T3' ? [8, 6] : []); ctx.stroke(); ctx.setLineDash([]);
             }
             y += 14;
-            if (p.summary.length) {
-                ctx.font = pzFont(700, 21);
-                const lines = pzWrap(ctx, p.summary[0], innerW - (T === 'T2' ? 40 : 0)), lh = 30;
+            // 한 줄 제목(있으면)을 크게, 없으면 소개 문장을 넣어요.
+            const catchText = (posterCatch || '').trim().slice(0, 30);
+            const sumText = catchText || p.summary[0];
+            if (sumText) {
+                ctx.font = catchText ? pzFont(800, 27) : pzFont(700, 21);
+                const lines = pzWrap(ctx, sumText, innerW - (T === 'T2' ? 40 : 0)), lh = catchText ? 38 : 30;
+                const sumCol = catchText ? (T === 'T3' ? th.main : T === 'T2' ? th.dark : PZ_INK) : col.sum;
                 if (T === 'T2') {
                     const bh = lines.length * lh + 22; ctx.fillStyle = '#fff'; pzRound(ctx, x0, y + 6, innerW, bh, 20); ctx.fill();
-                    ctx.fillStyle = col.sum; ctx.textAlign = 'center';
-                    lines.forEach((ln, i) => ctx.fillText(ln, cx, y + 6 + 30 + i * lh - 2)); y += bh + 16;
+                    ctx.fillStyle = sumCol; ctx.textAlign = 'center';
+                    lines.forEach((ln, i) => ctx.fillText(ln, cx, y + 6 + lh + i * lh - 2)); y += bh + 16;
                 } else {
-                    ctx.fillStyle = col.sum; ctx.textAlign = 'center';
-                    lines.forEach((ln, i) => ctx.fillText(ln, cx, y + 24 + i * lh)); y += lines.length * lh + 22;
+                    ctx.fillStyle = sumCol; ctx.textAlign = 'center';
+                    lines.forEach((ln, i) => ctx.fillText(ln, cx, y + lh - 6 + i * lh)); y += lines.length * lh + 22;
                 }
             } else { y += 10; }
 
@@ -1604,7 +1610,7 @@
             loadPosterFonts().then(() => { if (token === posterDrawToken) drawAllPosters(); });
         }
 
-        function posterPickCount() { const p = pickedByGroup(); return p.tasks.length + p.skills.length + p.summary.length; }
+        function posterPickCount() { const p = pickedByGroup(); return p.tasks.length + p.skills.length + p.summary.length + ((posterCatch || '').trim() ? 1 : 0); }
 
         function renderPosterPicks() {
             const box = document.getElementById('posterPicksBox'); if (!box) return;
@@ -1741,6 +1747,13 @@
             let y = card.y + 278;
             if (T !== 'T2') s.addShape('line', { x: R(x0), y: R(y), w: R(innerW), h: 0, line: { color: T === 'T3' ? hexNo(th.main) : ink, width: 1.5, dashType: T === 'T3' ? 'dash' : 'solid' } });
             y += 24;
+            const catchText = (posterCatch || '').trim().slice(0, 30);
+            if (catchText) {
+                measure(pzFont(800, 27));
+                const cl = wrap(catchText, innerW);
+                pxText(s, cl.join('\n'), { x: R(x0), y: R(y - 8), w: R(innerW), h: R(cl.length * 38 + 10), fontSize: ptOf(27), bold: true, color: col.title, align: 'center', name: '한 줄 제목' });
+                y += cl.length * 38 + 16;
+            }
 
             // 가운데 칸들
             const footH = 56, bodyTop = y, bodyBottom = card.y + card.h - footH;
@@ -1922,6 +1935,12 @@
                         <h3 class="font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-circle-question text-amber-500"></i>이 직업을 왜 골랐나요? <small class="text-xs font-bold text-slate-500">(포스터에 같이 나와요)</small></h3>
                         <div id="reasonChips" class="flex flex-wrap gap-2"></div>
                     </div>
+                    <div class="bg-white rounded-2xl p-5 border-2 border-violet-200 shadow-sm space-y-3">
+                        <h3 class="font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-violet-600"></i>나만의 한 줄 제목 <small class="text-xs font-bold text-slate-500">(포스터 직업 이름 아래에 크게 나와요)</small></h3>
+                        <div id="catchSuggestBox" class="space-y-2"></div>
+                        <input type="text" id="posterCatchInput" maxlength="30" value="${esc(posterCatch)}" oninput="onPosterCatch(this.value)" aria-label="포스터 한 줄 제목"
+                            class="w-full p-2.5 border border-slate-300 rounded-xl text-sm bg-white" placeholder="추천 문장을 누르거나 직접 써요">
+                    </div>
                     <div>
                         <h3 class="step-h"><span class="num n3">3</span>포스터 모양 고르기</h3>
                         <div id="posterDesignBox" class="mt-3 bg-white rounded-2xl p-5 border border-slate-200"></div>
@@ -1958,6 +1977,7 @@
                 </div>
             </div>`;
             renderReasons();
+            renderCatchSuggest();
             refreshPoster();
         }
 
@@ -1973,6 +1993,78 @@
         function toggleReason(id) {
             if (choiceReasons.has(id)) choiceReasons.delete(id); else choiceReasons.add(id);
             saveState(); renderReasons(); updatePosterPreview(); schedulePosterDraw();
+        }
+
+        // ---------- AI 문장 추천 (포스터 한 줄 제목 · 미래 직업 카드 실천 다짐) ----------
+        // 강점 번호·직업 코드·연습 항목 번호만 보내요. 고른 문장은 입력 칸에 들어가서 고쳐 쓸 수 있어요.
+        const PHRASE_ROUNDS = 3;
+        let phraseSets = {};               // { 묶음 키: { round, items, busy, msg } }
+        function phraseKey(kind) {
+            const job = selectedTargetJob;
+            if (!job || job.source !== '커리어넷' || !careerCache[job.id]) return '';
+            const pi = kind === 'promise' ? prepItem() : null;
+            return [kind, job.id, selectedStrengths.slice().sort().join('.'), pi ? (pi.job ? pi.wid : pi.id) : ''].join('|');
+        }
+        async function loadPhrases(kind, next) {
+            const key = phraseKey(kind);
+            if (!key) return;
+            const st = phraseSets[key] = phraseSets[key] || { round: 0, items: [], busy: false, msg: '' };
+            if (st.busy) return;
+            const round = next ? (st.round % PHRASE_ROUNDS) + 1 : (st.round || 1);
+            st.busy = true; st.msg = ''; renderPhraseBoxes();
+            try {
+                const pi = kind === 'promise' ? prepItem() : null;
+                const d = await callAi('phrases', { kind, seq: careerCache[selectedTargetJob.id].seq, strengths: selectedStrengths, prep: pi ? (pi.job ? pi.wid : pi.id) : '', n: round });
+                const items = asStrArr(d.items).slice(0, 3);
+                if (items.length) { st.items = items; st.round = round; } else st.msg = '문장을 만들지 못했어요.';
+            } catch (e) { st.msg = aiErrorMsg(e, '문장을 만들지 못했어요.'); }
+            st.busy = false;
+            renderPhraseBoxes();
+        }
+        function phraseBlockHtml(kind, current, pickFn) {
+            const key = phraseKey(kind);
+            if (!key) return '<p class="text-xs text-slate-500">2번 탭에서 커리어넷 직업을 고르면 AI가 문장을 추천해 줘요.</p>';
+            const st = phraseSets[key] || { items: [], busy: false, msg: '' };
+            const label = kind === 'catch' ? '한 줄 제목' : '다짐';
+            const head = st.busy
+                ? `<p class="text-sm font-bold text-violet-700" role="status"><i class="fa-solid fa-spinner fa-spin mr-1"></i>내 강점에 맞는 ${label}을 만들고 있어요...</p>`
+                : st.items.length
+                    ? `<p class="text-xs text-slate-500">마음에 드는 문장을 누르면 아래 칸에 들어가요. 고쳐 써도 돼요. <span class="font-extrabold text-violet-700">AI 추천</span></p>`
+                    : `<button type="button" onclick="loadPhrases('${kind}')" class="px-4 py-2.5 btn-go font-extrabold rounded-xl text-sm"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>AI에게 ${label} 추천받기</button>
+                       ${selectedStrengths.length ? '' : '<p class="text-xs text-amber-700 font-bold">1번 탭에서 강점을 고르면 나에게 더 잘 맞는 문장이 나와요.</p>'}`;
+            const list = st.items.map((t, i) => {
+                const on = current.trim() === t;
+                return `<button type="button" onclick="${pickFn}(${i})" aria-pressed="${on}" class="w-full text-left p-3 rounded-xl border-2 text-sm font-bold ${on ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-300/50' : 'border-slate-200 bg-white hover:border-violet-300'}">${on ? '<i class="fa-solid fa-check text-violet-600 mr-1"></i>' : ''}${esc(t)}</button>`;
+            }).join('');
+            const more = st.items.length && !st.busy ? `<button type="button" onclick="loadPhrases('${kind}', true)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs"><i class="fa-solid fa-rotate mr-1"></i>다른 문장 보기</button>` : '';
+            return head + (list ? `<div class="grid gap-2">${list}</div>` : '') + more + (st.msg ? `<p class="text-xs font-bold text-rose-600" role="status">${esc(st.msg)}</p>` : '');
+        }
+        function phraseItems(kind) { const st = phraseSets[phraseKey(kind)]; return st ? st.items : []; }
+        function renderPhraseBoxes() { renderCatchSuggest(); if (document.getElementById('promiseOptions')) renderPromiseOptions(); }
+
+        // 포스터 한 줄 제목
+        function renderCatchSuggest() {
+            const box = document.getElementById('catchSuggestBox');
+            if (box) box.innerHTML = phraseBlockHtml('catch', posterCatch, 'pickCatch');
+        }
+        function pickCatch(i) {
+            const t = phraseItems('catch')[i];
+            if (!t) return;
+            posterCatch = t.slice(0, 30);
+            const el = document.getElementById('posterCatchInput'); if (el) el.value = posterCatch;
+            renderCatchSuggest(); updatePosterPreview(); schedulePosterDraw();
+        }
+        function onPosterCatch(v) {
+            posterCatch = v;
+            renderCatchSuggest(); updatePosterPreview(); schedulePosterDraw();
+        }
+
+        // 미래 직업 카드 실천 다짐: 추천을 누르면 '내가 직접 쓰기' 칸에 들어가요.
+        function pickPromiseSuggest(i) {
+            const t = phraseItems('promise')[i];
+            if (!t) return;
+            customPromise = t.slice(0, 60); promiseFromAi = true; promiseChoice = 'custom';
+            renderPromiseOptions(); updateDreamCard();
         }
         const POSTER_MAX = 4;   // 포스터 한 칸에 넣을 수 있는 내용 수
         let posterMsgTimer = null;
@@ -2009,6 +2101,7 @@
         function posterText() {
             const p = pickedByGroup();
             const lines = [`직업 이름: ${selectedTargetJob.name}`];
+            if ((posterCatch || '').trim()) lines.push('한 줄 제목: ' + posterCatch.trim());
             if (p.tasks.length) lines.push('하는 일: ' + p.tasks.join(' / '));
             if (p.skills.length) lines.push('필요한 능력: ' + p.skills.join(' / '));
             if (p.summary.length) lines.push('소개 문장: ' + p.summary.join(' '));
@@ -2051,7 +2144,7 @@
             let lastErr;
             for (let attempt = 0; attempt < 2; attempt++) {
                 const ctrl = new AbortController();
-                const timer = setTimeout(() => ctrl.abort(), 30000);
+                const timer = setTimeout(() => ctrl.abort(), 45000);   // AI는 바쁠 때 다른 모델로 한 번 더 해 봐서 오래 걸릴 수 있어요
                 try {
                     const res = await fetch(url, {
                         method: 'POST',
@@ -2064,7 +2157,7 @@
                     if (res.ok && data && data.result) return data.result;
                     lastErr = new Error(data && data.error ? data.error : 'HTTP ' + res.status);
                     lastErr.code = data && data.code;
-                    if (res.status < 500 || res.status === 501) break;       // 4xx는 다시 해도 같아요
+                    if (res.status < 500 || res.status === 501 || res.status === 504) break;       // 4xx나 AI 시간 초과는 바로 다시 해도 같아요
                 } catch (e) { clearTimeout(timer); lastErr = e; }
                 await new Promise(r => setTimeout(r, 800));
             }
@@ -2363,7 +2456,10 @@
                 <span class="mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${on ? 'border-amber-600' : 'border-slate-300'}">${on ? '<span class="w-2.5 h-2.5 rounded-full bg-amber-600"></span>' : ''}</span>
                 <span class="flex-1">${inner}</span></button>`;
             const customOn = promiseChoice === 'custom';
-            box.innerHTML = opts.map(o => radio(o.id, promiseChoice === o.id,
+            const aiBlock = `<div class="rounded-xl border-2 border-violet-200 bg-violet-50/40 p-3 space-y-2">
+                    <p class="text-sm font-extrabold text-violet-900"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>AI가 추천하는 다짐 <span class="text-[11px] font-bold text-slate-500">누르면 '내가 직접 쓰기' 칸에 들어가요</span></p>
+                    ${phraseBlockHtml('promise', customOn ? customPromise : '', 'pickPromiseSuggest')}</div>`;
+            box.innerHTML = aiBlock + opts.map(o => radio(o.id, promiseChoice === o.id,
                 `<span class="block font-bold text-slate-800 leading-snug">${esc(o.text)}</span><span class="block text-[11px] text-slate-500 mt-0.5">${esc(o.from)}</span>`)).join('') +
                 `<div class="rounded-xl border-2 p-3 space-y-2 transition ${customOn ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-300/50' : 'border-slate-200 bg-white'}">
                     <button type="button" role="radio" aria-checked="${customOn}" onclick="choosePromise('custom')" class="w-full text-left flex items-center gap-3 text-sm font-bold text-slate-800">
@@ -2395,6 +2491,7 @@
         }
         function onCustomPromise(v) {
             customPromise = v;
+            if (!v.trim()) promiseFromAi = false;
             if (promiseChoice !== 'custom') {
                 promiseChoice = 'custom';
                 renderPromiseOptions();
@@ -2566,7 +2663,7 @@
             if (job) buildPosterList().forEach(it => { if (posterPicks.has(it.key)) { if (it.src === '커리어넷') career++; else base++; } });
             let promiseType = '미정';
             if (currentPromiseText()) {
-                if (promiseChoice === 'custom') promiseType = '직접 쓴 다짐';
+                if (promiseChoice === 'custom') promiseType = promiseFromAi ? '직접 쓴 다짐(AI 추천 활용)' : '직접 쓴 다짐';
                 else if (promiseChoice === 'prep') promiseType = '선택형(내가 고른 연습)';
                 else if (promiseChoice === 'mission') promiseType = '선택형(연습 도우미 미션)';
             }
