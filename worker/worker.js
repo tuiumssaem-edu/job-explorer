@@ -1,6 +1,6 @@
 // 꿈차근! 직업탐색기 서버(Cloudflare Worker) v6
 // 하는 일: ① 주니어커리어넷 직업정보를 대신 가져와 앱에 전달해요.  ② 직업 설명을 Gemini로 쉬운 말로 바꿔요.
-//          ③ 직업 맞춤 취업 준비 항목과 연습 도우미(상황 3개 × 역할극·따라 말하기, 이번 주 미션)를 만들어요.
+//          ③ 직업 맞춤 취업 준비 항목과 연습 도우미(상황 3개 × 상황 이야기·역할극, 이번 주 미션)를 만들어요.
 // 필요한 Secret: CAREERNET_API_KEY (주니어커리어넷 인증키), GEMINI_API_KEY (쉬운 말 바꾸기)
 // 있으면 좋은 것: KV 바인딩 EASY_CACHE (같은 직업의 쉬운 말 결과를 저장해 두고 다시 써요. 없어도 동작해요)
 // 앱과 주고받는 mode: junior-search, junior-detail, easy-job, job-prep, coach, phrases(포스터 한 줄 제목·실천 다짐 추천)
@@ -334,11 +334,11 @@ async function jobPrep(seq, env) {
   });
 }
 
-// ---------- 연습 도우미 (상황 3개 × 역할극 · 따라 말하기, 이번 주 미션) ----------
+// ---------- 연습 도우미 (상황 3개 × 상황 이야기 + 역할극, 이번 주 미션) ----------
 // 직업과 연습 항목마다 그 일터에 맞는 상황 3개를 한 번에 만들고 저장해 두고 다시 써요.
 const COACH_SCENES = 3;
 const COACH_SYSTEM = EASY_SYSTEM.replace("[자료]의 직업 설명을 '쉬운 글'로 바꿔 씁니다.",
-  "학생이 일터에서 할 행동을 미리 연습하도록 역할극과 따라 말하기 자료를 쉬운 글로 만듭니다.") + `
+  "학생이 일터에서 할 행동을 미리 연습하도록 상황 이야기와 역할극을 쉬운 글로 만듭니다.") + `
 추가 규칙:
 - 학생을 탓하거나 창피를 주는 말은 쓰지 않아요. 틀린 선택에도 부드럽게 더 좋은 방법을 알려 줘요.
 - 안전과 관계된 내용은 정확하게, 꼭 어른(담당자)에게 묻고 지침을 지키는 쪽으로 써요.
@@ -347,7 +347,7 @@ const SCENE_SCHEMA = {
   type: "OBJECT",
   properties: {
     title: { type: "STRING" },
-    say: { type: "ARRAY", items: { type: "STRING" } },
+    story: { type: "ARRAY", items: { type: "STRING" } },
     roleplay: {
       type: "ARRAY",
       items: {
@@ -367,7 +367,7 @@ const SCENE_SCHEMA = {
       }
     }
   },
-  required: ["title", "say", "roleplay"]
+  required: ["title", "story", "roleplay"]
 };
 const COACH_SCHEMA = {
   type: "OBJECT",
@@ -379,7 +379,7 @@ const COACH_SCHEMA = {
 };
 
 async function coach(seq, itemId, env) {
-  return cached(env, `coach2:${EASY_VERSION}:${seq}:${itemId}`, async () => {
+  return cached(env, `coach4:${EASY_VERSION}:${seq}:${itemId}`, async () => {
     let item = COMMON_PREP[itemId];
     if (!item) {
       const p = await jobPrep(seq, env);
@@ -394,13 +394,17 @@ ${d.name}(으)로 일하는 곳에서 '연습할 행동'이 꼭 필요한 상황
 - 상황 ${COACH_SCENES}개는 이 직업에서 실제로 일어날 만한 장면이고, 만나는 사람이나 하는 일이 서로 달라야 해요.
 - scenes: 상황 ${COACH_SCENES}개. 각 상황은
   - title: 상황을 알려 주는 짧은 제목 (15글자 안팎)
-  - say: 그 상황에서 학생이 따라 말할 짧은 문장 2~3개 (실제로 소리 내어 말할 말이에요)
+  - story: '나'가 주인공인 상황 이야기 3~4문장. 언제, 어디서, 누구와, 무슨 일이 생겼는지 눈에 그려지게 구체적으로 써요.
+    예: "토요일 점심이에요." / "가게에 손님이 많아서 바빠요." / "나는 계산대 옆에서 음료를 만들고 있어요." / "그때 처음 보는 손님이 다가와요."
+    마지막 문장은 '연습할 행동'이 필요해지는 순간에서 멈춰요. 내가 어떻게 했는지는 쓰지 않아요.
   - roleplay: 역할극 2단계. 각 단계는
-    - line: 상대방(손님, 동료, 담당자)이 하는 말이나 일어난 일 한두 문장
-    - choices: 내가 할 수 있는 행동이나 말 3개. 그중 하나만 good이 true예요.
+    - line: 그 순간 상대방(손님, 동료, 담당자)이 하는 말(큰따옴표로)이나 일어난 일 한두 문장. 2단계는 1단계 다음에 이어지는 일이에요.
+    - choices: 내가 할 수 있는 말이나 행동 3개. 그중 하나만 good이 true예요. 말이면 실제로 할 말을 큰따옴표로 써요.
+      틀린 보기도 학생이 실제로 할 법한 행동으로 써요. (예: 혼자 짐작해서 하기, 작은 목소리로 말하기, 다른 일을 먼저 하기)
+      화내기, 던지기, 숨기, 도망가기처럼 엉뚱하거나 나쁜 행동은 쓰지 않아요. 모든 글은 "~해요"체로 써요.
     - feedback: good이면 칭찬과 이유 한 문장, 아니면 "이렇게 하면 ~할 수 있어요"처럼 더 좋은 방법 한 문장
 - missions: 이번 주에 학교나 집에서 '연습할 행동'을 해 볼 작은 미션 3개 (한 문장씩)
-{"scenes":[{"title":"...","say":["..."],"roleplay":[{"line":"...","choices":[{"text":"...","good":true,"feedback":"..."}]}]}],"missions":["..."]}`, COACH_SCHEMA, 0.6, COACH_TIMEOUT_MS);
+{"scenes":[{"title":"...","story":["..."],"roleplay":[{"line":"...","choices":[{"text":"...","good":true,"feedback":"..."}]}]}],"missions":["..."]}`, COACH_SCHEMA, 0.6, COACH_TIMEOUT_MS);
     const scenes = (Array.isArray(parsed.scenes) ? parsed.scenes : []).map(s => {
       const roleplay = (Array.isArray(s && s.roleplay) ? s.roleplay : []).map(t => {
         const choices = (Array.isArray(t && t.choices) ? t.choices : [])
@@ -410,8 +414,8 @@ ${d.name}(으)로 일하는 곳에서 '연습할 행동'이 꼭 필요한 상황
         for (let i = choices.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [choices[i], choices[j]] = [choices[j], choices[i]]; }
         return { line: cleanText(t && t.line, 160), choices };
       }).filter(t => t.line && t.choices.length >= 2 && t.choices.filter(c => c.good).length === 1).slice(0, 2);
-      return { title: cleanText(s && s.title, 40), say: strs(s && s.say, 3, 80), roleplay };
-    }).filter(s => s.title && s.say.length && s.roleplay.length).slice(0, COACH_SCENES);
+      return { title: cleanText(s && s.title, 40), story: strs(s && s.story, 4, 120), roleplay };
+    }).filter(s => s.title && s.story.length && s.roleplay.length).slice(0, COACH_SCENES);
     if (!scenes.length) throw new CareerError("AI_EMPTY", "AI 응답이 비어 있어요. 다시 시도해 주세요.");
     return { seq, item: itemId, scenes, missions: strs(parsed.missions, 3, 100) };
   });
