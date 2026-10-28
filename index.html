@@ -2132,13 +2132,16 @@
             try { return (localStorage.getItem('jx_ai_endpoint') || AI_ENDPOINT || '').trim(); } catch (e) { return (AI_ENDPOINT || '').trim(); }
         }
 
-        async function callAi(mode, payload) {
+        // timeoutMs: 한 번 기다리는 시간. AI는 바쁠 때 다른 모델로 한 번 더 해 봐서 오래 걸릴 수 있어요.
+        // 아주 오래 기다리는 요청(연습 도우미)은 같은 시간을 또 기다리지 않게 한 번만 보내요.
+        async function callAi(mode, payload, timeoutMs) {
             const url = getEndpoint();
             if (!url) throw new Error('NO_ENDPOINT');
+            const wait = timeoutMs || 45000;
             let lastErr;
-            for (let attempt = 0; attempt < 2; attempt++) {
+            for (let attempt = 0; attempt < (wait > 45000 ? 1 : 2); attempt++) {
                 const ctrl = new AbortController();
-                const timer = setTimeout(() => ctrl.abort(), 45000);   // AI는 바쁠 때 다른 모델로 한 번 더 해 봐서 오래 걸릴 수 있어요
+                const timer = setTimeout(() => ctrl.abort(), wait);
                 try {
                     const res = await fetch(url, {
                         method: 'POST',
@@ -2295,7 +2298,7 @@
                 // 고르기만 하면 바로 자료를 불러와요. 실패했을 때만 다시 불러오기 버튼을 보여 줘요.
                 box.innerHTML = coachShell(err
                     ? `<p class="text-xs font-bold text-rose-600" role="status">${esc(err)}</p><button type="button" onclick="loadCoach()" class="px-4 py-2.5 btn-go font-extrabold rounded-xl text-sm"><i class="fa-solid fa-rotate mr-1"></i>다시 불러오기</button>`
-                    : `<p class="text-sm font-bold text-violet-700" role="status"><i class="fa-solid fa-spinner fa-spin mr-1"></i>${esc(t.job.name)} 일터에서 연습할 상황을 준비하고 있어요... 처음에는 20초쯤 걸려요.</p>`, t.pi.short);
+                    : `<p class="text-sm font-bold text-violet-700" role="status"><i class="fa-solid fa-spinner fa-spin mr-1"></i>${esc(t.job.name)} 일터에서 연습할 상황을 준비하고 있어요...</p><p class="text-xs text-slate-500">처음에는 20초쯤 걸려요. AI가 붐빌 때는 1분 넘게 걸릴 수 있으니 조금만 기다려요.</p>`, t.pi.short);
                 if (!err && !coachBusy) loadCoach();
                 return;
             }
@@ -2358,7 +2361,7 @@
             if (!t || t.data || coachBusy) return;
             delete coachErr[t.key]; coachBusy = t.key; renderCoach();
             try {
-                const d = await callAi('coach', { seq: t.cc.seq, item: t.wid });
+                const d = await callAi('coach', { seq: t.cc.seq, item: t.wid }, 100000);
                 const scenes = (Array.isArray(d.scenes) ? d.scenes : []).map(s => ({
                     title: asStr(s && s.title), say: asStrArr(s && s.say).slice(0, 3),
                     roleplay: (Array.isArray(s && s.roleplay) ? s.roleplay : []).map(r => ({
