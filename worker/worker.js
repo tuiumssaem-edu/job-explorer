@@ -3,7 +3,7 @@
 //          ③ 직업 맞춤 취업 준비 항목과 연습 도우미(상황 3개 × 역할극·따라 말하기, 이번 주 미션)를 만들어요.
 // 필요한 Secret: CAREERNET_API_KEY (주니어커리어넷 인증키), GEMINI_API_KEY (쉬운 말 바꾸기)
 // 있으면 좋은 것: KV 바인딩 EASY_CACHE (같은 직업의 쉬운 말 결과를 저장해 두고 다시 써요. 없어도 동작해요)
-// 앱과 주고받는 mode: junior-search, junior-detail, easy-job, job-prep, coach
+// 앱과 주고받는 mode: junior-search, junior-detail, easy-job, job-prep, coach, phrases(포스터 한 줄 제목·실천 다짐 추천)
 const ALLOWED_ORIGIN = "https://tuiumssaem-edu.github.io";
 const CAREER_BASE = "https://www.career.go.kr/cnet/front/openapi";
 const GEMINI_MODEL = "gemini-3.8-flash";   // 다른 모델을 쓰려면 변수 GEMINI_MODEL을 추가해요. (2.5 Flash는 새 사용자에게 막혔어요)
@@ -189,45 +189,62 @@ async function cached(env, key, make) {
   return result;
 }
 
+// 기본 모델이 바쁘거나(429·5xx) 너무 오래 걸리면 가벼운 모델로 한 번 더 해 봐요.
+const GEMINI_FALLBACK_MODEL = "gemini-3.5-flash-lite";   // 바꾸려면 변수 GEMINI_FALLBACK_MODEL을 추가해요.
+const GEMINI_TIMEOUT_MS = 18000;                         // 모델 하나를 기다리는 시간 (앱은 45초까지 기다려요)
+
+async function callGeminiOnce(env, model, body) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), GEMINI_TIMEOUT_MS);
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": env.GEMINI_API_KEY // 키를 주소에 붙이지 않고 헤더로 보내요
+      },
+      body,
+      signal: ctrl.signal
+    });
+    const data = await res.json().catch(() => ({}));
+    return { status: res.status, ok: res.ok, data };
+  } catch (e) {
+    return { status: 0, ok: false, timeout: true, data: {} };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function callGemini(env, system, prompt, schema, temperature) {
   if (!env.GEMINI_API_KEY) {
     throw new CareerError("NO_GEMINI_KEY", "Gemini 인증키(GEMINI_API_KEY)가 아직 설정되지 않았어요.", 501);
   }
-  let res;
-  try {
-    res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${env.GEMINI_MODEL || GEMINI_MODEL}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": env.GEMINI_API_KEY // 키를 주소에 붙이지 않고 헤더로 보내요
-        },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: schema,
-            temperature: temperature,
-            // '생각'에 쓰는 토큰도 이 한도에 들어가서, 한도가 작으면 JSON이 중간에 잘릴 수 있어요.
-            maxOutputTokens: 8192
-          }
-        })
-      }
-    );
-  } catch (e) {
-    throw new CareerError("AI_UNREACHABLE", "AI 서버에 연결하지 못했어요.");
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: system }] },
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+      temperature: temperature,
+      // '생각'에 쓰는 토큰도 이 한도에 들어가서, 한도가 작으면 JSON이 중간에 잘릴 수 있어요.
+      maxOutputTokens: 8192
+    }
+  });
+  const models = [env.GEMINI_MODEL || GEMINI_MODEL, env.GEMINI_FALLBACK_MODEL || GEMINI_FALLBACK_MODEL];
+  let last = null;
+  for (const model of models) {
+    last = await callGeminiOnce(env, model, body);
+    if (last.ok) {
+      const raw = (last.data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
+      try { return JSON.parse(raw); } catch (e) { last = { status: 200, badJson: true, data: {} }; continue; }
+    }
+    // 키·요청 문제(400·403 등)는 다른 모델로 바꿔도 같아요.
+    if (!last.timeout && last.status && last.status !== 429 && last.status < 500) break;
   }
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const why = cleanText(data && data.error && data.error.message, 120);
-    throw new CareerError("AI_HTTP", "Gemini 요청이 거절되었어요. (" + res.status + ") " + why);
-  }
-  const raw = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
-  try { return JSON.parse(raw); } catch (e) {
-    throw new CareerError("AI_BAD_RESPONSE", "AI 응답을 읽을 수 없어요. 다시 시도해 주세요.");
-  }
+  if (last.timeout) throw new CareerError("AI_TIMEOUT", "AI가 지금 너무 바빠요. 잠시 뒤에 다시 시도해 주세요.", 504);
+  if (last.badJson) throw new CareerError("AI_BAD_RESPONSE", "AI 응답을 읽을 수 없어요. 다시 시도해 주세요.");
+  const why = cleanText(last.data && last.data.error && last.data.error.message, 120);
+  throw new CareerError("AI_HTTP", "Gemini 요청이 거절되었어요. (" + last.status + ") " + why);
 }
 
 async function jobSource(seq, env) {
@@ -397,6 +414,57 @@ ${d.name}(으)로 일하는 곳에서 '연습할 행동'이 꼭 필요한 상황
   });
 }
 
+// ---------- 포스터 한 줄 제목 · 미래 직업 카드 실천 다짐 추천 ----------
+// 앱의 강점 카드와 같아요. 앱은 강점 번호만 보내고, 글은 여기서 정해요.
+const STRENGTHS = {
+  S1: "친절하고 인사를 잘해요", S2: "손으로 조립/만들기를 잘해요", S3: "정리정돈과 라벨 맞추기를 잘해요",
+  S4: "동물과 식물을 사랑해요", S5: "청소와 세척 위생관리를 잘해요", S6: "컴퓨터/스마트기기를 다뤄요",
+  S7: "약속 시간과 규칙을 잘 지켜요", S8: "음식과 디저트에 관심이 많아요", S9: "체력이 좋고 부지런히 움직여요",
+  S10: "꼼꼼하게 개수를 세고 체크해요"
+};
+const PHRASE_ROUNDS = 3;   // [다른 문장 보기]로 볼 수 있는 묶음 수
+const PHRASE_SCHEMA = {
+  type: "OBJECT",
+  properties: { items: { type: "ARRAY", items: { type: "STRING" } } },
+  required: ["items"]
+};
+const PHRASE_SYSTEM = COACH_SYSTEM + `
+- 외모, 성적, 다른 사람과 비교하는 말, "최고", "1등" 같은 과장은 쓰지 않아요.
+- 학생이 고른 강점을 살려서, 학생이 읽고 기분 좋아지는 따뜻한 말로 써요.`;
+
+async function phrases(kind, seq, strengthIds, prepId, n, env) {
+  const key = `phrase:${EASY_VERSION}:${kind}:${seq}:${strengthIds.join(".") || "-"}:${prepId || "-"}:${n}`;
+  return cached(env, key, async () => {
+    const d = await jobSource(seq, env);
+    let prep = "";
+    if (prepId) {
+      prep = COMMON_PREP[prepId] || "";
+      if (!prep) {
+        const p = await jobPrep(seq, env);
+        const found = p.items.find(x => x.id === prepId);
+        prep = found ? found.text : "";
+      }
+    }
+    const strengths = strengthIds.map(id => STRENGTHS[id]).join(", ") || "아직 고르지 않았어요";
+    const ask = kind === "catch"
+      ? `포스터 맨 위에 크게 넣을 '나만의 한 줄 제목' 3개를 쓰세요.
+- 학생의 강점과 ${d.name} 일을 이어 주는 밝은 문장이에요. 예: "향기로운 미소로 아침을 여는 바리스타!"
+- 18글자 안팎, 길어도 24글자를 넘기지 않아요. 직업 이름을 넣고 느낌표(!)로 끝내도 좋아요.
+- 세 문장은 서로 다른 강점이나 다른 장면을 담아요.`
+      : `미래 직업 카드에 쓸 '실천 다짐' 3개를 쓰세요.
+- "나는 ~할 거예요."로 끝나는 한 문장, 25글자 안팎이에요.
+- 이번 주부터 학교나 집에서 바로 할 수 있는 구체적인 행동이에요.
+- 학생의 강점을 살리고, ${prep ? "'연습할 행동'과 이어지게 써요." : `${d.name}이(가) 되는 데 도움이 되는 행동이에요.`}`;
+    const parsed = await callGemini(env, PHRASE_SYSTEM, `${jobMaterial(d)}
+학생이 고른 강점: ${strengths}
+${prep ? `연습할 행동: ${prep}\n` : ""}${ask}
+${n > 1 ? `(이번이 ${n}번째 묶음이에요. 흔한 표현 말고 새로운 표현으로 써요.)\n` : ""}{"items":["...","...","..."]}`, PHRASE_SCHEMA, 0.9);
+    const items = strs(parsed.items, 3, kind === "catch" ? 40 : 60);
+    if (!items.length) throw new CareerError("AI_EMPTY", "AI 응답이 비어 있어요. 다시 시도해 주세요.");
+    return { kind, items };
+  });
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -436,6 +504,19 @@ export default {
         const item = String(body.item || "");
         if (!/^(C[1-6]|J[1-4])$/.test(item)) return json({ error: "연습 항목이 올바르지 않습니다." }, 400, headers);
         return json({ result: await coach(jseq, item, env) }, 200, headers);
+      }
+      if (mode === "phrases") {
+        const jseq = String(body.seq || "");
+        const kind = String(body.kind || "");
+        const prep = String(body.prep || "");
+        const n = Number(body.n) || 1;
+        const ids = [...new Set((Array.isArray(body.strengths) ? body.strengths : []).map(String))]
+          .filter(id => STRENGTHS[id]).sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
+        if (!/^\d{1,10}$/.test(jseq) || !["catch", "promise"].includes(kind) || (prep && !/^(C[1-6]|J[1-4])$/.test(prep))
+          || !Number.isInteger(n) || n < 1 || n > PHRASE_ROUNDS) {
+          return json({ error: "요청 내용이 올바르지 않습니다." }, 400, headers);
+        }
+        return json({ result: await phrases(kind, jseq, ids, kind === "promise" ? prep : "", n, env) }, 200, headers);
       }
       return json({ error: "지원하지 않는 요청입니다." }, 400, headers);
     } catch (e) {
