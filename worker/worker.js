@@ -378,8 +378,12 @@ const COACH_SCHEMA = {
   required: ["scenes", "missions"]
 };
 
+// 규칙을 줘도 AI가 가끔 엉뚱한 틀린 보기를 만들어요. 이런 말이 들어간 틀린 보기는 빼고 보여 줘요(보기가 2개만 남아도 괜찮아요).
+// "다시 알려주세요" 연습(C4)에서는 그 말을 하는 보기가 오답으로 섞이면 헷갈려서 그것도 빼요.
+const TOO_MUCH = /(화를?\s?내|화내|짜증|던지|던져|숨어|숨기|숨는|숨었|도망|울음|울어|울면|소리를?\s?지르|소리\s?질러|무서워|때리|때려|욕을|욕해|귀를\s?막|밖으로\s?나가|뛰쳐|드러누|발을\s?구르|집에\s?가\s?버)/;
+
 async function coach(seq, itemId, env) {
-  return cached(env, `coach4:${EASY_VERSION}:${seq}:${itemId}`, async () => {
+  return cached(env, `coach6:${EASY_VERSION}:${seq}:${itemId}`, async () => {
     let item = COMMON_PREP[itemId];
     if (!item) {
       const p = await jobPrep(seq, env);
@@ -400,16 +404,19 @@ ${d.name}(으)로 일하는 곳에서 '연습할 행동'이 꼭 필요한 상황
   - roleplay: 역할극 2단계. 각 단계는
     - line: 그 순간 상대방(손님, 동료, 담당자)이 하는 말(큰따옴표로)이나 일어난 일 한두 문장. 2단계는 1단계 다음에 이어지는 일이에요.
     - choices: 내가 할 수 있는 말이나 행동 3개. 그중 하나만 good이 true예요. 말이면 실제로 할 말을 큰따옴표로 써요.
-      틀린 보기도 학생이 실제로 할 법한 행동으로 써요. (예: 혼자 짐작해서 하기, 작은 목소리로 말하기, 다른 일을 먼저 하기)
-      화내기, 던지기, 숨기, 도망가기처럼 엉뚱하거나 나쁜 행동은 쓰지 않아요. 모든 글은 "~해요"체로 써요.
+      틀린 보기 2개는 '나쁜 행동'이 아니라 '조금 아쉬운 행동'이에요. 학생이 실제로 헷갈려서 고를 만한 행동으로 써요.
+      좋은 틀린 보기 예: 혼자 짐작해서 그냥 해요 / 아무 말 없이 기다려요 / 작은 목소리로 웅얼거려요 / 나중에 물어보려고 미뤄요 / 옆 동료가 하는 걸 몰래 따라 해요
+      화내기, 짜증 내기, 울기, 소리 지르기, 던지기, 숨기, 도망가기, 밖으로 나가기, 무서워하기처럼 감정이 크거나 엉뚱한 행동은 절대 쓰지 않아요.
+      틀린 보기에는 '연습할 행동'을 제대로 하는 말이나 행동을 절대 넣지 않아요. 정답은 '연습할 행동'을 하는 보기 하나뿐이에요.
+      세 보기의 길이와 말투를 비슷하게 맞춰서, 정답만 눈에 띄지 않게 해요. 모든 글은 "~해요"체로 써요.
     - feedback: good이면 칭찬과 이유 한 문장, 아니면 "이렇게 하면 ~할 수 있어요"처럼 더 좋은 방법 한 문장
 - missions: 이번 주에 학교나 집에서 '연습할 행동'을 해 볼 작은 미션 3개 (한 문장씩)
-{"scenes":[{"title":"...","story":["..."],"roleplay":[{"line":"...","choices":[{"text":"...","good":true,"feedback":"..."}]}]}],"missions":["..."]}`, COACH_SCHEMA, 0.6, COACH_TIMEOUT_MS);
+{"scenes":[{"title":"...","story":["..."],"roleplay":[{"line":"...","choices":[{"text":"...","good":true,"feedback":"..."}]}]}],"missions":["..."]}`, COACH_SCHEMA, 0.4, COACH_TIMEOUT_MS);
     const scenes = (Array.isArray(parsed.scenes) ? parsed.scenes : []).map(s => {
       const roleplay = (Array.isArray(s && s.roleplay) ? s.roleplay : []).map(t => {
         const choices = (Array.isArray(t && t.choices) ? t.choices : [])
           .map(c => ({ text: cleanText(c && c.text, 100), good: !!(c && c.good), feedback: cleanText(c && c.feedback, 160) }))
-          .filter(c => c.text && c.feedback).slice(0, 3);
+          .filter(c => c.text && c.feedback && (c.good || (!TOO_MUCH.test(c.text) && !(itemId === "C4" && /다시\s?알려/.test(c.text))))).slice(0, 3);
         // 좋은 답이 늘 같은 자리에 오지 않게 섞어서 저장해요.
         for (let i = choices.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [choices[i], choices[j]] = [choices[j], choices[i]]; }
         return { line: cleanText(t && t.line, 160), choices };
