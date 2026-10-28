@@ -587,7 +587,7 @@
                     </button>
                 </div>
                 <!-- 넓은 화면: 왼쪽 위 고르기, 왼쪽 아래 미션, 오른쪽 연습 도우미 / 좁은 화면: 고르기 → 연습 도우미 → 미션 -->
-                <div class="grid md:grid-cols-2 gap-6 items-start">
+                <div class="grid md:grid-cols-2 md:grid-rows-[auto_1fr] gap-6 items-start">
                     <div id="prepChoiceList" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2"></div>
                     <div id="coachBox" class="md:col-start-2 md:row-start-1 md:row-span-2"></div>
                     <div id="missionBox" class="md:col-start-1 md:row-start-2"></div>
@@ -2258,26 +2258,32 @@
             return fallback + ' 잠시 뒤에 다시 눌러 봐요.' + why;
         }
 
-        // ---------- 4-1. 연습 도우미 (상황 3개 × 역할극 · 따라 말하기) + 이번 주 미션(왼쪽 칸) ----------
-        // 직업·연습 항목마다 그 일터에 맞는 상황 3개를 한 번에 받아요. 자료는 careerCache[직업].coach2[항목]에 저장해요.
+        // ---------- 4-1. 연습 도우미 (상황 1·2·3 → 상황 이야기 → 역할극) + 이번 주 미션(왼쪽 칸) ----------
+        // 직업·연습 항목마다 그 일터에 맞는 상황 3개를 한 번에 받아요. 자료는 careerCache[직업].coach3[항목]에 저장해요.
         let coachScene = {};               // { '직업|항목': 지금 고른 상황 번호(0부터) }
-        let coachMode = {};                // { '직업|항목': 'rp'(역할극) | 'say'(따라 말하기) }
         let coachBusy = '', coachErr = {};   // 불러오는 중인 '직업|항목' / { '직업|항목': 실패 안내 글 }
         let rpPicks = {};                  // { '직업|항목|상황': [단계마다 고른 보기 번호들] } 역할극에서 고른 것
+        // 앱 전체 색 규칙이 Tailwind 색을 파스텔로 바꿔서, 여기 색은 직접 정해요. 상황·상대방 말·정답·다시 고르기가 서로 달라 보이게요.
+        const CO = {
+            story: 'background:#fff8e8;border:2px solid #f0d58c;color:#3d2e00',
+            line: 'background:#eef4fb;border:2px solid #b9d3f0;color:#1d3b5c',
+            choice: 'background:#fff;border:2px solid #d5d9e0;color:#1f2937',
+            good: 'background:#e7f6ec;border:2px solid #2f9e5b;color:#14532d',
+            retry: 'background:#fff4e5;border:2px solid #f0a050;color:#7a3e00',
+            tabOff: 'background:#fff;border:2px solid #d5d9e0;color:#374151'
+        };
         function coachTarget() {
             const job = selectedTargetJob, pi = prepItem();
             if (!job || job.source !== '커리어넷' || !pi || !careerCache[job.id]) return null;
             const wid = pi.job ? pi.wid : pi.id;
             const key = job.id + '|' + wid;
             const cc = careerCache[job.id];
-            const data = cc.coach2 && cc.coach2[wid];
+            const data = cc.coach3 && cc.coach3[wid];
             const si = data ? Math.min(coachScene[key] || 0, data.scenes.length - 1) : 0;
-            return { job, pi, wid, key, cc, data, si, scene: data ? data.scenes[si] : null, mode: coachMode[key] || 'rp', rkey: key + '|' + si };
+            return { job, pi, wid, key, cc, data, si, scene: data ? data.scenes[si] : null, rkey: key + '|' + si };
         }
-        const coachShell = (inner, sub) => `<div class="bg-white rounded-2xl p-6 border-2 border-violet-300 shadow-sm space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-lg flex flex-wrap items-center gap-2"><i class="fa-solid fa-person-chalkboard text-violet-600"></i>연습 도우미${sub ? `<span class="text-sm font-bold text-violet-700">· ${esc(sub)}</span>` : ''}</h3>${inner}</div>`;
-        // 버튼 묶음: 고른 것은 진하게(btn-go), 나머지는 흰 바탕
-        const pillBtn = (on, onclick, inner, extra) => `<button type="button" aria-pressed="${on}" onclick="${onclick}" class="px-4 py-2.5 rounded-xl text-sm font-extrabold border-2 ${on ? 'btn-go border-transparent' : 'bg-white border-violet-200 text-slate-800 hover:border-violet-400'} ${extra || ''}">${inner}</button>`;
+        const coachShell = (inner, sub) => `<div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-extrabold text-slate-900 text-lg flex flex-wrap items-center gap-2"><i class="fa-solid fa-person-chalkboard text-violet-600"></i>연습 도우미${sub ? `<span class="text-sm font-bold text-slate-500">· ${esc(sub)}</span>` : ''}</h3>${inner}</div>`;
         function renderCoach() {
             renderMissions();
             const box = document.getElementById('coachBox');
@@ -2303,43 +2309,42 @@
                 return;
             }
             const sc = t.scene;
-            let body;
-            if (t.mode === 'say') {
-                body = `<p class="text-xs font-bold text-slate-500">문장을 누르면 소리로 들려줘요. 듣고 소리 내어 따라 말해요.</p>
-                    <div class="grid gap-2">${sc.say.map((s, i) => `<button type="button" onclick="speakSay(${i})" class="text-left p-3 rounded-xl bg-white border-2 border-violet-200 hover:border-violet-400 text-base font-bold text-slate-800"><i class="fa-solid fa-volume-high text-violet-600 mr-2"></i>${esc(s)}</button>`).join('')}</div>`;
-            } else {
-                // 역할극: 좋은 답을 고른 단계까지 열고, 다음 단계를 보여 줘요.
-                const picks = rpPicks[t.rkey] || [];
-                let rp = '', open = true;
-                sc.roleplay.forEach((step, si) => {
-                    if (!open) return;
-                    const mine = picks[si] || [];
-                    const solved = mine.some(ci => step.choices[ci] && step.choices[ci].good);
-                    const last = mine.length ? step.choices[mine[mine.length - 1]] : null;
-                    rp += `<div class="space-y-2">
-                    <p class="bg-sky-50 border border-sky-200 rounded-2xl rounded-tl-sm p-3 text-sm font-semibold text-sky-900"><i class="fa-solid fa-comment-dots mr-1"></i>${esc(step.line)}</p>
-                    <p class="text-xs font-bold text-slate-500">나는 어떻게 할까요?</p>
+            // ① 상황 고르기: 상황 1·2·3 탭
+            const tabs = `<div class="grid grid-cols-3 gap-2" role="tablist">${t.data.scenes.map((s, i) => {
+                const on = i === t.si;
+                return `<button type="button" role="tab" aria-selected="${on}" onclick="pickScene(${i})" class="py-2.5 rounded-xl text-sm font-extrabold ${on ? 'btn-go' : ''}" ${on ? '' : `style="${CO.tabOff}"`}>상황 ${i + 1}</button>`;
+            }).join('')}</div>`;
+            // ② 상황 이야기
+            const story = `<div class="rounded-2xl p-4 space-y-2" style="${CO.story}">
+                <div class="flex items-center gap-2"><i class="fa-solid fa-book-open"></i><p class="font-extrabold flex-1">${esc(sc.title)}</p>
+                    <button type="button" onclick="speakStory()" class="px-2.5 py-1 bg-white/70 hover:bg-white rounded-lg text-xs font-bold"><i class="fa-solid fa-volume-high mr-1"></i>읽어주기</button></div>
+                <div class="text-[15px] leading-relaxed font-semibold space-y-0.5">${sc.story.map(s => `<p>${esc(s)}</p>`).join('')}</div></div>`;
+            // ③ 역할극: 좋은 답을 고른 단계까지 열고, 다음 단계를 보여 줘요.
+            const picks = rpPicks[t.rkey] || [];
+            let rp = '', open = true;
+            sc.roleplay.forEach((step, si) => {
+                if (!open) return;
+                const mine = picks[si] || [];
+                const solved = mine.some(ci => step.choices[ci] && step.choices[ci].good);
+                const last = mine.length ? step.choices[mine[mine.length - 1]] : null;
+                rp += `<div class="space-y-2">
+                    <p class="rounded-2xl rounded-tl-sm p-3 text-sm font-bold" style="${CO.line}"><i class="fa-solid fa-comment-dots mr-1"></i>${esc(step.line)}</p>
+                    <p class="text-xs font-extrabold text-slate-500 pt-1">이럴 때 나는 어떻게 할까요?</p>
                     <div class="grid gap-2">${step.choices.map((c, ci) => {
                         const tried = mine.includes(ci);
-                        const cls = tried ? (c.good ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-amber-300 bg-amber-50 text-amber-900') : 'border-slate-200 bg-white hover:border-violet-300 text-slate-800';
-                        return `<button type="button" ${solved ? 'disabled' : ''} onclick="pickRoleplay(${si}, ${ci})" class="text-left p-3 rounded-xl border-2 text-sm font-bold ${cls}">${tried ? (c.good ? '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>' : '<i class="fa-solid fa-rotate-right text-amber-600 mr-1"></i>') : ''}${esc(c.text)}</button>`;
+                        const st = tried ? (c.good ? CO.good : CO.retry) : CO.choice;
+                        const icon = tried ? (c.good ? '<i class="fa-solid fa-circle-check mr-1.5"></i>' : '<i class="fa-solid fa-rotate-right mr-1.5"></i>') : '';
+                        return `<button type="button" ${solved ? 'disabled' : ''} onclick="pickRoleplay(${si}, ${ci})" class="text-left px-3 py-2.5 rounded-xl text-sm font-bold ${solved && !tried ? 'opacity-50' : ''}" style="${st}">${icon}${esc(c.text)}</button>`;
                     }).join('')}</div>
-                    ${last ? `<p class="text-sm font-bold ${last.good ? 'text-emerald-700' : 'text-amber-700'}" role="status">${esc(last.feedback)}${last.good ? '' : ' 다시 골라 봐요.'}</p>` : ''}
+                    ${last ? `<p class="text-sm font-bold" role="status" style="color:${last.good ? '#14532d' : '#7a3e00'}">${esc(last.feedback)}${last.good ? '' : ' 다시 골라 봐요.'}</p>` : ''}
                 </div>`;
-                    open = solved;
-                });
-                const done = sc.roleplay.every((step, si) => (picks[si] || []).some(ci => step.choices[ci] && step.choices[ci].good));
-                if (done) rp += `<div class="flex flex-wrap items-center gap-2"><p class="text-sm font-extrabold text-emerald-700">역할극을 끝냈어요! 정말 잘했어요 👏</p>
-                    <button type="button" onclick="resetRoleplay()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs"><i class="fa-solid fa-rotate-left mr-1"></i>한 번 더</button>
-                    ${t.si < t.data.scenes.length - 1 ? `<button type="button" onclick="pickScene(${t.si + 1})" class="px-3 py-1.5 btn-go font-bold rounded-xl text-xs">다음 상황 <i class="fa-solid fa-arrow-right ml-1"></i></button>` : ''}</div>`;
-                body = `<div class="space-y-4">${rp}</div>`;
-            }
-            box.innerHTML = coachShell(`
-                <div class="space-y-2"><p class="text-xs font-extrabold text-slate-500">상황</p>
-                    <div class="grid gap-2">${t.data.scenes.map((s, i) => pillBtn(i === t.si, `pickScene(${i})`, `<span class="mr-1 opacity-70">${i + 1}</span>${esc(s.title)}`, 'text-left')).join('')}</div></div>
-                <div class="space-y-2"><p class="text-xs font-extrabold text-slate-500">연습 방법</p>
-                    <div class="grid grid-cols-2 gap-2">${pillBtn(t.mode === 'rp', "pickCoachMode('rp')", '<i class="fa-solid fa-masks-theater mr-1"></i>역할극')}${pillBtn(t.mode === 'say', "pickCoachMode('say')", '<i class="fa-solid fa-comment-dots mr-1"></i>따라 말하기')}</div></div>
-                <div class="border-t border-slate-100 pt-4">${body}</div>
+                open = solved;
+            });
+            const done = sc.roleplay.every((step, si) => (picks[si] || []).some(ci => step.choices[ci] && step.choices[ci].good));
+            if (done) rp += `<div class="flex flex-wrap items-center gap-2 pt-1"><p class="text-sm font-extrabold flex-1" style="color:#14532d">잘했어요! 이 상황 연습을 끝냈어요 👏</p>
+                    <button type="button" onclick="resetRoleplay()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs"><i class="fa-solid fa-rotate-left mr-1"></i>한 번 더</button>
+                    ${t.si < t.data.scenes.length - 1 ? `<button type="button" onclick="pickScene(${t.si + 1})" class="px-3 py-2 btn-go font-bold rounded-xl text-xs">다음 상황 <i class="fa-solid fa-arrow-right ml-1"></i></button>` : ''}</div>`;
+            box.innerHTML = coachShell(`${tabs}${story}<div class="space-y-4">${rp}</div>
                 <p class="text-[11px] text-slate-400">AI가 만든 연습 자료예요. 이상한 곳이 있으면 선생님께 알려요.</p>`, t.pi.short);
         }
         // 왼쪽 칸: 이번 주 미션 (연습 도우미 자료가 있을 때 보여요)
@@ -2353,7 +2358,7 @@
                 <h3 class="font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-flag-checkered text-amber-500"></i>이번 주 미션 <small class="text-xs font-bold text-slate-500">하나 고르면 미래 직업 카드 다짐이 돼요</small></h3>
                 <div class="grid gap-2">${list.map((m, mi) => {
                     const on = chosenMission === m;
-                    return `<button type="button" role="radio" aria-checked="${on}" onclick="pickMission(${mi})" class="w-full text-left p-3 rounded-xl border-2 text-sm font-bold ${on ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-300/50' : 'border-slate-200 bg-white hover:border-amber-300'}">${on ? '<i class="fa-solid fa-star text-amber-500 mr-1"></i>' : ''}${esc(m)}</button>`;
+                    return `<button type="button" role="radio" aria-checked="${on}" onclick="pickMission(${mi})" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold" style="${on ? CO.story : CO.choice}">${on ? '<i class="fa-solid fa-star mr-1.5"></i>' : ''}${esc(m)}</button>`;
                 }).join('')}</div></div>`;
         }
         async function loadCoach() {
@@ -2363,15 +2368,16 @@
             try {
                 const d = await callAi('coach', { seq: t.cc.seq, item: t.wid }, 100000);
                 const scenes = (Array.isArray(d.scenes) ? d.scenes : []).map(s => ({
-                    title: asStr(s && s.title), say: asStrArr(s && s.say).slice(0, 3),
+                    title: asStr(s && s.title), story: asStrArr(s && s.story).slice(0, 4),
                     roleplay: (Array.isArray(s && s.roleplay) ? s.roleplay : []).map(r => ({
                         line: asStr(r && r.line),
                         choices: (Array.isArray(r && r.choices) ? r.choices : []).map(c => ({ text: asStr(c && c.text), good: !!(c && c.good), feedback: asStr(c && c.feedback) })).filter(c => c.text).slice(0, 3)
                     })).filter(r => r.line && r.choices.some(c => c.good)).slice(0, 2)
-                })).filter(s => s.title && s.say.length && s.roleplay.length).slice(0, 3);
+                })).filter(s => s.title && s.story.length && s.roleplay.length).slice(0, 3);
                 if (scenes.length) {
-                    t.cc.coach2 = t.cc.coach2 || {};
-                    t.cc.coach2[t.wid] = { scenes, missions: asStrArr(d.missions).slice(0, 3) };
+                    t.cc.coach3 = t.cc.coach3 || {};
+                    t.cc.coach3[t.wid] = { scenes, missions: asStrArr(d.missions).slice(0, 3) };
+                    delete t.cc.coach2;   // 예전 형식(따라 말하기)은 더 쓰지 않아요
                     saveState();
                 } else coachErr[t.key] = '연습 자료를 만들지 못했어요.';
             } catch (e) { coachErr[t.key] = aiErrorMsg(e, '연습 자료를 만들지 못했어요.'); }
@@ -2382,12 +2388,6 @@
             const t = coachTarget();
             if (!t || !t.data) return;
             coachScene[t.key] = i;
-            renderCoach();
-        }
-        function pickCoachMode(m) {
-            const t = coachTarget();
-            if (!t) return;
-            coachMode[t.key] = m;
             renderCoach();
         }
         function pickRoleplay(si, ci) {
@@ -2415,9 +2415,9 @@
             saveState();
             renderMissions();
         }
-        function speakSay(i) {
+        function speakStory() {
             const t = coachTarget();
-            if (t && t.scene && t.scene.say[i]) speakText(t.scene.say[i]);
+            if (t && t.scene) speakText(t.scene.title + '. ' + t.scene.story.join(' ') + ' ' + (t.scene.roleplay[0] ? t.scene.roleplay[0].line : ''));
         }
 
         // ---------- 5. 미래 직업 카드 ----------
