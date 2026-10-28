@@ -594,6 +594,7 @@
                         </div>
                         <div id="prepChoiceList" class="space-y-2"></div>
                     </div>
+                    <div id="coachBox"></div>
 
                 </div>
             </div>
@@ -787,7 +788,8 @@
         let selectedStrengths = [];
         let selectedTargetJob = null;
         let checkedSkills = new Set();
-        let chosenPrep = null;            // 연습하고 싶은 것 id
+        let chosenPrep = null;            // 연습하고 싶은 것 id (공통 C1~C6, 직업 맞춤 'CN_번호:J1')
+        let chosenMission = '';           // 연습 도우미에서 고른 이번 주 미션 (미래 직업 카드 다짐 후보)
         let posterPicks = new Set();      // 포스터 재료로 고른 항목 key
         let promiseChoice = 'custom';
         let customPromise = '';
@@ -945,7 +947,15 @@
         const findJob = id => allJobs().find(j => j.id === id) || null;
 
         const strengthShort = id => { const s = STRENGTHS_DATA.find(x => x.id === id); return s ? s.short : ''; };
-        const prepItem = () => CHECKLIST_ITEMS.find(c => c.id === chosenPrep) || null;
+        // 직업 맞춤 항목: 고른 직업의 careerCache.prep에서 와요. id는 '직업id:J1'처럼 직업마다 달라요.
+        const isChecklistId = id => CHECKLIST_ITEMS.some(c => c.id === id) || /^CN_\d+:J[1-4]$/.test(String(id || ''));
+        function jobPrepItems() {
+            const job = selectedTargetJob;
+            const p = job && careerCache[job.id] && careerCache[job.id].prep;
+            return p ? p.items.map(x => ({ id: job.id + ':' + x.id, wid: x.id, text: x.text, short: x.short, icon: 'fa-briefcase', job: true })) : [];
+        }
+        const allChecklist = () => CHECKLIST_ITEMS.concat(jobPrepItems());
+        const prepItem = () => allChecklist().find(c => c.id === chosenPrep) || null;
 
         // ---------- 상태 저장 (같은 기기에서 1차시→2차시 이어서 하기) ----------
         function saveState() {
@@ -955,6 +965,7 @@
                     jobId: selectedTargetJob ? selectedTargetJob.id : null,
                     checked: [...checkedSkills],
                     prep: chosenPrep,
+                    mission: chosenMission,
                     posterPicks: [...posterPicks],
                     careerCache: careerCache,
                     abilityChecks: abilityChecks,
@@ -972,8 +983,9 @@
                 const st = JSON.parse(raw);
                 selectedStrengths = Array.isArray(st.strengths) ? st.strengths.filter(id => STRENGTHS_DATA.some(x => x.id === id)) : [];
                 selectedTargetJob = null;
-                checkedSkills = new Set((st.checked || []).filter(id => CHECKLIST_ITEMS.some(c => c.id === id)));
-                chosenPrep = CHECKLIST_ITEMS.some(c => c.id === st.prep) ? st.prep : null;
+                checkedSkills = new Set((st.checked || []).filter(isChecklistId));
+                chosenPrep = isChecklistId(st.prep) ? st.prep : null;
+                chosenMission = typeof st.mission === 'string' ? st.mission.slice(0, 100) : '';
                 posterPicks = new Set(st.posterPicks || []);
                 careerCache = st.careerCache && typeof st.careerCache === 'object' ? st.careerCache : {};
                 selectedTargetJob = findJob(st.jobId);
@@ -991,7 +1003,7 @@
         function resetAll(skipConfirm) {
             if (skipConfirm !== true && !confirm('지금까지 고른 것을 모두 지우고 처음부터 다시 할까요?')) return;
             try { localStorage.removeItem(STATE_KEY); } catch (e) {}
-            selectedStrengths = []; selectedTargetJob = null; checkedSkills = new Set(); chosenPrep = null;
+            selectedStrengths = []; selectedTargetJob = null; checkedSkills = new Set(); chosenPrep = null; chosenMission = '';
             careerCache = {}; abilityChecks = {}; posterPicks = new Set();
             choiceReasons = new Set();
             posterTemplate = 'T1'; posterTheme = 'C1'; posterMaker = '';
@@ -1325,7 +1337,7 @@
             const on = !!(easyView[job.id] && job.cc && job.cc.easy);
             const btn = easyBusy === job.id
                 ? '<button type="button" disabled class="px-4 py-2 bg-violet-100 text-violet-800 font-bold rounded-xl text-sm"><i class="fa-solid fa-spinner fa-spin mr-1"></i>쉬운 말로 바꾸고 있어요...</button>'
-                : `<button type="button" onclick="toggleEasy('${job.id}')" ${easyBusy ? 'disabled' : ''} aria-pressed="${on}" class="px-4 py-2 ${on ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-violet-600 text-white hover:bg-violet-700'} font-bold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid ${on ? 'fa-rotate-left' : 'fa-wand-magic-sparkles'} mr-1"></i>${on ? '원래 글 보기' : '쉬운 말로 바꿔 보기'}</button>`;
+                : `<button type="button" onclick="toggleEasy('${job.id}')" ${easyBusy ? 'disabled' : ''} aria-pressed="${on}" class="px-4 py-2 ${on ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'btn-go'} font-bold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid ${on ? 'fa-rotate-left' : 'fa-wand-magic-sparkles'} mr-1"></i>${on ? '원래 글 보기' : '쉬운 말로 바꿔 보기'}</button>`;
             const note = on ? '<span class="text-[11px] text-slate-500">AI가 커리어넷 글을 쉬운 말로 바꿨어요. 이상한 곳이 있으면 선생님께 알려요.</span>'
                 : easyMsg ? `<span class="text-xs font-bold text-rose-600" role="status">${esc(easyMsg)}</span>` : '';
             bar.innerHTML = btn + note;
@@ -2062,12 +2074,50 @@
         const asStr = v => String(v == null ? '' : v).trim();
 
         // ---------- 4. 취업 역량 체크 ----------
-        function renderSkillChecklist() {
-            document.getElementById('skillChecklist').innerHTML = CHECKLIST_ITEMS.map(item => `
-                <label class="flex items-start gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl cursor-pointer border border-slate-200">
+        let jobPrepBusy = '', jobPrepErr = {};   // 직업 맞춤 항목을 가져오는 중인 직업 id / { 직업 id: 실패 안내 글 }
+        const checkRow = item => `
+                <label class="flex items-start gap-3 p-3 ${item.job ? 'bg-violet-50/60 hover:bg-violet-50 border-violet-200' : 'bg-slate-50 hover:bg-slate-100 border-slate-200'} rounded-xl cursor-pointer border">
                     <input type="checkbox" ${checkedSkills.has(item.id) ? 'checked' : ''} onchange="toggleSkillCheck('${item.id}')" class="mt-1 w-5 h-5 accent-emerald-600">
                     <span class="text-sm font-semibold text-slate-800 leading-snug">${esc(item.text)}</span>
-                </label>`).join('');
+                </label>`;
+        function renderSkillChecklist() {
+            const job = selectedTargetJob;
+            const items = jobPrepItems();
+            let jobPart;
+            if (!job || job.source !== '커리어넷') {
+                jobPart = `<p class="text-xs text-slate-500 bg-slate-50 rounded-xl p-3">2번 탭에서 희망 직업을 고르면, 그 직업에 맞는 준비 항목이 여기에 나와요.</p>`;
+            } else if (items.length) {
+                jobPart = items.map(checkRow).join('');
+            } else if (jobPrepBusy === job.id) {
+                jobPart = `<p class="text-sm font-bold text-violet-700 p-3" role="status"><i class="fa-solid fa-spinner fa-spin mr-1"></i>${esc(job.name)} 일에 맞는 준비를 찾고 있어요...</p>`;
+            } else {
+                const err = jobPrepErr[job.id];
+                jobPart = `<div class="flex flex-wrap items-center gap-2 p-3">${err ? `<span class="text-xs font-bold text-rose-600" role="status">${esc(err)}</span>` : ''}
+                    <button type="button" onclick="loadJobPrep()" class="px-3 py-1.5 btn-go font-bold rounded-xl text-xs"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>직업에 맞는 준비 찾기</button></div>`;
+            }
+            document.getElementById('skillChecklist').innerHTML = CHECKLIST_ITEMS.map(checkRow).join('') + `
+                <div class="pt-3 mt-1 border-t border-slate-100 space-y-3">
+                    <p class="font-extrabold text-violet-900 text-sm flex flex-wrap items-center gap-2"><i class="fa-solid fa-briefcase text-violet-600"></i>${job ? esc(job.name) + ' 일에 필요한 준비' : '내 희망 직업에 필요한 준비'}
+                        ${items.length ? '<span class="text-[10px] font-extrabold bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded">AI가 만든 항목</span>' : ''}</p>
+                    ${jobPart}
+                </div>`;
+            if (job && job.source === '커리어넷' && !items.length && !jobPrepBusy && !jobPrepErr[job.id]) loadJobPrep();
+        }
+        async function loadJobPrep() {
+            const job = selectedTargetJob;
+            const cc = job && careerCache[job.id];
+            if (!cc || jobPrepBusy) return;
+            delete jobPrepErr[job.id];
+            jobPrepBusy = job.id; renderSkillChecklist();
+            try {
+                const d = await callAi('job-prep', { seq: cc.seq });
+                const items = (Array.isArray(d.items) ? d.items : []).map(x => ({ id: asStr(x && x.id), text: asStr(x && x.text), short: asStr(x && x.short) }))
+                    .filter(x => /^J[1-4]$/.test(x.id) && x.text && x.short);
+                if (items.length) { cc.prep = { items }; saveState(); }
+                else jobPrepErr[job.id] = '준비 항목을 만들지 못했어요.';
+            } catch (e) { jobPrepErr[job.id] = aiErrorMsg(e, '준비 항목을 만들지 못했어요.'); }
+            jobPrepBusy = '';
+            renderSkillChecklist(); renderPrepChoices(); updateReadinessProgress();
         }
         function toggleSkillCheck(id) {
             if (checkedSkills.has(id)) checkedSkills.delete(id); else checkedSkills.add(id);
@@ -2075,7 +2125,9 @@
             updateReadinessProgress();
         }
         function updateReadinessProgress() {
-            const pct = Math.round((checkedSkills.size / CHECKLIST_ITEMS.length) * 100);
+            // 공통 항목 + 지금 고른 직업의 맞춤 항목으로 계산해요. 다른 직업에서 체크한 항목은 세지 않아요.
+            const list = allChecklist();
+            const pct = Math.round((list.filter(c => checkedSkills.has(c.id)).length / list.length) * 100);
             document.getElementById('readinessScore').innerText = `${pct} %`;
             document.getElementById('readinessProgressBar').style.width = `${pct}%`;
             const el = document.getElementById('readinessMessage');
@@ -2084,15 +2136,16 @@
             else { el.innerText = '잘할 수 있는 것에 체크해 보세요.'; el.className = 'text-xs font-semibold text-slate-500'; }
         }
         function renderPrepChoices() {
-            document.getElementById('prepChoiceList').innerHTML = CHECKLIST_ITEMS.map(item => {
+            document.getElementById('prepChoiceList').innerHTML = allChecklist().map(item => {
                 const on = chosenPrep === item.id;
                 return `<button type="button" role="radio" aria-checked="${on}" onclick="choosePrep('${item.id}')"
                     class="w-full text-left p-3 rounded-xl border-2 flex items-center gap-3 font-bold text-sm transition ${on ? 'border-emerald-600 bg-emerald-50 ring-2 ring-emerald-300/50' : 'border-slate-200 bg-white hover:border-emerald-300'}">
-                    <span class="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${on ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-emerald-600'}"><i class="fa-solid ${item.icon}"></i></span>
+                    <span class="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${on ? 'bg-emerald-600 text-white' : item.job ? 'bg-violet-100 text-violet-600' : 'bg-slate-100 text-emerald-600'}"><i class="fa-solid ${item.icon}"></i></span>
                     <span class="flex-1">${esc(item.short)}</span>
                     ${on ? '<span class="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">선택됨 ✓</span>' : ''}
                 </button>`;
             }).join('');
+            renderCoach();
         }
         function choosePrep(id) {
             chosenPrep = id;
@@ -2100,8 +2153,155 @@
             saveState();
             renderPrepChoices();
         }
-        function readPrepOptions() { speakText('연습하고 싶은 것을 한 가지 골라요. ' + CHECKLIST_ITEMS.map((c, i) => `${i + 1}번. ${c.short}`).join('. ')); }
-        function readChecklist() { speakText('내가 잘할 수 있는 것을 체크해요. ' + CHECKLIST_ITEMS.map((c, i) => `${i + 1}번. ${c.text}`).join(' ')); }
+        function readPrepOptions() { speakText('연습하고 싶은 것을 한 가지 골라요. ' + allChecklist().map((c, i) => `${i + 1}번. ${c.short}`).join('. ')); }
+        function readChecklist() { speakText('내가 잘할 수 있는 것을 체크해요. ' + allChecklist().map((c, i) => `${i + 1}번. ${c.text}`).join(' ')); }
+
+        function aiErrorMsg(e, fallback) {
+            if (e && e.message === 'NO_ENDPOINT') return '지금은 서버가 연결되어 있지 않아요. 선생님께 알려요.';
+            if (e && e.code === 'NO_GEMINI_KEY') return 'AI 인증키가 아직 설정되지 않았어요. 선생님께 알려요.';
+            let why = '';
+            try { if (new URLSearchParams(location.search).get('teacher') === '1') why = ' [교사용 원인: ' + ((e && e.message) || '알 수 없음') + (e && e.code ? ' / ' + e.code : '') + ']'; } catch (x) {}
+            return fallback + ' 잠시 뒤에 다시 눌러 봐요.' + why;
+        }
+
+        // ---------- 4-1. 연습 도우미 (이야기 · 따라 말하기 · 역할극 · 이번 주 미션) ----------
+        // 상황 1~5를 넘기며 더 연습할 수 있어요. 자료는 careerCache[직업].coach[항목][상황]에 저장해요.
+        const COACH_TOTAL = 5;
+        let coachN = {};                   // { '직업|항목': 지금 보는 상황 번호 }
+        let coachBusy = '', coachMsg = '';
+        let rpPicks = {};                  // { '직업|항목|상황': [단계마다 고른 보기 번호들] } 역할극에서 고른 것
+        function coachTarget() {
+            const job = selectedTargetJob, pi = prepItem();
+            if (!job || job.source !== '커리어넷' || !pi || !careerCache[job.id]) return null;
+            const wid = pi.job ? pi.wid : pi.id;
+            const key = job.id + '|' + wid;
+            const n = coachN[key] || 1;
+            const cc = careerCache[job.id];
+            const data = cc.coach && cc.coach[wid] && cc.coach[wid][n];
+            return { job, pi, wid, key, n, cc, data, rkey: key + '|' + n };
+        }
+        function renderCoach() {
+            const box = document.getElementById('coachBox');
+            if (!box) return;
+            if (!chosenPrep) { box.innerHTML = ''; return; }
+            const t = coachTarget();
+            const shell = inner => `<div class="bg-white rounded-2xl p-6 border-2 border-violet-300 shadow-sm space-y-4">
+                <h3 class="font-extrabold text-slate-900 text-lg flex items-center gap-2"><i class="fa-solid fa-person-chalkboard text-violet-600"></i>연습 도우미</h3>${inner}</div>`;
+            if (!t) {
+                box.innerHTML = shell('<p class="text-sm text-slate-600">2번 탭에서 커리어넷 직업을 희망 직업으로 고르면, 그 일터에서 미리 연습해 볼 수 있어요.</p>');
+                return;
+            }
+            const busy = coachBusy === t.rkey;
+            const msg = coachMsg ? `<p class="text-xs font-bold text-rose-600" role="status">${esc(coachMsg)}</p>` : '';
+            if (!t.data) {
+                box.innerHTML = shell(`<p class="text-sm text-slate-700"><b>${esc(t.job.name)}</b> 일터에서 <b>${esc(t.pi.short)}</b>을(를) 미리 연습해 봐요. 이야기를 읽고, 역할극으로 골라 보고, 이번 주 미션을 정해요.</p>
+                    ${busy ? `<p class="text-sm font-bold text-violet-700" role="status"><i class="fa-solid fa-spinner fa-spin mr-1"></i>연습 자료를 만들고 있어요... 처음에는 20초쯤 걸려요.</p>`
+                        : `<button type="button" onclick="loadCoach()" class="px-5 py-3 btn-go font-extrabold rounded-xl text-base"><i class="fa-solid fa-play mr-1"></i>${t.n > 1 ? `상황 ${t.n} 연습하기` : '연습 도우미 만나기'}</button>`}
+                    ${msg}${t.n > 1 && !busy ? `<button type="button" onclick="moveCoach(-1)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-sm"><i class="fa-solid fa-arrow-left mr-1"></i>앞 상황</button>` : ''}`);
+                return;
+            }
+            const d = t.data;
+            const picks = rpPicks[t.rkey] || [];
+            // 역할극: 좋은 답을 고른 단계까지 열고, 다음 단계를 보여 줘요.
+            let rp = '', open = true;
+            d.roleplay.forEach((step, si) => {
+                if (!open) return;
+                const mine = picks[si] || [];
+                const solved = mine.some(ci => step.choices[ci] && step.choices[ci].good);
+                const last = mine.length ? step.choices[mine[mine.length - 1]] : null;
+                rp += `<div class="space-y-2">
+                    <p class="bg-sky-50 border border-sky-200 rounded-2xl rounded-tl-sm p-3 text-sm font-semibold text-sky-900"><i class="fa-solid fa-comment-dots mr-1"></i>${esc(step.line)}</p>
+                    <p class="text-xs font-bold text-slate-500">나는 어떻게 할까요?</p>
+                    <div class="grid gap-2">${step.choices.map((c, ci) => {
+                        const tried = mine.includes(ci);
+                        const cls = tried ? (c.good ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-amber-300 bg-amber-50 text-amber-900') : 'border-slate-200 bg-white hover:border-violet-300 text-slate-800';
+                        return `<button type="button" ${solved ? 'disabled' : ''} onclick="pickRoleplay(${si}, ${ci})" class="text-left p-3 rounded-xl border-2 text-sm font-bold ${cls}">${tried ? (c.good ? '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>' : '<i class="fa-solid fa-rotate-right text-amber-600 mr-1"></i>') : ''}${esc(c.text)}</button>`;
+                    }).join('')}</div>
+                    ${last ? `<p class="text-sm font-bold ${last.good ? 'text-emerald-700' : 'text-amber-700'}" role="status">${esc(last.feedback)}${last.good ? '' : ' 다시 골라 봐요.'}</p>` : ''}
+                </div>`;
+                open = solved;
+            });
+            const rpDone = d.roleplay.every((step, si) => (picks[si] || []).some(ci => step.choices[ci] && step.choices[ci].good));
+            if (rpDone) rp += '<p class="text-sm font-extrabold text-emerald-700">역할극을 끝냈어요! 정말 잘했어요 👏</p>';
+            const missions = d.missions.map((m, mi) => {
+                const on = chosenMission === m;
+                return `<button type="button" role="radio" aria-checked="${on}" onclick="pickMission(${mi})" class="w-full text-left p-3 rounded-xl border-2 text-sm font-bold ${on ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-300/50' : 'border-slate-200 bg-white hover:border-amber-300'}">${on ? '<i class="fa-solid fa-star text-amber-500 mr-1"></i>' : ''}${esc(m)}</button>`;
+            }).join('');
+            const sec = (num, title, extra) => `<h4 class="font-extrabold text-violet-900 flex items-center gap-2 pt-2"><span class="w-6 h-6 rounded-full bg-violet-200 text-violet-900 font-black text-xs flex items-center justify-center">${num}</span>${title}${extra || ''}</h4>`;
+            box.innerHTML = shell(`
+                <div class="flex flex-wrap items-center gap-2"><span class="text-xs font-extrabold bg-violet-100 text-violet-800 px-2 py-1 rounded-full">상황 ${t.n} / ${COACH_TOTAL}</span><span class="font-extrabold text-slate-900">${esc(d.title)}</span></div>
+                <p class="text-[11px] text-slate-500">${esc(t.job.name)} · ${esc(t.pi.short)} · AI가 만든 연습 자료예요. 이상한 곳이 있으면 선생님께 알려요.</p>
+                ${sec(1, '이야기로 알아봐요', `<button type="button" onclick="speakCoach('story')" class="ml-auto px-3 py-1 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs"><i class="fa-solid fa-volume-high text-violet-600 mr-1"></i>읽어주기</button>`)}
+                <div class="bg-violet-50/60 rounded-xl p-4 text-sm text-slate-800 leading-relaxed space-y-1">${d.story.map(s => `<p>${esc(s)}</p>`).join('')}</div>
+                ${sec(2, '따라 말해요')}
+                <div class="grid gap-2">${d.say.map((s, i) => `<button type="button" onclick="speakCoach('say', ${i})" class="text-left p-3 rounded-xl bg-white border-2 border-violet-200 hover:border-violet-400 text-sm font-bold text-slate-800"><i class="fa-solid fa-volume-high text-violet-600 mr-2"></i>${esc(s)}</button>`).join('')}</div>
+                ${sec(3, '역할극으로 연습해요')}
+                <div class="space-y-4">${rp}</div>
+                ${sec(4, '이번 주 미션을 골라요')}
+                <p class="text-xs text-slate-500">고른 미션은 미래 직업 카드의 실천 다짐으로 쓸 수 있어요.</p>
+                <div class="grid gap-2">${missions}</div>
+                ${msg}
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+                    ${t.n > 1 ? `<button type="button" onclick="moveCoach(-1)" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-sm"><i class="fa-solid fa-arrow-left mr-1"></i>앞 상황</button>` : ''}
+                    ${t.n < COACH_TOTAL ? `<button type="button" onclick="moveCoach(1)" ${coachBusy ? 'disabled' : ''} class="flex-1 px-4 py-2.5 btn-go font-extrabold rounded-xl text-sm disabled:opacity-60"><i class="fa-solid fa-forward mr-1"></i>다른 상황으로 더 연습하기</button>`
+                        : '<span class="text-sm font-bold text-violet-700 self-center">다섯 가지 상황을 모두 볼 수 있어요. 앞 상황으로 돌아가 다시 연습해도 좋아요.</span>'}
+                </div>`);
+        }
+        async function loadCoach() {
+            const t = coachTarget();
+            if (!t || t.data || coachBusy) return;
+            coachMsg = ''; coachBusy = t.rkey; renderCoach();
+            try {
+                const d = await callAi('coach', { seq: t.cc.seq, item: t.wid, n: t.n });
+                const rp = (Array.isArray(d.roleplay) ? d.roleplay : []).map(s => ({
+                    line: asStr(s && s.line),
+                    choices: (Array.isArray(s && s.choices) ? s.choices : []).map(c => ({ text: asStr(c && c.text), good: !!(c && c.good), feedback: asStr(c && c.feedback) })).filter(c => c.text).slice(0, 3)
+                })).filter(s => s.line && s.choices.some(c => c.good));
+                const data = { title: asStr(d.title), story: asStrArr(d.story), say: asStrArr(d.say).slice(0, 2), roleplay: rp.slice(0, 2), missions: asStrArr(d.missions).slice(0, 3) };
+                if (data.story.length && data.roleplay.length) {
+                    t.cc.coach = t.cc.coach || {};
+                    t.cc.coach[t.wid] = t.cc.coach[t.wid] || {};
+                    t.cc.coach[t.wid][t.n] = data;
+                    saveState();
+                } else coachMsg = '연습 자료를 만들지 못했어요.';
+            } catch (e) { coachMsg = aiErrorMsg(e, '연습 자료를 만들지 못했어요.'); }
+            coachBusy = '';
+            renderCoach();
+        }
+        function moveCoach(step) {
+            const t = coachTarget();
+            if (!t || coachBusy) return;
+            coachN[t.key] = Math.min(COACH_TOTAL, Math.max(1, t.n + step));
+            coachMsg = '';
+            renderCoach();
+            const nt = coachTarget();
+            if (step > 0 && nt && !nt.data) loadCoach();
+            document.getElementById('coachBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function pickRoleplay(si, ci) {
+            const t = coachTarget();
+            if (!t || !t.data) return;
+            const picks = rpPicks[t.rkey] = rpPicks[t.rkey] || [];
+            picks[si] = picks[si] || [];
+            if (!picks[si].includes(ci)) picks[si].push(ci);
+            const c = t.data.roleplay[si].choices[ci];
+            if (c.good) playSfx('ok');
+            renderCoach();
+            speakText(c.feedback + (c.good ? '' : ' 다시 골라 봐요.'));
+        }
+        function pickMission(mi) {
+            const t = coachTarget();
+            if (!t || !t.data || !t.data.missions[mi]) return;
+            chosenMission = chosenMission === t.data.missions[mi] ? '' : t.data.missions[mi];
+            if (chosenMission) promiseChoice = 'mission';
+            saveState();
+            renderCoach();
+        }
+        function speakCoach(part, i) {
+            const t = coachTarget();
+            if (!t || !t.data) return;
+            speakText(part === 'story' ? t.data.story.join(' ') : t.data.say[i]);
+        }
 
         // ---------- 5. 미래 직업 카드 ----------
         function renderStep5() {
@@ -2132,6 +2332,7 @@
             const opts = [];
             const pi = prepItem();
             if (pi) opts.push({ id: 'prep', text: `${pi.short}, 이것을 매일 연습할 거예요.`, from: '내가 고른 연습' });
+            if (chosenMission) opts.push({ id: 'mission', text: chosenMission, from: '연습 도우미에서 고른 미션' });
             return opts;
         }
 
@@ -2349,6 +2550,7 @@
             if (currentPromiseText()) {
                 if (promiseChoice === 'custom') promiseType = '직접 쓴 다짐';
                 else if (promiseChoice === 'prep') promiseType = '선택형(내가 고른 연습)';
+                else if (promiseChoice === 'mission') promiseType = '선택형(연습 도우미 미션)';
             }
             return {
                 job: job ? job.name : '',
