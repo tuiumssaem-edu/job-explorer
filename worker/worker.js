@@ -1,8 +1,9 @@
-// 꿈차근! 직업탐색기 서버(Cloudflare Worker) v5
+// 꿈차근! 직업탐색기 서버(Cloudflare Worker) v6
 // 하는 일: ① 주니어커리어넷 직업정보를 대신 가져와 앱에 전달해요.  ② 직업 설명을 Gemini로 쉬운 말로 바꿔요.
+//          ③ 직업 맞춤 취업 준비 항목과 연습 도우미(이야기·역할극·미션)를 만들어요.
 // 필요한 Secret: CAREERNET_API_KEY (주니어커리어넷 인증키), GEMINI_API_KEY (쉬운 말 바꾸기)
 // 있으면 좋은 것: KV 바인딩 EASY_CACHE (같은 직업의 쉬운 말 결과를 저장해 두고 다시 써요. 없어도 동작해요)
-// 앱과 주고받는 mode: junior-search, junior-detail, easy-job
+// 앱과 주고받는 mode: junior-search, junior-detail, easy-job, job-prep, coach
 const ALLOWED_ORIGIN = "https://tuiumssaem-edu.github.io";
 const CAREER_BASE = "https://www.career.go.kr/cnet/front/openapi";
 const GEMINI_MODEL = "gemini-3.8-flash";   // 다른 모델을 쓰려면 변수 GEMINI_MODEL을 추가해요. (2.5 Flash는 새 사용자에게 막혔어요)
@@ -172,31 +173,26 @@ const EASY_SCHEMA = {
   required: ["summary", "works", "words"]
 };
 
-async function easyJob(seq, env) {
-  const key = `easy:${EASY_VERSION}:${seq}`;
+// ---------- Gemini · KV 도우미 ----------
+const strs = (v, n, max) => (Array.isArray(v) ? v : []).map(x => cleanText(x, max)).filter(Boolean).slice(0, n);
+
+// KV에 저장된 결과가 있으면 그대로 쓰고, 없으면 만들어서 저장해요.
+async function cached(env, key, make) {
   if (env.EASY_CACHE) {
     const hit = await env.EASY_CACHE.get(key, "json").catch(() => null);
     if (hit) return hit;
   }
+  const result = await make();
+  if (env.EASY_CACHE) {
+    await env.EASY_CACHE.put(key, JSON.stringify(result), { expirationTtl: 60 * 60 * 24 * 90 }).catch(() => {});
+  }
+  return result;
+}
+
+async function callGemini(env, system, prompt, schema, temperature) {
   if (!env.GEMINI_API_KEY) {
     throw new CareerError("NO_GEMINI_KEY", "Gemini 인증키(GEMINI_API_KEY)가 아직 설정되지 않았어요.", 501);
   }
-  const d = await juniorDetail(seq, env);
-  if (!d.summary && !d.works.length) {
-    throw new CareerError("EMPTY_JOB", "이 직업은 바꿀 설명이 비어 있어요.", 404);
-  }
-  const prompt = `직업: ${d.name}
-[자료]
-소개: ${d.summary}
-하는 일:
-${d.works.map(t => "- " + t).join("\n")}
-[자료 끝]
-아래 JSON을 작성하세요.
-- summary: 이 직업을 소개하는 쉬운 문장 2개
-- works: 하는 일을 쉬운 문장으로 3~4개 (한 항목에 한 문장)
-- words: 이 직업을 알려면 꼭 알아야 하는 낱말 0~3개와 그 뜻 (직업 이름이 어려우면 포함해요. 뜻은 한 문장)
-{"summary":"...","works":["..."],"words":[{"word":"...","meaning":"..."}]}`;
-
   let res;
   try {
     res = await fetch(
@@ -208,14 +204,14 @@ ${d.works.map(t => "- " + t).join("\n")}
           "x-goog-api-key": env.GEMINI_API_KEY // 키를 주소에 붙이지 않고 헤더로 보내요
         },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: EASY_SYSTEM }] },
+          systemInstruction: { parts: [{ text: system }] },
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: {
             responseMimeType: "application/json",
-            responseSchema: EASY_SCHEMA,
-            temperature: 0.3,
+            responseSchema: schema,
+            temperature: temperature,
             // '생각'에 쓰는 토큰도 이 한도에 들어가서, 한도가 작으면 JSON이 중간에 잘릴 수 있어요.
-            maxOutputTokens: 4096
+            maxOutputTokens: 8192
           }
         })
       }
@@ -229,26 +225,183 @@ ${d.works.map(t => "- " + t).join("\n")}
     throw new CareerError("AI_HTTP", "Gemini 요청이 거절되었어요. (" + res.status + ") " + why);
   }
   const raw = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
-  let parsed;
-  try { parsed = JSON.parse(raw); } catch (e) {
+  try { return JSON.parse(raw); } catch (e) {
     throw new CareerError("AI_BAD_RESPONSE", "AI 응답을 읽을 수 없어요. 다시 시도해 주세요.");
   }
-  const strs = (v, n, max) => (Array.isArray(v) ? v : []).map(x => cleanText(x, max)).filter(Boolean).slice(0, n);
-  const result = {
-    seq,
-    summary: cleanText(parsed.summary, 200),
-    works: strs(parsed.works, 4, 120),
-    words: (Array.isArray(parsed.words) ? parsed.words : [])
-      .map(w => ({ word: cleanText(w && w.word, 30), meaning: cleanText(w && w.meaning, 120) }))
-      .filter(w => w.word && w.meaning).slice(0, 3)
-  };
-  if (!result.summary && !result.works.length) {
-    throw new CareerError("AI_EMPTY", "AI 응답이 비어 있어요. 다시 시도해 주세요.");
+}
+
+async function jobSource(seq, env) {
+  const d = await juniorDetail(seq, env);
+  if (!d.summary && !d.works.length) {
+    throw new CareerError("EMPTY_JOB", "이 직업은 설명이 비어 있어요.", 404);
   }
-  if (env.EASY_CACHE) {
-    await env.EASY_CACHE.put(key, JSON.stringify(result), { expirationTtl: 60 * 60 * 24 * 90 }).catch(() => {});
-  }
-  return result;
+  return d;
+}
+const jobMaterial = d => `[자료]
+직업: ${d.name}
+소개: ${d.summary}
+하는 일:
+${d.works.map(t => "- " + t).join("\n")}
+필요한 적성: ${d.aptitudes.join(", ")}
+[자료 끝]`;
+
+async function easyJob(seq, env) {
+  return cached(env, `easy:${EASY_VERSION}:${seq}`, async () => {
+    const d = await jobSource(seq, env);
+    const parsed = await callGemini(env, EASY_SYSTEM, `${jobMaterial(d)}
+아래 JSON을 작성하세요.
+- summary: 이 직업을 소개하는 쉬운 문장 2개
+- works: 하는 일을 쉬운 문장으로 3~4개 (한 항목에 한 문장)
+- words: 이 직업을 알려면 꼭 알아야 하는 낱말 0~3개와 그 뜻 (직업 이름이 어려우면 포함해요. 뜻은 한 문장)
+{"summary":"...","works":["..."],"words":[{"word":"...","meaning":"..."}]}`, EASY_SCHEMA, 0.3);
+    const result = {
+      seq,
+      summary: cleanText(parsed.summary, 200),
+      works: strs(parsed.works, 4, 120),
+      words: (Array.isArray(parsed.words) ? parsed.words : [])
+        .map(w => ({ word: cleanText(w && w.word, 30), meaning: cleanText(w && w.meaning, 120) }))
+        .filter(w => w.word && w.meaning).slice(0, 3)
+    };
+    if (!result.summary && !result.works.length) {
+      throw new CareerError("AI_EMPTY", "AI 응답이 비어 있어요. 다시 시도해 주세요.");
+    }
+    return result;
+  });
+}
+
+// ---------- 직업 맞춤 취업 준비 항목 ----------
+// 앱의 공통 체크 항목과 같아요. 연습 도우미는 항목 번호만 받아서 이 글을 써요.
+const COMMON_PREP = {
+  C1: "정해진 출근 시간보다 10분 일찍 도착할 수 있어요.",
+  C2: "단정한 옷차림을 하고 손을 깨끗이 씻어요.",
+  C3: "선생님과 동료를 만나면 웃으며 크게 인사해요.",
+  C4: "일을 하다 잘 모르는 것이 생기면 \"다시 알려주세요\"라고 물어봐요.",
+  C5: "지정된 자리에서 내 작업 도구를 깔끔하게 정돈해요.",
+  C6: "위험한 도구나 기계를 사용할 때는 지침을 꼭 지켜요."
+};
+const PREP_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    items: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: { text: { type: "STRING" }, short: { type: "STRING" } },
+        required: ["text", "short"]
+      }
+    }
+  },
+  required: ["items"]
+};
+
+async function jobPrep(seq, env) {
+  return cached(env, `prep:${EASY_VERSION}:${seq}`, async () => {
+    const d = await jobSource(seq, env);
+    const parsed = await callGemini(env, COACH_SYSTEM, `${jobMaterial(d)}
+학생이 이 직업으로 일하려면 미리 연습할 수 있는 행동을 4개 쓰세요.
+- 학교나 집에서 지금 연습할 수 있는 구체적인 행동이어야 해요. (자격증, 학위, 경력 같은 것은 쓰지 않아요)
+- 아래 공통 항목과 겹치지 않게, 이 직업에서 하는 일과 이어지는 행동을 써요.
+  공통 항목: 일찍 도착하기, 옷차림과 손 씻기, 인사하기, 모르면 묻기, 도구 정돈하기, 안전 지침 지키기
+- text: "~할 수 있어요."로 끝나는 체크 문장 (25글자 안팎)
+- short: 10글자 안팎의 짧은 이름 ("~하기"로 끝나요)
+{"items":[{"text":"...","short":"..."}]}`, PREP_SCHEMA, 0.3);
+    const items = (Array.isArray(parsed.items) ? parsed.items : [])
+      .map(x => ({ text: cleanText(x && x.text, 80), short: cleanText(x && x.short, 30) }))
+      .filter(x => x.text && x.short).slice(0, 4)
+      .map((x, i) => ({ id: "J" + (i + 1), ...x }));
+    if (!items.length) throw new CareerError("AI_EMPTY", "AI 응답이 비어 있어요. 다시 시도해 주세요.");
+    return { seq, items };
+  });
+}
+
+// ---------- 연습 도우미 (이야기 · 따라 말하기 · 역할극 · 미션) ----------
+// 상황 번호마다 다른 장면으로 연습해요. 같은 번호는 늘 같은 내용이라 저장해 두고 다시 써요.
+const COACH_FOCUS = [
+  "손님이나 일터를 이용하는 사람을 만날 때",
+  "같이 일하는 동료와 함께할 때",
+  "담당자에게 일을 처음 배울 때",
+  "처음 해 보는 일을 맡았을 때",
+  "바쁘거나 예상하지 못한 일이 생겼을 때"
+];
+const COACH_SYSTEM = EASY_SYSTEM.replace("[자료]의 직업 설명을 '쉬운 글'로 바꿔 씁니다.",
+  "학생이 일터에서 할 행동을 미리 연습하도록 사회적 이야기와 역할극을 쉬운 글로 만듭니다.") + `
+추가 규칙:
+- 학생을 탓하거나 창피를 주는 말은 쓰지 않아요. 틀린 선택에도 부드럽게 더 좋은 방법을 알려 줘요.
+- 안전과 관계된 내용은 정확하게, 꼭 어른(담당자)에게 묻고 지침을 지키는 쪽으로 써요.
+- 사람 이름은 쓰지 않고 "손님", "동료", "담당자"처럼 써요.`;
+const COACH_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    title: { type: "STRING" },
+    story: { type: "ARRAY", items: { type: "STRING" } },
+    say: { type: "ARRAY", items: { type: "STRING" } },
+    roleplay: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          line: { type: "STRING" },
+          choices: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: { text: { type: "STRING" }, good: { type: "BOOLEAN" }, feedback: { type: "STRING" } },
+              required: ["text", "good", "feedback"]
+            }
+          }
+        },
+        required: ["line", "choices"]
+      }
+    },
+    missions: { type: "ARRAY", items: { type: "STRING" } }
+  },
+  required: ["title", "story", "say", "roleplay", "missions"]
+};
+
+async function coach(seq, itemId, n, env) {
+  return cached(env, `coach:${EASY_VERSION}:${seq}:${itemId}:${n}`, async () => {
+    let item = COMMON_PREP[itemId];
+    if (!item) {
+      const p = await jobPrep(seq, env);
+      const found = p.items.find(x => x.id === itemId);
+      if (!found) throw new CareerError("BAD_ITEM", "연습 항목을 찾을 수 없어요.", 400);
+      item = found.text;
+    }
+    const d = await jobSource(seq, env);
+    const parsed = await callGemini(env, COACH_SYSTEM, `${jobMaterial(d)}
+연습할 행동: ${item}
+상황: ${d.name}(으)로 일하는 곳에서, ${COACH_FOCUS[n - 1]}
+위 상황에서 '연습할 행동'을 연습하는 자료를 JSON으로 쓰세요.
+- title: 상황을 알려 주는 짧은 제목 (15글자 안팎)
+- story: "나는"으로 시작하는 사회적 이야기 4~5문장 (상황 → 내가 하는 행동 → 좋은 결과 순서)
+- say: 학생이 따라 말하거나 따라 할 짧은 문장 2개
+- roleplay: 역할극 2단계. 각 단계는
+  - line: 상대방(손님, 동료, 담당자)이 하는 말이나 일어난 일 한두 문장
+  - choices: 내가 할 수 있는 행동이나 말 3개. 그중 하나만 good이 true예요.
+  - feedback: good이면 칭찬과 이유 한 문장, 아니면 "이렇게 하면 ~할 수 있어요"처럼 더 좋은 방법 한 문장
+- missions: 이번 주에 학교나 집에서 해 볼 작은 연습 3개 (한 문장씩)
+{"title":"...","story":["..."],"say":["..."],"roleplay":[{"line":"...","choices":[{"text":"...","good":true,"feedback":"..."}]}],"missions":["..."]}`, COACH_SCHEMA, 0.6);
+    const roleplay = (Array.isArray(parsed.roleplay) ? parsed.roleplay : []).map(t => {
+      const choices = (Array.isArray(t && t.choices) ? t.choices : [])
+        .map(c => ({ text: cleanText(c && c.text, 100), good: !!(c && c.good), feedback: cleanText(c && c.feedback, 160) }))
+        .filter(c => c.text && c.feedback).slice(0, 3);
+      // 좋은 답이 늘 같은 자리에 오지 않게 섞어서 저장해요.
+      for (let i = choices.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [choices[i], choices[j]] = [choices[j], choices[i]]; }
+      return { line: cleanText(t && t.line, 160), choices };
+    }).filter(t => t.line && t.choices.length >= 2 && t.choices.filter(c => c.good).length === 1).slice(0, 2);
+    const result = {
+      seq, item: itemId, n, total: COACH_FOCUS.length,
+      title: cleanText(parsed.title, 40),
+      story: strs(parsed.story, 5, 120),
+      say: strs(parsed.say, 2, 80),
+      roleplay,
+      missions: strs(parsed.missions, 3, 100)
+    };
+    if (!result.story.length || !result.roleplay.length) {
+      throw new CareerError("AI_EMPTY", "AI 응답이 비어 있어요. 다시 시도해 주세요.");
+    }
+    return result;
+  });
 }
 
 export default {
@@ -282,6 +435,17 @@ export default {
         if (!/^\d{1,10}$/.test(jseq)) return json({ error: "직업 코드가 올바르지 않습니다." }, 400, headers);
         const result = mode === "easy-job" ? await easyJob(jseq, env) : await juniorDetail(jseq, env);
         return json({ result }, 200, headers);
+      }
+      if (mode === "job-prep" || mode === "coach") {
+        const jseq = String(body.seq || "");
+        if (!/^\d{1,10}$/.test(jseq)) return json({ error: "직업 코드가 올바르지 않습니다." }, 400, headers);
+        if (mode === "job-prep") return json({ result: await jobPrep(jseq, env) }, 200, headers);
+        const item = String(body.item || "");
+        const n = Number(body.n);
+        if (!/^(C[1-6]|J[1-4])$/.test(item) || !(n >= 1 && n <= COACH_FOCUS.length && Number.isInteger(n))) {
+          return json({ error: "연습 항목이나 상황 번호가 올바르지 않습니다." }, 400, headers);
+        }
+        return json({ result: await coach(jseq, item, n, env) }, 200, headers);
       }
       return json({ error: "지원하지 않는 요청입니다." }, 400, headers);
     } catch (e) {
